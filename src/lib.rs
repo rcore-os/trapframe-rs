@@ -9,6 +9,14 @@ mod arch;
 #[path = "arch/riscv/mod.rs"]
 mod arch;
 
+#[cfg(target_arch = "mips")]
+#[path = "arch/mipsel/mod.rs"]
+pub mod arch;
+
+#[cfg(target_arch = "aarch64")]
+#[path = "arch/aarch64/mod.rs"]
+pub mod arch;
+
 pub use arch::*;
 
 pub fn init() {}
