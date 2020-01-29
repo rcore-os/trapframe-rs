@@ -1,6 +1,6 @@
 # rcore-cpu
 
-[![Build Status](https://travis-ci.org/rcore-os/cpu.svg?branch=master)](https://travis-ci.org/rcore-os/cpu)
+[![Actions Status](https://github.com/rcore-os/cpu/workflows/CI/badge.svg)](https://github.com/rcore-os/cpu/actions)
 
 An abstraction layer for CPU on multiple architectures.
 

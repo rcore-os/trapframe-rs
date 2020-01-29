@@ -1,0 +1,53 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rm rust-toolchain
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
+      - name: Check code format
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+      - name: Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [
+          x86_64-unknown-linux-gnu,
+          aarch64-unknown-linux-gnu,
+          riscv32imac-unknown-none-elf,
+          riscv64imac-unknown-none-elf,
+          mipsel-unknown-linux-gnu,
+        ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        target: ${{ matrix.target }}
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --all-features --target ${{ matrix.target }}
+    - name: Build docs
+      uses: actions-rs/cargo@v1
+      with:
+        command: doc
+        args: --target ${{ matrix.target }}
