@@ -10,5 +10,8 @@ description = "Abstraction of CPU for OS development on multiple architectures."
 [dependencies]
 log = "0.4"
 
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+x86_64 = "0.8"
+
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
 riscv = "0.5"

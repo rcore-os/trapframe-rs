@@ -1,9 +1,5 @@
 ifeq ($(ARCH), x86_64)
-ifeq ($(shell uname), Darwin)
-TARGET := x86_64-apple-darwin
-else
 TARGET := x86_64-unknown-linux-gnu
-endif
 else ifeq ($(ARCH), aarch64)
 TARGET := aarch64-unknown-linux-gnu
 else ifeq ($(ARCH), mipsel)
