@@ -1,10 +1,17 @@
 use core::default::Default;
 use core::fmt;
 
-global_asm!(include_str!("trap.S"));
-global_asm!(include_str!("vector.S"));
+//global_asm!(include_str!("trap.S"));
+global_asm!(include_str!("syscall.S"));
+//global_asm!(include_str!("vector.S"));
 
 mod fast_syscall;
+
+pub use fast_syscall::{GeneralRegs, run_user};
+
+pub fn init() {
+    fast_syscall::init();
+}
 
 #[derive(Clone)]
 #[repr(C)]

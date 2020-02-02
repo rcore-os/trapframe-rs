@@ -18,5 +18,3 @@ pub mod arch;
 pub mod arch;
 
 pub use arch::*;
-
-pub fn init() {}
