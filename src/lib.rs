@@ -4,6 +4,7 @@
 
 extern crate alloc;
 
+#[macro_use]
 extern crate log;
 
 #[cfg(target_arch = "x86_64")]

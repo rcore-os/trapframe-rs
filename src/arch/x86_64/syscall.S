@@ -72,6 +72,9 @@ syscall_entry:
     # push trap frame (struct GeneralRegs)
     push r11                # push rflags
     push rcx                # push rip
+
+.global trap_syscall_entry
+trap_syscall_entry:
     push r15
     push r14
     push r13
@@ -108,7 +111,7 @@ syscall_entry:
     pop r15
 
     # enable interrupt
-    sti
+    # sti
 
     # go back to Rust
     ret

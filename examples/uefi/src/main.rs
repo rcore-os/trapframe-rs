@@ -1,12 +1,14 @@
 #![no_std]
 #![no_main]
 #![feature(abi_efiapi)]
-#![deny(warnings)]
+#![feature(core_intrinsics)]
+//#![deny(warnings)]
 
 extern crate alloc;
 
+use core::intrinsics::breakpoint;
 use log::*;
-use trapframe::GeneralRegs;
+use trapframe::{GeneralRegs, TrapFrame};
 use uefi::prelude::*;
 use x86_64::registers::control::*;
 use x86_64::structures::paging::{PageTable, PageTableFlags};
@@ -45,9 +47,24 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
     unsafe {
         trapframe::run_user(&mut regs);
     }
-    info!("back from user: {:#x?}", regs);
+    info!("back from user: {:#x?}", regs);  // syscall
 
+    info!("go to user");
+    unsafe {
+        trapframe::run_user(&mut regs);
+    }
+    info!("back from user: {:#x?}", regs);  // int3
+
+    // trap from kernel
+    unsafe {
+        breakpoint();
+    }
     unimplemented!()
+}
+
+#[no_mangle]
+extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
+    panic!("TRAP: {:#x?}", tf);
 }
 
 /// Initialize user code at 0x1000.
@@ -55,8 +72,10 @@ fn init_user_code() {
     allow_user_access(USER_CODE_ADDR);
     const USER_CODE_ADDR: usize = 0x1000;
     const SYSCALL_OPCODE: u16 = 0x05_0f;
+    const INT3_OPCODE: u8 = 0xcc;
     unsafe {
         (USER_CODE_ADDR as *mut u16).write(SYSCALL_OPCODE);
+        ((USER_CODE_ADDR + 2) as *mut u8).write(INT3_OPCODE);
     }
 }
 

@@ -3,7 +3,39 @@
 .text
 .global __alltraps
 __alltraps:
+    swapgs                  # swap in kernel gs
     push rax
+
+    /*
+    kernel stack:
+    - ptr to GeneralRegs
+    - ss
+    - rsp
+    - rflags
+    - cs
+    - rip
+    - error code
+    - trap num
+    - rax
+    */
+    mov ax, [rsp + 4*8]     # load cs
+    and ax, 0x3             # test
+    jz __from_kernel        # continue trap
+
+    mov rax, [rsp + 6*8]    # rax = user rsp
+    mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
+
+    mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
+    add rsp, 18*8           # rsp = top of trap frame
+    mov rax, gs:4           # rax = kernel stack
+
+    # push trap frame (struct GeneralRegs)
+    push [rax - 3*8]        # push rflags
+    push [rax - 5*8]        # push rip
+    mov rax, [rax - 8*8]    # pop rax
+    jmp trap_syscall_entry
+
+__from_kernel:
     push rcx
     push rdx
     push rdi
@@ -21,10 +53,12 @@ __alltraps:
     push r15
 
     # push fsbase gsbase
+    swapgs
     rdgsbase rdx
     push rdx
     rdfsbase rdx
     push rdx
+    swapgs
 
     # save fp registers
     # align to 16 byte boundary
@@ -47,8 +81,7 @@ __alltraps:
 .global trap_ret
 trap_ret:
 
-    mov rdi, rsp
-    call set_return_rsp
+    mov gs:4, rsp           # store kernel rsp -> TSS.sp0
 
     # pop fp state offset
     pop rcx
@@ -65,6 +98,7 @@ skip_fxrstor:
     add rsp, 16+512
 
     # pop fsbase gsbase
+    swapgs
     pop rdx
     wrfsbase rdx
     pop rdx

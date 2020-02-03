@@ -1,7 +1,7 @@
 use super::*;
 
-//global_asm!(include_str!("trap.S"));
-//global_asm!(include_str!("vector.S"));
+global_asm!(include_str!("trap.S"));
+global_asm!(include_str!("vector.S"));
 
 #[derive(Clone)]
 #[repr(C)]
@@ -22,13 +22,16 @@ impl Default for FpState {
 #[derive(Debug, Clone, Default)]
 #[repr(C)]
 pub struct TrapFrame {
+    // Pushed by 'trap.S'
+
     // fpstate needs to be 16-byte aligned
     // so we reserve some space here and save the offset
     // the read fpstate begin from fpstate[offset]
     pub fpstate_offset: usize,
     pub fpstate: FpState,
-    // Pushed by __alltraps at 'trap.asm'
+
     pub fsbase: usize,
+    pub gsbase: usize,
 
     pub r15: usize,
     pub r14: usize,
@@ -47,7 +50,7 @@ pub struct TrapFrame {
     pub rcx: usize,
     pub rax: usize,
 
-    // Pushed by vector{i} at 'vector.asm'
+    // Pushed by 'vector.S'
     pub trap_num: usize,
     pub error_code: usize,
 
