@@ -1,9 +1,12 @@
 .intel_syntax noprefix
 
 .text
-    # extern "C" fn run_user(&mut GeneralRegs)
+    # extern "sysv64" fn run_user(&mut GeneralRegs)
 .global run_user
 run_user:
+    # disable interrupt
+    cli
+
     # save callee-saved registers
     push r15
     push r14
@@ -103,6 +106,9 @@ syscall_entry:
     pop r13
     pop r14
     pop r15
+
+    # enable interrupt
+    sti
 
     # go back to Rust
     ret

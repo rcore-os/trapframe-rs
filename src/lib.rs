@@ -1,5 +1,10 @@
 #![no_std]
 #![feature(asm, global_asm, linkage)]
+#![feature(vec_leak)]
+
+extern crate alloc;
+
+extern crate log;
 
 #[cfg(target_arch = "x86_64")]
 #[path = "arch/x86_64/mod.rs"]
