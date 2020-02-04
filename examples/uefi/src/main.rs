@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(abi_efiapi)]
 #![feature(core_intrinsics)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 extern crate alloc;
 
@@ -63,12 +63,13 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
 
 #[no_mangle]
 extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
-    info!("TRAP: {:#x?}", tf);
-    if tf.trap_num == 3 {
-        // int3
-        tf.rip += 1;
-    } else {
-        panic!("trap!");
+    match tf.trap_num {
+        3 => {
+            info!("TRAP: BreakPoint");
+            tf.rip += 1;
+        }
+        0x68 => {} // UEFI timer
+        _ => panic!("TRAP: {:#x?}", tf),
     }
 }
 

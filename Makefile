@@ -10,12 +10,17 @@ else ifeq ($(ARCH), riscv64)
 TARGET := riscv64imac-unknown-none-elf
 endif
 
+.PHONY: env build clippy doc
+
 all: build
 
 env:
 	rustup target add $(TARGET)
 
 build:
+	cargo build --target $(TARGET)
+
+clippy:
 	cargo build --target $(TARGET)
 
 doc:

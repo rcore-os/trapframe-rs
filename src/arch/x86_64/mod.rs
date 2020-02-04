@@ -1,5 +1,4 @@
 use core::default::Default;
-use core::fmt;
 
 mod gdt;
 mod idt;
