@@ -35,9 +35,9 @@ pub fn init() {
         assert!(cpuid.get_extended_feature_info().unwrap().has_fsgsbase());
         Cr4::update(|cr4| cr4.insert(Cr4Flags::FSGSBASE));
 
-        //        let mut star = Msr::new(0xC0000081); // legacy mode SYSCALL target
-        let mut lstar = Msr::new(0xC0000082); // long mode SYSCALL target
-        let mut sfmask = Msr::new(0xC0000084); // EFLAGS mask for syscall
+        //        let mut star = Msr::new(0xC000_0081); // legacy mode SYSCALL target
+        let mut lstar = Msr::new(0xC000_0082); // long mode SYSCALL target
+        let mut sfmask = Msr::new(0xC000_0084); // EFLAGS mask for syscall
 
         // flags to clear on syscall
         // copy from Linux 5.0
@@ -45,7 +45,7 @@ pub fn init() {
         const RFLAGS_MASK: u64 = 0x47700;
 
         //        star.write(core::mem::transmute(STAR));
-        lstar.write(syscall_entry as u64);
+        lstar.write(syscall_entry as usize as u64);
         sfmask.write(RFLAGS_MASK);
     }
 }

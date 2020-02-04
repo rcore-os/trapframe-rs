@@ -21,7 +21,7 @@ build:
 	cargo build --target $(TARGET)
 
 clippy:
-	cargo build --target $(TARGET)
+	cargo clippy --target $(TARGET)
 
 doc:
 	cargo doc --target $(TARGET) --no-deps

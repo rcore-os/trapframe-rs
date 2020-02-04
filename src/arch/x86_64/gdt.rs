@@ -54,7 +54,7 @@ pub fn init() {
         // store address of TSS to kernel_gsbase
         GsBase::MSR.write(tss as *const _ as u64);
 
-        let mut star = Msr::new(0xC0000081); // legacy mode SYSCALL target
+        let mut star = Msr::new(0xC000_0081); // legacy mode SYSCALL target
         star.write(core::mem::transmute(StarMsr {
             eip: 0,
             kernel_cs: SegmentSelector::new(entry_count as u16 + 2, PrivilegeLevel::Ring0).0,
