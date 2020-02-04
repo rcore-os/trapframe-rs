@@ -70,9 +70,11 @@ impl UserContext {
     ///
     /// On return, the context will be reset to the status before the trap.
     /// Trap reason and error code will be placed at `trap_num` and `error_code`.
-    /// Both 2 fields will be ignored when going to user space.
     ///
     /// If the trap was triggered by `syscall` instruction, the `trap_num` will be set to `0x100`.
+    ///
+    /// If `trap_num` is `0x100`, it will go user by `sysret` (`rcx` and `r11` are dropped),
+    /// otherwise it will use `iret`.
     ///
     /// # Example
     /// ```no_run

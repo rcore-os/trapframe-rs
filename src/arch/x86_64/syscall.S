@@ -47,6 +47,38 @@ syscall_return:
     pop r13
     pop r14
     pop r15
+    # rip
+    # rflags
+    # fsbase
+    # gsbase
+    # trap_num
+    # error_code
+
+    # determain sysret or iret
+    cmp dword ptr [rsp + 4*8], 0x100  # syscall?
+    je sysret
+iret:
+    # get user cs from STAR MSR
+    mov ecx, 0xC0000081
+    rdmsr                   # msr[ecx] => edx:eax
+    shr edx, 16             # dx = user_cs
+    lea ax, [edx + 8]       # ax = user_ss
+
+    # construct trap frame
+    push rax                # push ss
+    push [rsp - 8*8]        # push rsp
+    push [rsp + 3*8]        # push rflags
+    push rdx                # push cs
+    push [rsp + 4*8]        # push rip
+
+    # recover rcx, rdx, rax
+    mov rax, [rsp - 11*8]
+    mov rcx, [rsp - 9*8]
+    mov rdx, [rsp - 8*8]
+
+    iretq
+
+sysret:
     pop rcx                 # rcx = rip
     pop r11                 # r11 = rflags
     mov rsp, [rsp - 11*8]   # load rsp

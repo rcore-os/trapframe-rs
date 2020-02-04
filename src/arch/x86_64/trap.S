@@ -33,7 +33,8 @@ __from_user:
     # push trap_num, error_code
     push [rax - 6*8]        # push error_code
     push [rax - 7*8]        # push trap_num
-    sub rsp, 16             # skip fsbase, gsbase
+    push rax                # skip gsbase
+    push rax                # skip fsbase
     # push general registers
     push [rax - 3*8]        # push rflags
     push [rax - 5*8]        # push rip

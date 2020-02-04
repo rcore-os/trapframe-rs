@@ -50,11 +50,13 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
 
     info!("go to user");
     context.run();
-    info!("back from user: {:#x?}", context); // syscall
+    info!("back from user: {:#x?}", context);
+    assert_eq!(context.trap_num, 0x100); // syscall
 
     info!("go to user");
     context.run();
-    info!("back from user: {:#x?}", context); // int3
+    info!("back from user: {:#x?}", context);
+    assert_eq!(context.trap_num, 0xd); // GPF
 
     // trap from kernel
     unsafe {
