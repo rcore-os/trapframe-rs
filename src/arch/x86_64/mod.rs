@@ -6,7 +6,7 @@ mod gdt;
 mod idt;
 mod trap;
 
-pub use fast_syscall::{run_user, GeneralRegs};
+pub use fast_syscall::{GeneralRegs, UserContext};
 pub use trap::TrapFrame;
 use x86_64::instructions::interrupts;
 

@@ -8,7 +8,7 @@ extern crate alloc;
 
 use core::intrinsics::breakpoint;
 use log::*;
-use trapframe::{GeneralRegs, TrapFrame};
+use trapframe::{GeneralRegs, TrapFrame, UserContext};
 use uefi::prelude::*;
 use x86_64::registers::control::*;
 use x86_64::structures::paging::{PageTable, PageTableFlags};
@@ -20,40 +20,39 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
     init_user_code();
     trapframe::init();
 
-    let mut regs = GeneralRegs {
-        rax: 0,
-        rbx: 1,
-        rcx: 2,
-        rdx: 3,
-        rsi: 4,
-        rdi: 5,
-        rbp: 6,
-        rsp: 7,
-        r8: 8,
-        r9: 9,
-        r10: 10,
-        r11: 11,
-        r12: 12,
-        r13: 13,
-        r14: 14,
-        r15: 15,
-        rip: 0x1000,
-        rflags: 0x202,
-        fsbase: 18,
-        gsbase: 19,
+    let mut context = UserContext {
+        vector: Default::default(),
+        general: GeneralRegs {
+            rax: 0,
+            rbx: 1,
+            rcx: 2,
+            rdx: 3,
+            rsi: 4,
+            rdi: 5,
+            rbp: 6,
+            rsp: 7,
+            r8: 8,
+            r9: 9,
+            r10: 10,
+            r11: 11,
+            r12: 12,
+            r13: 13,
+            r14: 14,
+            r15: 15,
+            rip: 0x1000,
+            rflags: 0x202,
+            fsbase: 18,
+            gsbase: 19,
+        },
     };
 
     info!("go to user");
-    unsafe {
-        trapframe::run_user(&mut regs);
-    }
-    info!("back from user: {:#x?}", regs);  // syscall
+    context.run();
+    info!("back from user: {:#x?}", context); // syscall
 
     info!("go to user");
-    unsafe {
-        trapframe::run_user(&mut regs);
-    }
-    info!("back from user: {:#x?}", regs);  // int3
+    context.run();
+    info!("back from user: {:#x?}", context); // int3
 
     // trap from kernel
     unsafe {

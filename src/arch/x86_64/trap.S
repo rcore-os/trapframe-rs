@@ -26,7 +26,7 @@ __alltraps:
     mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
 
     mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
-    add rsp, 18*8           # rsp = top of trap frame
+    add rsp, 512+18*8       # rsp = top of trap frame
     mov rax, gs:4           # rax = kernel stack
 
     # push trap frame (struct GeneralRegs)
