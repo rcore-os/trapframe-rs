@@ -104,10 +104,6 @@ fn allow_user_access(vaddr: usize) {
 }
 
 fn check_and_set_cpu_features() {
-    assert!(raw_cpuid::CpuId::new()
-        .get_extended_feature_info()
-        .unwrap()
-        .has_fsgsbase());
     unsafe {
         // Enable NX bit.
         Efer::update(|f| f.insert(EferFlags::NO_EXECUTE_ENABLE));

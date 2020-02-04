@@ -11,5 +11,4 @@ log = "0.4"
 x86_64 = "0.8"
 uefi = "0.4.3"
 uefi-services = "0.2.1"
-raw-cpuid = "7.0.3"
 trapframe = { path = "../.." }

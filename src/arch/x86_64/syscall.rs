@@ -6,25 +6,33 @@ use x86_64::registers::model_specific::{Efer, EferFlags, Msr};
 global_asm!(include_str!("syscall.S"));
 
 pub fn init() {
+    let cpuid = raw_cpuid::CpuId::new();
     unsafe {
         // enable `syscall` instruction
+        assert!(cpuid
+            .get_extended_function_info()
+            .unwrap()
+            .has_syscall_sysret());
         Efer::update(|efer| {
             efer.insert(EferFlags::SYSTEM_CALL_EXTENSIONS);
         });
 
         // enable FPU
+        assert!(cpuid.get_feature_info().unwrap().has_fpu());
         Cr0::update(|cr0| {
             cr0.remove(Cr0Flags::EMULATE_COPROCESSOR);
             cr0.insert(Cr0Flags::MONITOR_COPROCESSOR);
         });
 
         // enable `fxsave` `fxrstor` instruction
+        assert!(cpuid.get_feature_info().unwrap().has_fxsave_fxstor());
         Cr4::update(|cr4| {
             cr4.insert(Cr4Flags::OSFXSR);
             cr4.insert(Cr4Flags::OSXMMEXCPT_ENABLE);
         });
 
         // enable `rdfsbase` series instructions.
+        assert!(cpuid.get_extended_feature_info().unwrap().has_fsgsbase());
         Cr4::update(|cr4| cr4.insert(Cr4Flags::FSGSBASE));
 
         //        let mut star = Msr::new(0xC0000081); // legacy mode SYSCALL target
