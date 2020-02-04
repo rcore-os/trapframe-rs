@@ -19,4 +19,4 @@ build:
 	cargo build --target $(TARGET)
 
 doc:
-	cargo doc --target $(TARGET)
+	cargo doc --target $(TARGET) --no-deps
