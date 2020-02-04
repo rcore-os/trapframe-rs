@@ -63,7 +63,13 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
 
 #[no_mangle]
 extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
-    panic!("TRAP: {:#x?}", tf);
+    info!("TRAP: {:#x?}", tf);
+    if tf.trap_num == 3 {
+        // int3
+        tf.rip += 1;
+    } else {
+        panic!("trap!");
+    }
 }
 
 /// Initialize user code at 0x1000.

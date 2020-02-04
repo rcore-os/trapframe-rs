@@ -104,7 +104,6 @@ pub struct VectorRegs {
     pub xmm: [U128; 16],
     pub reserved: [U128; 3],
     pub available: [U128; 3],
-
     //    /// When only 16 registers are supported (pre-AVX-512), zmm[16-31] will be 0.
     //    /// YMM registers (256 bits) are v[0-4], XMM registers (128 bits) are v[0-2].
     //    pub zmm: [[u64; 8]; 32],

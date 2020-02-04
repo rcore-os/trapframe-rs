@@ -3,7 +3,6 @@
 .text
 .global __alltraps
 __alltraps:
-    swapgs                  # swap in kernel gs
     push rax
 
     /*
@@ -22,6 +21,8 @@ __alltraps:
     and ax, 0x3             # test
     jz __from_kernel        # continue trap
 
+__from_user:
+    swapgs                  # swap in kernel gs
     mov rax, [rsp + 6*8]    # rax = user rsp
     mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
 
@@ -36,92 +37,48 @@ __alltraps:
     jmp trap_syscall_entry
 
 __from_kernel:
-    push rcx
-    push rdx
+    pop rax
+    push r15
+    push r14
+    push r13
+    push r12
+    push r11
+    push r10
+    push r9
+    push r8
+    lea r8, [rsp + 13*8]
+    push r8                 # push rsp
+    push rbp
     push rdi
     push rsi
-    push r8
-    push r9
-    push r10
-    push r11
-
-    push rbx
-    push rbp
-    push r12
-    push r13
-    push r14
-    push r15
-
-    # push fsbase gsbase
-    swapgs
-    rdgsbase rdx
     push rdx
-    rdfsbase rdx
-    push rdx
-    swapgs
-
-    # save fp registers
-    # align to 16 byte boundary
-    sub rsp, 512
-    mov rax, rsp
-    and rax, 0xFFFFFFFFFFFFFFF0
-    # fxsave (rax)
-    .byte 0x0f
-    .byte 0xae
-    .byte 0x00
-    mov rcx, rsp
-    sub rcx, rax
-    # push fp state offset
-    sub rsp, 16
     push rcx
+    push rbx
+    push rax
 
     mov rdi, rsp
     call rust_trap
 
-.global trap_ret
-trap_ret:
-
-    mov gs:4, rsp           # store kernel rsp -> TSS.sp0
-
-    # pop fp state offset
-    pop rcx
-    cmp rcx, 16 # only 0-15 are valid
-    jge skip_fxrstor
-    mov rax, rsp
-    add rax, 16
-    sub rax, rcx
-    # fxrstor (rax)
-    .byte 0x0f
-    .byte 0xae
-    .byte 0x08
-skip_fxrstor:
-    add rsp, 16+512
-
-    # pop fsbase gsbase
-    swapgs
-    pop rdx
-    wrfsbase rdx
-    pop rdx
-    wrgsbase rdx
-
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop rbp
+.global trap_return
+trap_return:
+    pop rax
     pop rbx
-
-    pop r11
-    pop r10
-    pop r9
-    pop r8
+    pop rcx
+    pop rdx
     pop rsi
     pop rdi
-    pop rdx
-    pop rcx
-    pop rax
+    pop rbp
+    pop r8                  # skip rsp
+    pop r8
+    pop r9
+    pop r10
+    pop r11
+    pop r12
+    pop r13
+    pop r14
+    pop r15
 
-    # pop trap_num, error_code
+    # skip trap_num, error_code
     add rsp, 16
 
     iretq
