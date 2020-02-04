@@ -12,15 +12,20 @@ pub fn init() {
             efer.insert(EferFlags::SYSTEM_CALL_EXTENSIONS);
         });
 
-        // enable `fxsave` `fxrstor` instruction
+        // enable FPU
         Cr0::update(|cr0| {
             cr0.remove(Cr0Flags::EMULATE_COPROCESSOR);
             cr0.insert(Cr0Flags::MONITOR_COPROCESSOR);
         });
+
+        // enable `fxsave` `fxrstor` instruction
         Cr4::update(|cr4| {
             cr4.insert(Cr4Flags::OSFXSR);
             cr4.insert(Cr4Flags::OSXMMEXCPT_ENABLE);
         });
+
+        // enable `rdfsbase` series instructions.
+        Cr4::update(|cr4| cr4.insert(Cr4Flags::FSGSBASE));
 
         //        let mut star = Msr::new(0xC0000081); // legacy mode SYSCALL target
         let mut lstar = Msr::new(0xC0000082); // long mode SYSCALL target
@@ -42,6 +47,7 @@ extern "sysv64" {
     fn syscall_return(regs: &mut UserContext);
 }
 
+/// User space context
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct UserContext {
@@ -52,6 +58,32 @@ pub struct UserContext {
 }
 
 impl UserContext {
+    /// Go to user space with the context, and come back when a trap occurs.
+    ///
+    /// On return, the context will be reset to the status before the trap.
+    /// Trap reason and error code will be placed at `trap_num` and `error_code`.
+    /// Both 2 fields will be ignored when going to user space.
+    ///
+    /// If the trap was triggered by `syscall` instruction, the `trap_num` will be set to `0x100`.
+    ///
+    /// # Example
+    /// ```no_run
+    /// use trapframe::{UserContext, GeneralRegs};
+    ///
+    /// // init user space context
+    /// let mut context = UserContext {
+    ///     general: GeneralRegs {
+    ///         rip: 0x1000,
+    ///         rsp: 0x10000,
+    ///         ..Default::default()
+    ///     },
+    ///     ..Default::default()
+    /// };
+    /// // go to user
+    /// context.run();
+    /// // back from user
+    /// println!("back from user: {:#x?}", context);
+    /// ```
     pub fn run(&mut self) {
         unsafe {
             syscall_return(self);
@@ -59,6 +91,7 @@ impl UserContext {
     }
 }
 
+/// General registers
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct GeneralRegs {
@@ -84,6 +117,11 @@ pub struct GeneralRegs {
     pub gsbase: usize,
 }
 
+/// Vector registers
+///
+/// Currently the structure is same as the layout of the [`fxsave` map].
+///
+/// [`fxsave` map]: https://www.felixcloutier.com/x86/FXSAVE.html#tbl-3-47
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C, align(16))]
 pub struct VectorRegs {

@@ -3,6 +3,26 @@ use super::*;
 global_asm!(include_str!("trap.S"));
 global_asm!(include_str!("vector.S"));
 
+/// Trap frame of kernel interrupt
+///
+/// # Trap handler
+///
+/// You need to define a handler function like this:
+///
+/// ```
+/// use trapframe::TrapFrame;
+///
+/// #[no_mangle]
+/// extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
+///     match tf.trap_num {
+///         3 => {
+///             println!("TRAP: BreakPoint");
+///             tf.rip += 1;
+///         }
+///         _ => panic!("TRAP: {:#x?}", tf),
+///     }
+/// }
+/// ```
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {

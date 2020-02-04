@@ -76,7 +76,7 @@ syscall_entry:
 
     # push trap_num, error_code
     push 0                  # push error_code
-    push 255                # push trap_num
+    push 0x100              # push trap_num
     sub rsp, 16             # skip fsbase, gsbase
     # push general registers
     push r11                # push rflags

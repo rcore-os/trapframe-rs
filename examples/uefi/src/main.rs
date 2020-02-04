@@ -18,7 +18,9 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
     uefi_services::init(&st).expect_success("Failed to initialize utilities");
     check_and_set_cpu_features();
     init_user_code();
-    trapframe::init();
+    unsafe {
+        trapframe::init();
+    }
 
     let mut context = UserContext {
         general: GeneralRegs {
@@ -113,8 +115,5 @@ fn check_and_set_cpu_features() {
         // By default the page of CR3 have write protect.
         // We have to remove that before editing page table.
         Cr0::update(|f| f.remove(Cr0Flags::WRITE_PROTECT));
-
-        // Enable `rdfsbase` series instructions.
-        Cr4::update(|f| f.insert(Cr4Flags::FSGSBASE));
     }
 }
