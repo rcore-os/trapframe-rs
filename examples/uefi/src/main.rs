@@ -21,7 +21,6 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
     trapframe::init();
 
     let mut context = UserContext {
-        vector: Default::default(),
         general: GeneralRegs {
             rax: 0,
             rbx: 1,
@@ -44,6 +43,7 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
             fsbase: 18,
             gsbase: 19,
         },
+        ..Default::default()
     };
 
     info!("go to user");

@@ -1,9 +1,9 @@
 .intel_syntax noprefix
 
 .text
-    # extern "sysv64" fn run_user(&mut GeneralRegs)
-.global run_user
-run_user:
+    # extern "sysv64" fn syscall_return(&mut GeneralRegs)
+.global syscall_return
+syscall_return:
     # disable interrupt
     cli
 
@@ -21,10 +21,7 @@ run_user:
 
     # pop vector registers
     # fxrstor [rsp]
-    .byte 0x0f
-    .byte 0xae
-    .byte 0x0c
-    .byte 0x24
+    .byte 0x0f, 0xae, 0x0c, 0x24
     add rsp, 512
 
     # pop fsbase gsbase
@@ -75,9 +72,13 @@ syscall_entry:
     mov gs:12, rsp          # store user rsp -> scratch at TSS.sp1
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
     pop rsp                 # load rsp = bottom of trap frame
-    add rsp, 512+18*8       # rsp = top of trap frame
+    add rsp, 512+22*8       # rsp = top of trap frame
 
-    # push trap frame (struct GeneralRegs)
+    # push trap_num, error_code
+    push 0                  # push error_code
+    push 255                # push trap_num
+    sub rsp, 16             # skip fsbase, gsbase
+    # push general registers
     push r11                # push rflags
     push rcx                # push rip
 
@@ -111,10 +112,7 @@ trap_syscall_entry:
     # save vector registers
     sub rsp, 512
     # fxsave [rsp]
-    .byte 0x0f
-    .byte 0xae
-    .byte 0x04
-    .byte 0x24
+    .byte 0x0f, 0xae, 0x04, 0x24
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0

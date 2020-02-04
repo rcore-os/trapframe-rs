@@ -27,10 +27,14 @@ __from_user:
     mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
 
     mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
-    add rsp, 512+18*8       # rsp = top of trap frame
+    add rsp, 512+22*8       # rsp = top of trap frame
     mov rax, gs:4           # rax = kernel stack
 
-    # push trap frame (struct GeneralRegs)
+    # push trap_num, error_code
+    push [rax - 6*8]        # push error_code
+    push [rax - 7*8]        # push trap_num
+    sub rsp, 16             # skip fsbase, gsbase
+    # push general registers
     push [rax - 3*8]        # push rflags
     push [rax - 5*8]        # push rip
     mov rax, [rax - 8*8]    # pop rax

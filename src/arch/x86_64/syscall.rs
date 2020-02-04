@@ -39,7 +39,7 @@ pub fn init() {
 
 extern "sysv64" {
     fn syscall_entry();
-    fn run_user(regs: &mut UserContext);
+    fn syscall_return(regs: &mut UserContext);
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -47,12 +47,14 @@ extern "sysv64" {
 pub struct UserContext {
     pub vector: VectorRegs,
     pub general: GeneralRegs,
+    pub trap_num: usize,
+    pub error_code: usize,
 }
 
 impl UserContext {
     pub fn run(&mut self) {
         unsafe {
-            run_user(self);
+            syscall_return(self);
         }
     }
 }
