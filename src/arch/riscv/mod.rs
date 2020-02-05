@@ -1,1 +1,3 @@
-pub mod trap;
+mod trap;
+
+pub use trap::*;

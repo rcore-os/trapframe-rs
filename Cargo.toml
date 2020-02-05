@@ -24,3 +24,7 @@ uefi = { git = 'https://github.com/rcore-os/uefi-rs', branch = "alloc-align" }
 members = [
     "examples/uefi",
 ]
+
+exclude = [
+    "examples/riscv",
+]
