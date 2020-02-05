@@ -3,7 +3,7 @@ name = "trapframe"
 version = "0.1.0"
 authors = ["Runji Wang <wangrunji0408@163.com>"]
 edition = "2018"
-description = "Abstraction of CPU for OS development on multiple architectures."
+description = "Handle Trap Frame across kernel and user space on multiple ISAs."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
