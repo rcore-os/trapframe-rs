@@ -13,7 +13,7 @@ global_asm!(include_str!("vector.S"));
 /// use trapframe::TrapFrame;
 ///
 /// #[no_mangle]
-/// extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
+/// extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
 ///     match tf.trap_num {
 ///         3 => {
 ///             println!("TRAP: BreakPoint");

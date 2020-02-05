@@ -62,7 +62,7 @@ __from_kernel:
     push rax
 
     mov rdi, rsp
-    call rust_trap
+    call trap_handler
 
 .global trap_return
 trap_return:

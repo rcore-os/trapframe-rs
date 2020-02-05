@@ -12,3 +12,6 @@ x86_64 = "0.8"
 uefi = "0.4.3"
 uefi-services = "0.2.1"
 trapframe = { path = "../.." }
+
+[patch.crates-io]
+uefi = { git = 'https://github.com/rcore-os/uefi-rs', branch = "alloc-align" }

@@ -66,7 +66,7 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
 }
 
 #[no_mangle]
-extern "sysv64" fn rust_trap(tf: &mut TrapFrame) {
+extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
     match tf.trap_num {
         3 => {
             info!("TRAP: BreakPoint");

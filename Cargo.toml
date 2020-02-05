@@ -16,15 +16,3 @@ raw-cpuid = "7.0.3"
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
 riscv = "0.5"
-
-[patch.crates-io]
-uefi = { git = 'https://github.com/rcore-os/uefi-rs', branch = "alloc-align" }
-
-[workspace]
-members = [
-    "examples/uefi",
-]
-
-exclude = [
-    "examples/riscv",
-]

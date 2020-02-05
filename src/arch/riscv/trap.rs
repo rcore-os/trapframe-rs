@@ -1,34 +1,27 @@
+pub use riscv::register::scause;
 use riscv::register::{scause::Scause, sscratch, stvec};
 
 #[cfg(target_arch = "riscv32")]
 global_asm!(
     r"
-    .equ XLENB,     4
-    .equ XLENb,     32
+    .equ XLENB, 4
     .macro LOAD_SP a1, a2
         lw \a1, \a2*XLENB(sp)
     .endm
     .macro STORE_SP a1, a2
         sw \a1, \a2*XLENB(sp)
     .endm
-    .macro STORE a1, a2
-        sw \a1, \a2
-    .endm
 "
 );
 #[cfg(target_arch = "riscv64")]
 global_asm!(
     r"
-    .equ XLENB,     8
-    .equ XLENb,     64
+    .equ XLENB, 8
     .macro LOAD_SP a1, a2
         ld \a1, \a2*XLENB(sp)
     .endm
     .macro STORE_SP a1, a2
         sd \a1, \a2*XLENB(sp)
-    .endm
-    .macro STORE a1, a2
-        sd \a1, \a2
     .endm
 "
 );
@@ -43,7 +36,7 @@ global_asm!(include_str!("trap.S"));
 /// - Set `sscratch` to 0.
 /// - Set `stvec` to internal exception vector.
 ///
-/// You MUST NOT modify these registers later.
+/// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set sscratch register to 0, indicating to exception vector that we are
     // presently executing in the kernel
@@ -52,13 +45,6 @@ pub unsafe fn init() {
     stvec::write(trap_entry as usize, stvec::TrapMode::Direct);
 }
 
-/// # Example
-/// ```
-/// #[no_mangle]
-/// pub extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
-///     panic!("TRAP! scause: {:?}, stval: {:#x}, tf: {:#x?}", scause, stval, tf);
-/// }
-/// ```
 #[no_mangle]
 #[linkage = "weak"]
 extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
@@ -70,7 +56,20 @@ extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
     );
 }
 
-/// Saved registers on a trap.
+/// Trap frame of kernel interrupt
+///
+/// # Trap handler
+///
+/// You need to define a handler function like this:
+///
+/// ```no_run
+/// use trapframe::{TrapFrame, scause::Scause};
+///
+/// #[no_mangle]
+/// pub extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
+///     println!("TRAP! scause: {:?}, stval: {:#x}, tf: {:#x?}", scause, stval, tf);
+/// }
+/// ```
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {

@@ -3,8 +3,6 @@
 #![feature(asm)]
 
 #[macro_use]
-extern crate log;
-#[macro_use]
 extern crate opensbi_rt;
 
 use riscv::register::scause::{Exception as E, Scause, Trap};
@@ -21,7 +19,7 @@ extern "C" fn main() {
         general: GeneralRegs {
             zero: 0,
             ra: 1,
-            sp: 0x80800000,
+            sp: 0x8080_0000,
             gp: 3,
             tp: 4,
             t0: 5,
@@ -52,7 +50,7 @@ extern "C" fn main() {
             t5: 30,
             t6: 31,
         },
-        sstatus: 0xdeadbeaf,
+        sstatus: 0xdead_beaf,
         sepc: user_entry as usize,
     };
     println!("Go to user: {:#x?}", regs);
