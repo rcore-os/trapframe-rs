@@ -19,10 +19,6 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
-      - name: Clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
 
   build:
     runs-on: ubuntu-latest
@@ -46,7 +42,12 @@ jobs:
       with:
         command: build
         args: --all-features --target ${{ matrix.target }}
-    - name: Build docs
+    - name: Clippy
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: --target ${{ matrix.target }}
+    - name: Docs
       uses: actions-rs/cargo@v1
       with:
         command: doc
