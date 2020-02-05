@@ -1,5 +1,7 @@
 # TrapFrame-rs
 
+[![Crate](https://img.shields.io/crates/v/trapframe.svg)](https://crates.io/crates/trapframe)
+[![Docs](https://docs.rs/trapframe/badge.svg)](https://docs.rs/trapframe)
 [![Actions Status](https://github.com/rcore-os/trapframe-rs/workflows/CI/badge.svg)](https://github.com/rcore-os/trapframe-rs/actions)
 
 Handle Trap Frame across kernel and user space on multiple ISAs.
