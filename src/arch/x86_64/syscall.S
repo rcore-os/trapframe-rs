@@ -8,6 +8,8 @@ syscall_return:
     cli
 
     # save callee-saved registers
+    rdfsbase rax
+    push rax                # push fsbase
     push r15
     push r14
     push r13
@@ -156,6 +158,8 @@ trap_syscall_entry:
     pop r13
     pop r14
     pop r15
+    pop rax
+    wrfsbase rax            # pop fsbase
 
     # enable interrupt
     # sti
