@@ -1,7 +1,9 @@
 #![no_std]
 #![no_main]
+#![feature(asm)]
 #![feature(abi_efiapi)]
 #![feature(core_intrinsics)]
+#![feature(naked_functions)]
 #![deny(warnings)]
 
 extern crate alloc;
@@ -17,7 +19,7 @@ use x86_64::structures::paging::{PageTable, PageTableFlags};
 fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
     uefi_services::init(&st).expect_success("Failed to initialize utilities");
     check_and_set_cpu_features();
-    init_user_code();
+    allow_user_access(user_entry as usize);
     unsafe {
         trapframe::init();
     }
@@ -40,7 +42,7 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
             r13: 13,
             r14: 14,
             r15: 15,
-            rip: 0x1000,
+            rip: user_entry as usize,
             rflags: 0x202,
             fsbase: 18,
             gsbase: 19,
@@ -77,16 +79,9 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
     }
 }
 
-/// Initialize user code at 0x1000.
-fn init_user_code() {
-    allow_user_access(USER_CODE_ADDR);
-    const USER_CODE_ADDR: usize = 0x1000;
-    const SYSCALL_OPCODE: u16 = 0x05_0f;
-    const INT3_OPCODE: u8 = 0xcc;
-    unsafe {
-        (USER_CODE_ADDR as *mut u16).write(SYSCALL_OPCODE);
-        ((USER_CODE_ADDR + 2) as *mut u8).write(INT3_OPCODE);
-    }
+#[naked]
+unsafe extern "C" fn user_entry() {
+    asm!("syscall; int3");
 }
 
 /// Set user bit for 4-level PDEs of the `page`.

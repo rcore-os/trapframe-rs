@@ -61,8 +61,9 @@ iret:
     # get user cs from STAR MSR
     mov ecx, 0xC0000081
     rdmsr                   # msr[ecx] => edx:eax
-    shr edx, 16             # dx = user_cs
+    shr edx, 16             # dx = user_cs32
     lea ax, [edx + 8]       # ax = user_ss
+    add dx, 16              # dx = user_cs64
 
     # construct trap frame
     push rax                # push ss
