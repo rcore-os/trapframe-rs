@@ -18,6 +18,7 @@ syscall_return:
     push rbx
 
     push rdi
+    push rdi                # keep rsp 16 bytes align
     mov gs:4, rsp           # store kernel rsp -> TSS.sp0
     mov rsp, rdi            # set rsp = bottom of trap frame
 
@@ -151,6 +152,7 @@ trap_syscall_entry:
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
+    pop rbx
     pop rbx
     pop rbx
     pop rbp
