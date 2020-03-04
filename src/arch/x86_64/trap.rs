@@ -1,6 +1,7 @@
 use super::*;
 
 global_asm!(include_str!("trap.S"));
+#[cfg(not(target_os = "macos"))]
 global_asm!(include_str!("vector.S"));
 
 /// Trap frame of kernel interrupt
