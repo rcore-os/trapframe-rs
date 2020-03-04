@@ -1,7 +1,9 @@
 use super::*;
 use core::fmt;
 use x86_64::registers::control::{Cr0, Cr0Flags, Cr4, Cr4Flags};
-use x86_64::registers::model_specific::{Efer, EferFlags, Msr};
+use x86_64::registers::model_specific::{Efer, EferFlags, LStar, SFMask};
+use x86_64::registers::rflags::RFlags;
+use x86_64::VirtAddr;
 
 global_asm!(include_str!("syscall.S"));
 
@@ -35,18 +37,13 @@ pub fn init() {
         assert!(cpuid.get_extended_feature_info().unwrap().has_fsgsbase());
         Cr4::update(|cr4| cr4.insert(Cr4Flags::FSGSBASE));
 
-        //        let mut star = Msr::new(0xC000_0081); // legacy mode SYSCALL target
-        let mut lstar = Msr::new(0xC000_0082); // long mode SYSCALL target
-        let mut sfmask = Msr::new(0xC000_0084); // EFLAGS mask for syscall
-
         // flags to clear on syscall
         // copy from Linux 5.0
         // TF|DF|IF|IOPL|AC|NT
         const RFLAGS_MASK: u64 = 0x47700;
 
-        //        star.write(core::mem::transmute(STAR));
-        lstar.write(syscall_entry as usize as u64);
-        sfmask.write(RFLAGS_MASK);
+        LStar::write(VirtAddr::new(syscall_entry as usize as u64));
+        SFMask::write(RFlags::from_bits(RFLAGS_MASK).unwrap());
     }
 }
 

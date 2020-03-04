@@ -5,7 +5,7 @@ use alloc::vec::Vec;
 use core::mem::size_of;
 
 use x86_64::instructions::tables::{lgdt, load_tss};
-use x86_64::registers::model_specific::{GsBase, Msr};
+use x86_64::registers::model_specific::{GsBase, Star};
 use x86_64::structures::gdt::{Descriptor, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
 use x86_64::structures::DescriptorTablePointer;
@@ -54,12 +54,10 @@ pub fn init() {
         // store address of TSS to kernel_gsbase
         GsBase::MSR.write(tss as *const _ as u64);
 
-        let mut star = Msr::new(0xC000_0081); // legacy mode SYSCALL target
-        star.write(core::mem::transmute(StarMsr {
-            eip: 0,
-            kernel_cs: SegmentSelector::new(entry_count as u16 + 2, PrivilegeLevel::Ring0).0,
-            user_cs: SegmentSelector::new(entry_count as u16 + 4, PrivilegeLevel::Ring3).0,
-        }));
+        Star::write_raw(
+            SegmentSelector::new(entry_count as u16 + 4, PrivilegeLevel::Ring3).0,
+            SegmentSelector::new(entry_count as u16 + 2, PrivilegeLevel::Ring0).0,
+        );
     }
 }
 
@@ -69,15 +67,6 @@ unsafe fn sgdt() -> DescriptorTablePointer {
     let mut gdt = DescriptorTablePointer { limit: 0, base: 0 };
     asm!("sgdt ($0)" :: "r" (&mut gdt) : "memory" : "volatile");
     gdt
-}
-
-#[allow(dead_code)]
-#[repr(packed)]
-struct StarMsr {
-    /// ignored in 64 bit mode
-    eip: u32,
-    kernel_cs: u16,
-    user_cs: u16,
 }
 
 const KCODE64: u64 = 0x00209800_00000000; // EXECUTABLE | USER_SEGMENT | PRESENT | LONG_MODE
