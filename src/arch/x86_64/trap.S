@@ -4,6 +4,12 @@
 .global __alltraps
 __alltraps:
     push rax
+    push rdx
+
+    # store tsc
+    rdtsc                   # rdtsc => edx:eax
+    shl rdx, 32
+    or rdx, rax             # rdx = tsc
 
     /*
     kernel stack:
@@ -16,20 +22,24 @@ __alltraps:
     - error code
     - trap num
     - rax
+    - rdx
     */
-    mov ax, [rsp + 4*8]     # load cs
+    mov ax, [rsp + 5*8]     # load cs
     and ax, 0x3             # test
     jz __from_kernel        # continue trap
 
 __from_user:
     swapgs                  # swap in kernel gs
-    mov rax, [rsp + 6*8]    # rax = user rsp
-    mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
+    mov rax, [rsp + 7*8]    # rax = user rsp
+    mov gs:16, rax          # store user rsp -> scratch at TSS
 
-    mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
-    add rsp, 512+22*8       # rsp = top of trap frame
+    mov rsp, [rsp + 9*8]    # load rsp = bottom of trap frame
+    add rsp, 512+24*8       # rsp = top of trap frame
     mov rax, gs:4           # rax = kernel stack
 
+    # push tsc
+    push rdx                # push tsc1
+    sub rsp, 8              # skip tsc0
     # push trap_num, error_code
     push [rax - 6*8]        # push error_code
     push [rax - 7*8]        # push trap_num
@@ -38,10 +48,12 @@ __from_user:
     # push general registers
     push [rax - 3*8]        # push rflags
     push [rax - 5*8]        # push rip
+    mov rdx, [rax - 9*8]    # pop rdx
     mov rax, [rax - 8*8]    # pop rax
     jmp trap_syscall_entry
 
 __from_kernel:
+    pop rdx
     pop rax
     push 0
     push r15

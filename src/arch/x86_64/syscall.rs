@@ -60,6 +60,8 @@ pub struct UserContext {
     pub general: GeneralRegs,
     pub trap_num: usize,
     pub error_code: usize,
+    pub tsc_enter: usize,
+    pub tsc_exit: usize,
 }
 
 impl UserContext {

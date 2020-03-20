@@ -56,6 +56,7 @@ syscall_return:
     # gsbase
     # trap_num
     # error_code
+    # tsc
 
     # determain sysret or iret
     cmp dword ptr [rsp + 4*8], 0x100  # syscall?
@@ -75,6 +76,12 @@ iret:
     push rdx                # push cs
     push [rsp + 4*8]        # push rip
 
+    # store tsc
+    rdtsc                   # rdtsc => edx:eax
+    shl rdx, 32
+    or rax, rdx
+    mov [rsp + 11*8], rax   # push tsc
+
     # recover rcx, rdx, rax
     mov rax, [rsp - 11*8]
     mov rcx, [rsp - 9*8]
@@ -85,6 +92,15 @@ iret:
 sysret:
     pop rcx                 # rcx = rip
     pop r11                 # r11 = rflags
+
+    # store tsc
+    rdtsc                   # rdtsc => edx:eax
+    shl rdx, 32
+    or rax, rdx
+    mov [rsp + 4*8], rax    # push tsc
+
+    mov rax, [rsp - 18*8]   # load rax
+    mov rdx, [rsp - 15*8]   # load rdx
     mov rsp, [rsp - 11*8]   # load rsp
 
     sysretq
@@ -105,10 +121,21 @@ syscall_entry:
     # - load rip
 
     swapgs                  # swap in kernel gs
-    mov gs:12, rsp          # store user rsp -> scratch at TSS.sp1
+    mov gs:16, rsp          # store user rsp -> scratch at TSS
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
     pop rsp                 # load rsp = bottom of trap frame
     add rsp, 512+22*8       # rsp = top of trap frame
+
+    push rax                # push rax
+    push rdx                # push rdx
+
+    rdtsc                   # rdtsc => edx:eax
+    shl rdx, 32
+    or rax, rdx
+    mov [rsp + 3*8], rax    # push tsc1
+
+    pop rdx                 # pop rdx
+    pop rax                 # pop rax
 
     # push trap_num, error_code
     push 0                  # push error_code
@@ -128,7 +155,7 @@ trap_syscall_entry:
     push r10
     push r9
     push r8
-    push gs:12              # push rsp
+    push gs:16              # push rsp
     push rbp
     push rdi
     push rsi
