@@ -72,7 +72,6 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
     match tf.trap_num {
         3 => {
             info!("TRAP: BreakPoint");
-            tf.rip += 1;
         }
         0x68 => {} // UEFI timer
         _ => panic!("TRAP: {:#x?}", tf),

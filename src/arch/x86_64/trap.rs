@@ -44,6 +44,7 @@ pub struct TrapFrame {
     pub r13: usize,
     pub r14: usize,
     pub r15: usize,
+    pub _pad: usize,
 
     // Pushed by 'vector.S'
     pub trap_num: usize,

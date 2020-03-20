@@ -14,4 +14,4 @@ uefi-services = "0.2.1"
 trapframe = { path = "../.." }
 
 [patch.crates-io]
-uefi = { git = 'https://github.com/rcore-os/uefi-rs', branch = "alloc-align" }
+uefi = { git = 'https://github.com/rust-osdev/uefi-rs', rev = "2a89253" }
