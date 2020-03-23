@@ -76,6 +76,11 @@ iret:
     push rdx                # push cs
     push [rsp + 4*8]        # push rip
 
+    # invalidate cache
+    wbinvd
+    mov rax, cr3
+    mov cr3, rax
+
     # store tsc
     rdtsc                   # rdtsc => edx:eax
     shl rdx, 32
@@ -92,6 +97,11 @@ iret:
 sysret:
     pop rcx                 # rcx = rip
     pop r11                 # r11 = rflags
+
+    # invalidate cache
+    wbinvd
+    mov rax, cr3
+    mov cr3, rax
 
     # store tsc
     rdtsc                   # rdtsc => edx:eax
