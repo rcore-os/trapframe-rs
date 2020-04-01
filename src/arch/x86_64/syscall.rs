@@ -33,10 +33,6 @@ pub fn init() {
             cr4.insert(Cr4Flags::OSXMMEXCPT_ENABLE);
         });
 
-        // enable `rdfsbase` series instructions.
-        assert!(cpuid.get_extended_feature_info().unwrap().has_fsgsbase());
-        Cr4::update(|cr4| cr4.insert(Cr4Flags::FSGSBASE));
-
         // flags to clear on syscall
         // copy from Linux 5.0
         // TF|DF|IF|IOPL|AC|NT

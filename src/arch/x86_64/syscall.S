@@ -8,7 +8,10 @@ syscall_return:
     cli
 
     # save callee-saved registers
-    rdfsbase rax
+    mov ecx, 0xC0000100
+    rdmsr
+    shl rdx, 32
+    or  rax, rdx
     push rax                # push fsbase
     push r15
     push r14
@@ -29,10 +32,14 @@ syscall_return:
 
     # pop fsbase gsbase
     swapgs                  # store kernel gsbase
-    mov rax, [rsp + 18*8]   # rax = fsbase
-    wrfsbase rax
-    mov rax, [rsp + 19*8]   # rax = gsbase
-    wrgsbase rax
+    mov ecx, 0xC0000100
+    mov edx, [rsp + 18*8+4]
+    mov eax, [rsp + 18*8]
+    wrmsr                   # pop fsbase
+    mov ecx, 0xC0000101
+    mov edx, [rsp + 19*8+4]
+    mov eax, [rsp + 19*8]
+    wrmsr                   # pop gsbase
 
     pop rax
     pop rbx
@@ -138,12 +145,14 @@ trap_syscall_entry:
     push rax
 
     # push fsbase gsbase
-    swapgs
-    rdfsbase rax
-    mov [rsp + 18*8], rax   # store fsbase
-    rdgsbase rax
-    mov [rsp + 19*8], rax   # store gsbase
-    swapgs
+    mov ecx, 0xC0000100
+    rdmsr
+    mov [rsp + 18*8+4], edx
+    mov [rsp + 18*8], eax
+    mov ecx, 0xC0000102     # kernelgs
+    rdmsr
+    mov [rsp + 19*8+4], edx
+    mov [rsp + 19*8], eax
 
     # save vector registers
     sub rsp, 512
@@ -160,11 +169,12 @@ trap_syscall_entry:
     pop r13
     pop r14
     pop r15
-    pop rax
-    wrfsbase rax            # pop fsbase
 
-    # enable interrupt
-    # sti
+    pop rax
+    mov ecx, 0xC0000100
+    mov rdx, rax
+    shr rdx, 32
+    wrmsr                   # pop fsbase
 
     # go back to Rust
     ret
