@@ -24,9 +24,6 @@ syscall_return:
     push rdi                # keep rsp 16 bytes align
     mov gs:4, rsp           # store kernel rsp -> TSS.sp0
     mov rsp, rdi            # set rsp = bottom of trap frame
-    mov gs:12, rdi          # store &vector -> TSS.sp1
-
-    add rsp, 512
 
     # pop fsbase gsbase
     swapgs                  # store kernel gsbase
@@ -113,7 +110,7 @@ syscall_entry:
     mov gs:12, rsp          # store user rsp -> scratch at TSS.sp1
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
     pop rsp                 # load rsp = bottom of trap frame
-    add rsp, 512+22*8       # rsp = top of trap frame
+    add rsp, 22*8           # rsp = top of trap frame
 
     # push trap_num, error_code
     push 0                  # push error_code
@@ -151,9 +148,6 @@ trap_syscall_entry:
     rdmsr
     mov [rsp + 19*8+4], edx
     mov [rsp + 19*8], eax
-
-    # save vector registers
-    sub rsp, 512
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0

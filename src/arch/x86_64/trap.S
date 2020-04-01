@@ -27,7 +27,7 @@ __from_user:
     mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
 
     mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
-    add rsp, 512+22*8       # rsp = top of trap frame
+    add rsp, 22*8           # rsp = top of trap frame
     mov rax, gs:4           # rax = kernel stack
 
     # push trap_num, error_code
@@ -87,15 +87,4 @@ trap_return:
     # skip padding, trap_num, error_code
     add rsp, 24
 
-    iretq
-
-.global vector7
-vector7:
-    push rax
-    clts                    # clear CR0.TS
-    swapgs
-    mov rax, gs:12          # rax = &vector
-    .byte 0x0f, 0xae, 0x08  # fxrstor [rax]
-    swapgs
-    pop rax
     iretq

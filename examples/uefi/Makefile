@@ -11,6 +11,14 @@ ifeq (${MODE}, release)
 	BUILD_ARGS += --release
 endif
 
+ifeq ($(ACCEL), 1)
+ifeq ($(shell uname), Darwin)
+QEMU_ARGS += -accel hax
+else
+QEMU_ARGS += -accel kvm
+endif
+endif
+
 build:
 	cargo build $(BUILD_ARGS)
 
