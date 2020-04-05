@@ -88,3 +88,14 @@ trap_return:
     add rsp, 24
 
     iretq
+
+.global vector7
+vector7:
+    push rax
+    clts                    # clear CR0.TS
+    swapgs
+    mov rax, gs:12          # rax = &vector
+    .byte 0x0f, 0xae, 0x08  # fxrstor [rax]
+    swapgs
+    pop rax
+    iretq

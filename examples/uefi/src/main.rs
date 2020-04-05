@@ -49,10 +49,13 @@ fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
         },
         ..Default::default()
     };
+    context.vector.xmm[0].0[0] = 0x1234;
+    context.vector.set_lazy_restore(true);
 
     info!("go to user");
     context.run();
     info!("back from user: {:#x?}", context);
+    assert_eq!(context.vector.xmm[0].0[0], context.general.rbx as u64);
     assert_eq!(context.trap_num, 0x100); // syscall
 
     info!("go to user");
@@ -80,7 +83,10 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
 
 #[naked]
 unsafe extern "C" fn user_entry() {
-    asm!("syscall; int3");
+    // movq rbx, xmm0
+    asm!(".byte 0x66, 0x48, 0x0f, 0x7e, 0xc3");
+    asm!("syscall");
+    asm!("int3");
 }
 
 /// Set user bit for 4-level PDEs of the `page`.

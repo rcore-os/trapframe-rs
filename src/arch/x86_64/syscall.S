@@ -24,10 +24,8 @@ syscall_return:
     push rdi                # keep rsp 16 bytes align
     mov gs:4, rsp           # store kernel rsp -> TSS.sp0
     mov rsp, rdi            # set rsp = bottom of trap frame
+    mov gs:12, rdi          # store &vector -> TSS.sp1
 
-    # pop vector registers
-    # fxrstor [rsp]
-    .byte 0x0f, 0xae, 0x0c, 0x24
     add rsp, 512
 
     # pop fsbase gsbase
@@ -156,8 +154,6 @@ trap_syscall_entry:
 
     # save vector registers
     sub rsp, 512
-    # fxsave [rsp]
-    .byte 0x0f, 0xae, 0x04, 0x24
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0

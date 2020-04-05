@@ -24,6 +24,7 @@ pub fn init() {
         Cr0::update(|cr0| {
             cr0.remove(Cr0Flags::EMULATE_COPROCESSOR);
             cr0.insert(Cr0Flags::MONITOR_COPROCESSOR);
+            cr0.remove(Cr0Flags::TASK_SWITCHED);
         });
 
         // enable `fxsave` `fxrstor` instruction
@@ -89,7 +90,18 @@ impl UserContext {
     /// ```
     pub fn run(&mut self) {
         unsafe {
+            if self.vector.lazy_restore() {
+                Cr0::update(|f| f.insert(Cr0Flags::TASK_SWITCHED));
+            } else {
+                core::arch::x86_64::_fxrstor64(&self.vector as *const _ as *const u8);
+            }
+
             syscall_return(self);
+
+            if !Cr0::read().contains(Cr0Flags::TASK_SWITCHED) {
+                core::arch::x86_64::_fxsave64(&mut self.vector as *mut _ as *mut u8);
+            }
+            asm!("clts");
         }
     }
 }
@@ -158,10 +170,29 @@ pub struct VectorRegs {
     //    pub mxcsr: u32,
 }
 
+impl VectorRegs {
+    /// Set lazy restore vector registers.
+    ///
+    /// If set to true, vector registers will not be restored on switching to user space.
+    /// Instead, `CR0.TS` bit will be set, and all following operations will cause a #NM
+    /// exception (vector 7), so that we can lazily restore the FPU state.
+    pub fn set_lazy_restore(&mut self, value: bool) {
+        // now use the last byte of available area
+        unsafe {
+            (self as *mut _ as *mut bool).add(511).write(value);
+        }
+    }
+
+    /// Whether lazy restore vector registers.
+    pub fn lazy_restore(&mut self) -> bool {
+        unsafe { (self as *mut _ as *mut bool).add(511).read() }
+    }
+}
+
 // workaround: libcore has bug on Debug print u128 ??
 #[derive(Default, Clone, Copy)]
 #[repr(C, align(16))]
-pub struct U128([u64; 2]);
+pub struct U128(pub [u64; 2]);
 
 impl fmt::Debug for U128 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

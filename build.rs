@@ -13,6 +13,10 @@ fn gen_vector_asm() -> Result<()> {
     writeln!(f, ".section .text")?;
     writeln!(f, ".intel_syntax noprefix")?;
     for i in 0..256 {
+        // skip #NM. we have a custom handler.
+        if i == 7 {
+            continue;
+        }
         writeln!(f, "vector{}:", i)?;
         if !(i == 8 || (i >= 10 && i <= 14) || i == 17) {
             writeln!(f, "\tpush 0")?;
