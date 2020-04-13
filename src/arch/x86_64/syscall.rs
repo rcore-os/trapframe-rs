@@ -137,7 +137,7 @@ pub struct GeneralRegs {
 /// Currently the structure is same as the layout of the [`fxsave` map].
 ///
 /// [`fxsave` map]: https://www.felixcloutier.com/x86/FXSAVE.html#tbl-3-47
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C, align(16))]
 pub struct VectorRegs {
     pub fcw: u16,
@@ -168,6 +168,16 @@ pub struct VectorRegs {
     //
     //    /// SIMD control and status register.
     //    pub mxcsr: u32,
+}
+
+// https://xem.github.io/minix86/manual/intel-x86-and-64-manual-vol1/o_7281d5ea06a5b67a-274.html
+impl Default for VectorRegs {
+    fn default() -> Self {
+        VectorRegs {
+            mxcsr: 0x1f80,
+            ..unsafe { core::mem::zeroed() }
+        }
+    }
 }
 
 impl VectorRegs {
