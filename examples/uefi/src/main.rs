@@ -7,6 +7,7 @@
 #![deny(warnings)]
 
 extern crate alloc;
+extern crate rlibc;
 
 use core::intrinsics::breakpoint;
 use log::*;

@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Runji Wang <wangrunji0408@163.com>"]
 edition = "2018"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
@@ -20,7 +20,7 @@ log = "0.4"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 x86_64 = "0.11"
-raw-cpuid = "7.0.3"
+raw-cpuid = "8.0"
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
 riscv = "0.5"

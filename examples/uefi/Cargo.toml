@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 log = "0.4"
 x86_64 = "0.11"
-uefi = "0.4.4"
-uefi-services = "0.2.1"
+uefi = "0.4.6"
+uefi-services = "0.2.4"
+rlibc = "1.0.0"
 trapframe = { path = "../.." }

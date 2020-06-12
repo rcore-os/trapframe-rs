@@ -24,7 +24,7 @@ pub fn init() {
 fn sidt() -> DescriptorTablePointer {
     let mut dtp = DescriptorTablePointer { limit: 0, base: 0 };
     unsafe {
-        asm!("sidt ($0)" :: "r" (&mut dtp) : "memory" : "volatile");
+        asm!("sidt [{}]", in(reg) &mut dtp);
     }
     dtp
 }

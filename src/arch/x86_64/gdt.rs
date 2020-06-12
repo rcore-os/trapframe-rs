@@ -65,7 +65,7 @@ pub fn init() {
 #[inline]
 unsafe fn sgdt() -> DescriptorTablePointer {
     let mut gdt = DescriptorTablePointer { limit: 0, base: 0 };
-    asm!("sgdt ($0)" :: "r" (&mut gdt) : "memory" : "volatile");
+    asm!("sgdt [{}]", in(reg) &mut gdt);
     gdt
 }
 
