@@ -103,34 +103,46 @@ pub struct GeneralRegs {
     pub gsbase: usize,
 }
 
-impl GeneralRegs {
+impl UserContext {
+    /// Get number of syscall
+    pub fn get_syscall_num(&self) -> usize {
+        self.general.rax
+    }
+
     /// Get return value of syscall
     pub fn get_syscall_ret(&self) -> usize {
-        self.rax
+        self.general.rax
     }
 
     /// Set return value of syscall
     pub fn set_syscall_ret(&mut self, ret: usize) {
-        self.rax = ret;
+        self.general.rax = ret;
     }
 
     /// Get syscall args
     pub fn get_syscall_args(&self) -> [usize; 6] {
-        [self.rdi, self.rsi, self.rdx, self.r10, self.r8, self.r9]
+        [
+            self.general.rdi,
+            self.general.rsi,
+            self.general.rdx,
+            self.general.r10,
+            self.general.r8,
+            self.general.r9,
+        ]
     }
 
     /// Set instruction pointer
     pub fn set_ip(&mut self, ip: usize) {
-        self.rip = ip;
+        self.general.rip = ip;
     }
 
     /// Set stack pointer
     pub fn set_sp(&mut self, sp: usize) {
-        self.rsp = sp;
+        self.general.rsp = sp;
     }
 
     /// Set tls pointer
     pub fn set_tls(&mut self, tls: usize) {
-        self.fsbase = tls;
+        self.general.fsbase = tls;
     }
 }
