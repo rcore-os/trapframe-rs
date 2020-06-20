@@ -102,3 +102,35 @@ pub struct GeneralRegs {
     pub fsbase: usize,
     pub gsbase: usize,
 }
+
+impl GeneralRegs {
+    /// Get return value of syscall
+    pub fn get_syscall_ret(&self) -> usize {
+        self.rax
+    }
+
+    /// Set return value of syscall
+    pub fn set_syscall_ret(&mut self, ret: usize) {
+        self.rax = ret;
+    }
+
+    /// Get syscall args
+    pub fn get_syscall_args(&self) -> [usize; 6] {
+        [self.rdi, self.rsi, self.rdx, self.r10, self.r8, self.r9]
+    }
+
+    /// Set instruction pointer
+    pub fn set_ip(&mut self, ip: usize) {
+        self.rip = ip;
+    }
+
+    /// Set stack pointer
+    pub fn set_sp(&mut self, sp: usize) {
+        self.rsp = sp;
+    }
+
+    /// Set tls pointer
+    pub fn set_tls(&mut self, tls: usize) {
+        self.fsbase = tls;
+    }
+}
