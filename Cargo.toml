@@ -23,4 +23,4 @@ x86_64 = "0.11"
 raw-cpuid = "8.0"
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
-riscv = "0.5"
+riscv = { git = "https://github.com/rcore-os/riscv", rev = "d9794e", features = ["inline-asm"] }
