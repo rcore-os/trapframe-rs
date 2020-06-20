@@ -106,9 +106,7 @@ run_user:
 
     mv t0, sp
     mv sp, a0
-    li t1, 1 << 5
     STORE_SP t0, 0          # save kernel-sp
-    STORE_SP t1, 32         # sstatus = 1 << 5 (SIE=0, SPIE=1, SPP=U)
     csrw sscratch, sp       # sscratch = bottom of trap frame
 
 trap_return:
