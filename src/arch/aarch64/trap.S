@@ -31,6 +31,9 @@ __alltraps:
     mrs     x1, elr_el1
     stp     x1, x2, [sp, #-16]!
 
+    # save trap num
+    str     x0, [sp, #-16]!
+
     # check source is 0
     mov     x1, #0x11
     and     x1, x1, x0
@@ -38,9 +41,6 @@ __alltraps:
     beq     trap_from_user
 
 trap_from_kernel:
-    # save trap num
-    str     x0, [sp, #-16]!
-
     # go to rust
     mov     x0, sp
     # return to trap_return
@@ -49,9 +49,10 @@ trap_from_kernel:
 
 trap_from_user:
     # read sp
-    ldr     x2, [sp, #-8]
+    ldr     x2, [sp, #8]
 
     # load callee-saved registers
+    mov     x0, sp
     mov     sp, x2
     ldp     x19, x20, [sp], #16
     ldp     x21, x22, [sp], #16
@@ -59,6 +60,7 @@ trap_from_user:
     ldp     x25, x26, [sp], #16
     ldp     x27, x28, [sp], #16
     ldp     x29, x30, [sp], #16
+
     ret
 
 .macro HANDLER source kind
