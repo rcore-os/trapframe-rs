@@ -12,7 +12,7 @@ global_asm!(include_str!("trap.S"));
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set the exception vector address
-    VBAR_EL1.set(__vectors as u64);
+    VBAR_EL1.set(__vectors as usize as u64);
 }
 
 #[no_mangle]
