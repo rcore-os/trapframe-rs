@@ -104,6 +104,7 @@ run_user:
     # save kernel sp to TrapFrame
     mov     x1, sp
     mov     sp, x0
+    str     x1, [sp, #8]
 
 trap_return:
     # sp points to TrapFrame
