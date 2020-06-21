@@ -15,12 +15,6 @@ pub unsafe fn init() {
     VBAR_EL1.set(__vectors as usize as u64);
 }
 
-#[no_mangle]
-#[linkage = "weak"]
-extern "C" fn trap_handler(tf: &mut TrapFrame) {
-    unimplemented!("TRAP: tf={:#x?}", tf);
-}
-
 /// Trap frame of kernel interrupt
 ///
 /// # Trap handler
