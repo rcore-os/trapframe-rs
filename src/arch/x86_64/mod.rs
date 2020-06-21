@@ -32,5 +32,4 @@ pub unsafe fn init() {
     gdt::init();
     idt::init();
     syscall::init();
-    info!("initialize end");
 }
