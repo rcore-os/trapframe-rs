@@ -31,8 +31,8 @@ __alltraps:
     mrs     x1, elr_el1
     stp     x1, x2, [sp, #-16]!
 
-    # check
-    mov     x1, #0x10000
+    # check source is 0
+    mov     x1, #0x11
     and     x1, x1, x0
     cmp     x1, #0
     beq     trap_from_user
@@ -42,8 +42,10 @@ trap_from_kernel:
     str     x0, [sp, #-16]!
 
     # go to rust
-    mov      x0, sp
-    bl trap_handler
+    mov     x0, sp
+    # return to trap_return
+    adrp    x30, trap_return
+    b trap_handler
 
 trap_from_user:
     # read sp
@@ -105,7 +107,7 @@ run_user:
 
 trap_return:
     # sp points to TrapFrame
-    # esr and trap num, don't restore
+    # skip trap num, don't restore
     ldp     x1, x2, [sp], #16
 
     # elr and spsr
