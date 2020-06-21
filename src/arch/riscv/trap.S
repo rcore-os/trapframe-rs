@@ -82,14 +82,16 @@ end_trap_from_user:
     LOAD_SP s10, 10
     LOAD_SP s11, 11
     LOAD_SP ra, 12
-    addi sp, sp, 13 * XLENB
+    # not callee-saved, but is used to store mhartid
+    LOAD_SP tp, 13
+    addi sp, sp, 14 * XLENB
 
     ret
 
 .global run_user
 run_user:
     # save callee-saved registers
-    addi sp, sp, -13 * XLENB
+    addi sp, sp, -14 * XLENB
     STORE_SP s0, 0
     STORE_SP s1, 1
     STORE_SP s2, 2
@@ -103,6 +105,8 @@ run_user:
     STORE_SP s10, 10
     STORE_SP s11, 11
     STORE_SP ra, 12
+    # not callee-saved, but is used to store mhartid
+    STORE_SP tp, 13
 
     mv t0, sp
     mv sp, a0
