@@ -1,7 +1,7 @@
 ifeq ($(ARCH), x86_64)
 TARGET := x86_64-unknown-linux-gnu
 else ifeq ($(ARCH), aarch64)
-TARGET := aarch64-unknown-linux-gnu
+TARGET := aarch64-unknown-none
 else ifeq ($(ARCH), mipsel)
 TARGET := mipsel-unknown-linux-gnu
 else ifeq ($(ARCH), riscv32)
