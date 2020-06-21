@@ -6,6 +6,7 @@
 extern crate opensbi_rt;
 
 use riscv::register::scause::{Exception as E, Scause, Trap};
+use riscv::register::{scause, stval};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 
 #[no_mangle]
@@ -54,7 +55,9 @@ extern "C" fn main() {
         sepc: user_entry as usize,
     };
     println!("Go to user: {:#x?}", regs);
-    let (scause, stval) = regs.run();
+    regs.run();
+    let scause = scause::read();
+    let stval = stval::read();
     println!(
         "Back from user: {:?}, stval={:#x}\n{:#x?}",
         scause.cause(),
@@ -70,7 +73,9 @@ extern "C" fn main() {
 }
 
 #[no_mangle]
-extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
+extern "C" fn trap_handler(tf: &mut TrapFrame) {
+    let scause = scause::read();
+    let stval = stval::read();
     match scause.cause() {
         Trap::Exception(E::Breakpoint) => {
             println!("TRAP: Breakpoint");

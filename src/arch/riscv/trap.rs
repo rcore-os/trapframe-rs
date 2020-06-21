@@ -1,5 +1,5 @@
 pub use riscv::register::scause;
-use riscv::register::{scause::Scause, sscratch, stvec};
+use riscv::register::{sscratch, stvec};
 
 #[cfg(target_arch = "riscv32")]
 global_asm!(
@@ -47,13 +47,8 @@ pub unsafe fn init() {
 
 #[no_mangle]
 #[linkage = "weak"]
-extern "C" fn trap_handler(scause: Scause, stval: usize, tf: &mut TrapFrame) {
-    unimplemented!(
-        "TRAP: scause={:?}, stval={:#x}, tf={:#x?}",
-        scause.cause(),
-        stval,
-        tf
-    );
+extern "C" fn trap_handler(tf: &mut TrapFrame) {
+    unimplemented!("TRAP: tf={:#x?}", tf);
 }
 
 /// Trap frame of kernel interrupt
@@ -113,11 +108,11 @@ impl UserContext {
     ///     ..Default::default()
     /// };
     /// // go to user
-    /// let (scause, stval) = context.run();
+    /// context.run();
     /// // back from user
     /// println!("back from user: {:#x?}", context);
     /// ```
-    pub fn run(&mut self) -> (Scause, usize) {
+    pub fn run(&mut self) {
         unsafe { run_user(self) }
     }
 }
@@ -207,5 +202,5 @@ impl UserContext {
 #[allow(improper_ctypes)]
 extern "C" {
     fn trap_entry();
-    fn run_user(regs: &mut UserContext) -> (Scause, usize);
+    fn run_user(regs: &mut UserContext);
 }
