@@ -34,10 +34,10 @@ __alltraps:
     # save trap num
     str     x0, [sp, #-16]!
 
-    # check source is 0
+    # check source is 2
     mov     x1, #0x3
     and     x1, x1, x0
-    cmp     x1, #0
+    cmp     x1, #2
     beq     trap_from_user
 
 trap_from_kernel:
