@@ -1,30 +1,4 @@
-pub use riscv::register::scause;
-use riscv::register::{sscratch, stvec};
-
-#[cfg(target_arch = "riscv32")]
-global_asm!(
-    r"
-    .equ XLENB, 4
-    .macro LOAD_SP a1, a2
-        lw \a1, \a2*XLENB(sp)
-    .endm
-    .macro STORE_SP a1, a2
-        sw \a1, \a2*XLENB(sp)
-    .endm
-"
-);
-#[cfg(target_arch = "riscv64")]
-global_asm!(
-    r"
-    .equ XLENB, 8
-    .macro LOAD_SP a1, a2
-        ld \a1, \a2*XLENB(sp)
-    .endm
-    .macro STORE_SP a1, a2
-        sd \a1, \a2*XLENB(sp)
-    .endm
-"
-);
+use aarch64::regs::*;
 
 global_asm!(include_str!("trap.S"));
 
@@ -33,22 +7,12 @@ global_asm!(include_str!("trap.S"));
 /// # Safety
 ///
 /// This function will:
-/// - Set `sscratch` to 0.
-/// - Set `stvec` to internal exception vector.
+/// - Set `vbar_el1` to internal exception vector.
 ///
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
-    // Set sscratch register to 0, indicating to exception vector that we are
-    // presently executing in the kernel
-    sscratch::write(0);
     // Set the exception vector address
-    stvec::write(trap_entry as usize, stvec::TrapMode::Direct);
-}
-
-#[no_mangle]
-#[linkage = "weak"]
-extern "C" fn trap_handler(tf: &mut TrapFrame) {
-    unimplemented!("TRAP: tf={:#x?}", tf);
+    VBAR_EL1.set(__vectors as usize as u64);
 }
 
 /// Trap frame of kernel interrupt
@@ -68,24 +32,42 @@ extern "C" fn trap_handler(tf: &mut TrapFrame) {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {
+    /// Trap num: Source and Kind
+    pub trap_num: usize,
+    /// Reserved for internal use
+    pub __reserved: usize,
+    /// Exception Link Register, elr_el1
+    pub elr: usize,
+    /// Saved Process Status Register, spsr_el1
+    pub spsr: usize,
+    /// Stack Pointer, sp_el0
+    pub sp: usize,
+    /// Software Thread ID Register, tpidr_el0
+    pub tpidr: usize,
     /// General registers
+    /// Must be last in this struct
     pub general: GeneralRegs,
-    /// Supervisor Status
-    pub sstatus: usize,
-    /// Supervisor Exception Program Counter
-    pub sepc: usize,
 }
 
 /// Saved registers on a trap.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct UserContext {
+    /// Trap num: Source and Kind
+    pub trap_num: usize,
+    /// Reserved for internal use
+    pub __reserved: usize,
+    /// Exception Link Register, elr_el1
+    pub elr: usize,
+    /// Saved Process Status Register, spsr_el1
+    pub spsr: usize,
+    /// Stack Pointer, sp_el0
+    pub sp: usize,
+    /// Software Thread ID Register, tpidr_el0
+    pub tpidr: usize,
     /// General registers
+    /// Must be last in this struct
     pub general: GeneralRegs,
-    /// Supervisor Status
-    pub sstatus: usize,
-    /// Supervisor Exception Program Counter
-    pub sepc: usize,
 }
 
 impl UserContext {
@@ -121,86 +103,88 @@ impl UserContext {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct GeneralRegs {
-    pub zero: usize,
-    pub ra: usize,
-    pub sp: usize,
-    pub gp: usize,
-    pub tp: usize,
-    pub t0: usize,
-    pub t1: usize,
-    pub t2: usize,
-    pub s0: usize,
-    pub s1: usize,
-    pub a0: usize,
-    pub a1: usize,
-    pub a2: usize,
-    pub a3: usize,
-    pub a4: usize,
-    pub a5: usize,
-    pub a6: usize,
-    pub a7: usize,
-    pub s2: usize,
-    pub s3: usize,
-    pub s4: usize,
-    pub s5: usize,
-    pub s6: usize,
-    pub s7: usize,
-    pub s8: usize,
-    pub s9: usize,
-    pub s10: usize,
-    pub s11: usize,
-    pub t3: usize,
-    pub t4: usize,
-    pub t5: usize,
-    pub t6: usize,
+    pub x1: usize,
+    pub x2: usize,
+    pub x3: usize,
+    pub x4: usize,
+    pub x5: usize,
+    pub x6: usize,
+    pub x7: usize,
+    pub x8: usize,
+    pub x9: usize,
+    pub x10: usize,
+    pub x11: usize,
+    pub x12: usize,
+    pub x13: usize,
+    pub x14: usize,
+    pub x15: usize,
+    pub x16: usize,
+    pub x17: usize,
+    pub x18: usize,
+    pub x19: usize,
+    pub x20: usize,
+    pub x21: usize,
+    pub x22: usize,
+    pub x23: usize,
+    pub x24: usize,
+    pub x25: usize,
+    pub x26: usize,
+    pub x27: usize,
+    pub x28: usize,
+    pub x29: usize,
+    pub __reserved: usize, // for alignment
+    pub x30: usize,
+    // put here deliberately for ease of asm
+    pub x0: usize,
+    // x31 means special
 }
 
 impl UserContext {
     /// Get number of syscall
     pub fn get_syscall_num(&self) -> usize {
-        self.general.a7
+        self.general.x8
     }
 
     /// Get return value of syscall
     pub fn get_syscall_ret(&self) -> usize {
-        self.general.a0
+        self.general.x0
     }
 
     /// Set return value of syscall
     pub fn set_syscall_ret(&mut self, ret: usize) {
-        self.general.a0 = ret;
+        self.general.x0 = ret;
     }
 
     /// Get syscall args
     pub fn get_syscall_args(&self) -> [usize; 6] {
         [
-            self.general.a0,
-            self.general.a1,
-            self.general.a2,
-            self.general.a3,
-            self.general.a4,
-            self.general.a5,
+            self.general.x0,
+            self.general.x1,
+            self.general.x2,
+            self.general.x3,
+            self.general.x4,
+            self.general.x5,
         ]
     }
 
     /// Set instruction pointer
     pub fn set_ip(&mut self, ip: usize) {
-        self.sepc = ip;
+        self.elr = ip;
     }
 
     /// Set stack pointer
     pub fn set_sp(&mut self, sp: usize) {
-        self.general.sp = sp;
+        self.sp = sp;
     }
 
     /// Set tls pointer
     pub fn set_tls(&mut self, tls: usize) {
-        self.general.tp = tls;
+        self.tpidr = tls;
     }
 }
 
 #[allow(improper_ctypes)]
 extern "C" {
-    fn trap_entry();
+    fn __vectors();
     fn run_user(regs: &mut UserContext);
 }

@@ -55,14 +55,11 @@ trap_from_user:
     STORE_SP t0, 2          # save sp
     STORE_SP t1, 32         # save sstatus
     STORE_SP t2, 33         # save sepc
-    # return scause, stval
-    csrr a0, scause
-    csrr a1, stval
 
     andi t1, t1, 1 << 8     # sstatus.SPP = 1
     beqz t1, end_trap_from_user
 end_trap_from_kernel:
-    mv a2, sp
+    mv a0, sp               # first arg is TrapFrame
     la ra, trap_return      # set return address
     j trap_handler
 
@@ -82,14 +79,16 @@ end_trap_from_user:
     LOAD_SP s10, 10
     LOAD_SP s11, 11
     LOAD_SP ra, 12
-    addi sp, sp, 13 * XLENB
+    # not callee-saved, but is used to store mhartid
+    LOAD_SP tp, 13
+    addi sp, sp, 14 * XLENB
 
     ret
 
 .global run_user
 run_user:
     # save callee-saved registers
-    addi sp, sp, -13 * XLENB
+    addi sp, sp, -14 * XLENB
     STORE_SP s0, 0
     STORE_SP s1, 1
     STORE_SP s2, 2
@@ -103,12 +102,12 @@ run_user:
     STORE_SP s10, 10
     STORE_SP s11, 11
     STORE_SP ra, 12
+    # not callee-saved, but is used to store mhartid
+    STORE_SP tp, 13
 
     mv t0, sp
     mv sp, a0
-    li t1, 1 << 5
     STORE_SP t0, 0          # save kernel-sp
-    STORE_SP t1, 32         # sstatus = 1 << 5 (SIE=0, SPIE=1, SPP=U)
     csrw sscratch, sp       # sscratch = bottom of trap frame
 
 trap_return:

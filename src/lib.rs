@@ -5,10 +5,6 @@
 
 extern crate alloc;
 
-#[allow(unused_imports)]
-#[macro_use]
-extern crate log;
-
 #[cfg(target_arch = "x86_64")]
 #[path = "arch/x86_64/mod.rs"]
 mod arch;
