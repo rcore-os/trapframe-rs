@@ -35,7 +35,7 @@ __alltraps:
     str     x0, [sp, #-16]!
 
     # check source is 0
-    mov     x1, #0x11
+    mov     x1, #0x3
     and     x1, x1, x0
     cmp     x1, #0
     beq     trap_from_user
@@ -44,7 +44,7 @@ trap_from_kernel:
     # go to rust
     mov     x0, sp
     # return to trap_return
-    adrp    x30, trap_return
+    adr     x30, trap_return
     b trap_handler
 
 trap_from_user:
