@@ -1,4 +1,4 @@
-use aarch64::regs::*;
+use cortex_a::regs::*;
 
 global_asm!(include_str!("trap.S"));
 
@@ -83,10 +83,10 @@ impl UserContext {
     /// // init user space context
     /// let mut context = UserContext {
     ///     general: GeneralRegs {
-    ///         sp: 0x10000,
     ///         ..Default::default()
     ///     },
-    ///     sepc: 0x1000,
+    ///     sp: 0x10000,
+    ///     elr: 0x1000,
     ///     ..Default::default()
     /// };
     /// // go to user
