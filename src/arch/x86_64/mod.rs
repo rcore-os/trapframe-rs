@@ -41,7 +41,7 @@ pub unsafe fn init() {
 }
 
 /// User space context
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct UserContext {
     pub general: GeneralRegs,
@@ -50,7 +50,7 @@ pub struct UserContext {
 }
 
 /// General registers
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct GeneralRegs {
     pub rax: usize,

@@ -133,6 +133,7 @@ global_asm!(
 .endm
 
 .global _syscall_fn_entry
+.global syscall_fn_entry
 .global _syscall_fn_return
 .set _syscall_fn_entry, syscall_fn_entry
 .set _syscall_fn_return, syscall_fn_return
@@ -226,3 +227,137 @@ syscall_fn_return:
     jmp r11                 # restore rip
 "#
 );
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[cfg(target_os = "macos")]
+    global_asm!(".set _dump_registers, dump_registers");
+
+    // Mock user program to dump registers at stack.
+    global_asm!(
+        r#"
+.intel_syntax noprefix
+dump_registers:
+    push r15
+    push r14
+    push r13
+    push r12
+    push r11
+    push r10
+    push r9
+    push r8
+    push rsp
+    push rbp
+    push rdi
+    push rsi
+    push rdx
+    push rcx
+    push rbx
+    push rax
+
+    add rax, 10
+    add rbx, 10
+    add rcx, 10
+    add rdx, 10
+    add rsi, 10
+    add rdi, 10
+    add rbp, 10
+    add r8, 10
+    add r9, 10
+    add r10, 10
+    add r11, 10
+    add r12, 10
+    add r13, 10
+    add r14, 10
+    add r15, 10
+
+    call syscall_fn_entry
+"#
+    );
+
+    #[test]
+    fn run_fncall() {
+        extern "sysv64" {
+            fn dump_registers();
+        }
+        let mut stack = [0u8; 0x1000];
+        let mut cx = UserContext {
+            general: GeneralRegs {
+                rax: 0,
+                rbx: 1,
+                rcx: 2,
+                rdx: 3,
+                rsi: 4,
+                rdi: 5,
+                rbp: 6,
+                rsp: stack.as_mut_ptr() as usize + 0x1000,
+                r8: 8,
+                r9: 9,
+                r10: 10,
+                r11: 11,
+                r12: 12,
+                r13: 13,
+                r14: 14,
+                r15: 15,
+                rip: dump_registers as usize,
+                rflags: 0,
+                fsbase: 0, // don't set to non-zero garbage value
+                gsbase: 0,
+            },
+            trap_num: 0,
+            error_code: 0,
+        };
+        cx.run_fncall();
+        // check restored registers
+        let general = unsafe { *(cx.general.rsp as *const GeneralRegs) };
+        assert_eq!(
+            general,
+            GeneralRegs {
+                rax: 0,
+                rbx: 1,
+                rcx: 2,
+                rdx: 3,
+                rsi: 4,
+                rdi: 5,
+                rbp: 6,
+                // skip rsp
+                r8: 8,
+                r9: 9,
+                r10: 10,
+                // skip r11
+                r12: 12,
+                r13: 13,
+                r14: 14,
+                r15: 15,
+                ..general
+            }
+        );
+        // check saved registers
+        assert_eq!(
+            cx.general,
+            GeneralRegs {
+                rax: 10,
+                rbx: 11,
+                rcx: 12,
+                rdx: 13,
+                rsi: 14,
+                rdi: 15,
+                rbp: 16,
+                // skip rsp
+                r8: 18,
+                r9: 19,
+                r10: 20,
+                // skip r11
+                r12: 22,
+                r13: 23,
+                r14: 24,
+                r15: 25,
+                ..cx.general
+            }
+        );
+        assert_eq!(cx.trap_num, 0x100);
+        assert_eq!(cx.error_code, 0);
+    }
+}
