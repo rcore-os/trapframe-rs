@@ -28,6 +28,7 @@ jobs:
           x86_64-unknown-linux-gnu,
           x86_64-apple-darwin,
           aarch64-unknown-linux-gnu,
+          aarch64-unknown-none-softfloat,
           riscv32imac-unknown-none-elf,
           riscv64imac-unknown-none-elf,
           mipsel-unknown-linux-gnu,
@@ -56,7 +57,27 @@ jobs:
         command: doc
         args: --target ${{ matrix.target }}
 
-  test:
+  build-x86_64-none:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          components: rust-src
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all-features --target x86_64-linux-kernel -Z build-std=core,alloc
+      - name: Docs
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all-features --target x86_64-linux-kernel -Z build-std=core,alloc
+
+  test-x86_64:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
