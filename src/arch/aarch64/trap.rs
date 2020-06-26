@@ -1,5 +1,4 @@
 use super::*;
-use cortex_a::regs::*;
 
 global_asm!(include_str!("trap.S"));
 
@@ -13,7 +12,7 @@ global_asm!(include_str!("trap.S"));
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set the exception vector address
-    VBAR_EL1.set(__vectors as usize as u64);
+    asm!("msr VBAR_EL1 {}", in(reg) __vectors as usize);
 }
 
 /// Trap frame of kernel interrupt

@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Runji Wang <wangrunji0408@163.com>", "Jiajie Chen <c@jia.je>"]
 edition = "2018"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
@@ -20,9 +20,3 @@ exclude = ["docs", ".idea"]
 [target.'cfg(all(target_arch = "x86_64", target_os = "none"))'.dependencies]
 x86_64 = "0.11"
 raw-cpuid = "8.0"
-
-[target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
-riscv = "0.5"
-
-[target.'cfg(all(target_arch = "aarch64", target_os = "none"))'.dependencies]
-cortex-a = "3.0"

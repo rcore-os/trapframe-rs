@@ -5,6 +5,7 @@
 
     .section .text
     .global trap_entry
+    .balign 4
 trap_entry:
     # If coming from userspace, preserve the user stack pointer and load
     # the kernel stack pointer. If we came from the kernel, sscratch
