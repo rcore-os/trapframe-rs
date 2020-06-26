@@ -1,6 +1,3 @@
-pub use riscv::register::scause;
-use riscv::register::{sscratch, stvec};
-
 #[cfg(target_arch = "riscv32")]
 global_asm!(
     r"
@@ -40,9 +37,9 @@ global_asm!(include_str!("trap.S"));
 pub unsafe fn init() {
     // Set sscratch register to 0, indicating to exception vector that we are
     // presently executing in the kernel
-    sscratch::write(0);
+    llvm_asm!("csrw sscratch, $0" :: "r"(0) :: "volatile");
     // Set the exception vector address
-    stvec::write(trap_entry as usize, stvec::TrapMode::Direct);
+    llvm_asm!("csrw stvec, $0" :: "r"(trap_entry as usize) :: "volatile");
 }
 
 #[no_mangle]
