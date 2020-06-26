@@ -9,9 +9,9 @@ Handle Trap Frame across kernel and user space on multiple ISAs.
 Supported ISA:
 
 * ✅ x86_64
+* ✅ AArch64
 * ✅ RISC-V 32/64
 * 🚧 MIPS32
-* 🚧 AArch64
 
 ## Example
 
