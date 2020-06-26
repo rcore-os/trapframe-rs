@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - run: rm rust-toolchain
@@ -21,7 +21,7 @@ jobs:
           args: --all -- --check
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         target: [
@@ -74,3 +74,20 @@ jobs:
         with:
           command: test
           args: --all-features
+
+  test-aarch64:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: rm rust-toolchain
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: aarch64-unknown-linux-gnu
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: test
+          args: --target aarch64-unknown-linux-gnu
