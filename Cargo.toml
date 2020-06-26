@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Runji Wang <wangrunji0408@163.com>", "Jiajie Chen <c@jia.je>"]
 edition = "2018"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
