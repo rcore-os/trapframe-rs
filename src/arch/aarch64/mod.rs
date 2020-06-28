@@ -107,6 +107,11 @@ impl UserContext {
         self.sp = sp;
     }
 
+    /// Get stack pointer
+    pub fn get_sp(&self) -> usize {
+        self.sp
+    }
+
     /// Set tls pointer
     pub fn set_tls(&mut self, tls: usize) {
         self.tpidr = tls;
