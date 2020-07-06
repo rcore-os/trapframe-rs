@@ -40,9 +40,9 @@ pub struct TrapFrame {
     pub elr: usize,
     /// Saved Process Status Register, spsr_el1
     pub spsr: usize,
-    /// Stack Pointer, sp_el0
+    /// Stack Pointer, sp_el1
     pub sp: usize,
-    /// Software Thread ID Register, tpidr_el0
+    /// Software Thread ID Register, tpidr_el1
     pub tpidr: usize,
     /// General registers
     /// Must be last in this struct

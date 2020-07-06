@@ -21,10 +21,8 @@ __alltraps:
     stp     x3, x4, [sp, #-16]!
     stp     x1, x2, [sp, #-16]!
 
-    # read tpidr and sp
-    mrs     x2, tpidr_el0
-    mrs     x1, sp_el0
-    stp     x1, x2, [sp, #-16]!
+    # skip tpidr and sp
+    add     sp, sp, #-16
 
     # read spsr and elr
     mrs     x2, spsr_el1
@@ -41,19 +39,29 @@ __alltraps:
     beq     trap_from_user
 
 trap_from_kernel:
+    # read tpidr and sp
+    mrs     x2, tpidr_el1
+    add     x1, sp, #38*8
+    stp     x1, x2, [sp, #32]
     # go to rust
     mov     x0, sp
-    # return to trap_return
-    adr     x30, trap_return
-    b trap_handler
+    bl      trap_handler
+    # load tpidr
+    ldr     x1, [sp, #40]
+    msr     tpidr_el1, x1
+    # go to trap_return
+    b       trap_return
 
 trap_from_user:
+    # read tpidr and sp
+    mrs     x2, tpidr_el0
+    mrs     x1, sp_el0
+    stp     x1, x2, [sp, #32]
     # read sp
     ldr     x2, [sp, #8]
+    mov     sp, x2
 
     # load callee-saved registers
-    mov     x0, sp
-    mov     sp, x2
     ldp     x19, x20, [sp], #16
     ldp     x21, x22, [sp], #16
     ldp     x23, x24, [sp], #16
@@ -108,20 +116,23 @@ run_user:
     mov     sp, x0
     str     x1, [sp, #8]
 
+    # load sp and tpidr
+    ldp     x1, x2, [sp, #32]
+    msr     sp_el0, x1
+    msr     tpidr_el0, x2
+
 trap_return:
     # sp points to TrapFrame
     # skip trap num, don't restore
-    ldp     x1, x2, [sp], #16
+    add     sp, sp, #16
 
     # elr and spsr
     ldp     x1, x2, [sp], #16
     msr     elr_el1, x1
     msr     spsr_el1, x2
 
-    # sp and tpidr
-    ldp     x1, x2, [sp], #16
-    msr     sp_el0, x1
-    msr     tpidr_el0, x2
+    # skip sp and tpidr
+    add     sp, sp, #16
 
     # general purpose registers
     ldp     x1, x2, [sp], #16
