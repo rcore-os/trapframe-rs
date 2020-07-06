@@ -1,17 +1,17 @@
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 mod fncall;
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 mod gdt;
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 mod idt;
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 mod syscall;
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 mod trap;
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 pub use fncall::syscall_fn_entry;
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 pub use trap::TrapFrame;
 
 /// Initialize interrupt handling on x86_64.
@@ -32,7 +32,7 @@ pub use trap::TrapFrame;
 /// [TSS]: https://wiki.osdev.org/Task_State_Segment
 /// [`syscall`]: https://www.felixcloutier.com/x86/syscall
 ///
-#[cfg(target_os = "none")]
+#[cfg(any(target_os = "none", target_os = "uefi"))]
 pub unsafe fn init() {
     x86_64::instructions::interrupts::disable();
     gdt::init();
