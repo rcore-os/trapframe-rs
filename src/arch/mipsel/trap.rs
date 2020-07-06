@@ -37,6 +37,10 @@ extern "C" fn trap_handler(tf: &mut TrapFrame) {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {
+    /// TLS
+    pub tls: usize,
+    /// Reserved for internal use
+    pub __reserved: usize,
     /// CP0 Status
     pub status: usize,
     /// CP0 cause
@@ -53,6 +57,10 @@ pub struct TrapFrame {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct UserContext {
+    /// TLS
+    pub tls: usize,
+    /// Reserved for internal use
+    pub __reserved: usize,
     /// CP0 Status
     pub status: usize,
     /// CP0 cause
@@ -61,8 +69,6 @@ pub struct UserContext {
     pub epc: usize,
     /// CP0 vaddr
     pub vaddr: usize,
-    /// TLS
-    pub tls: usize,
     /// General registers
     pub general: GeneralRegs,
 }
