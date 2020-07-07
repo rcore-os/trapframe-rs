@@ -77,7 +77,13 @@ trap_from_kernel:
 
     # read cp0.status
     mfc0 $k0, $12
-    # cp0.status.ksu
+    # mask cp0.status.ksu, status.exl and status.ie
+    li $t0, ~0x1b
+    and $t1, $k0, $t0
+    # write cp0.status
+    mtc0 $t1, $12
+
+    # check cp0.status.ksu
     andi $k0, $k0, 0x10
     beq $k0, $zero, end_trap_from_kernel
     nop
