@@ -79,6 +79,8 @@ trap_from_kernel:
     # cp0.status.ksu
     andi $k0, $k0, 0x10
     beq $k0, $zero, end_trap_from_kernel
+    nop
+
 end_trap_from_user:
     # read kernel sp
     lw $t1, 4($sp)
@@ -100,12 +102,14 @@ end_trap_from_user:
     addiu $sp, $sp, 4*11
 
     jr $ra
+    nop
 
 end_trap_from_kernel:
     # first arg
     move $a0, $sp
     la $ra, trap_return
     j trap_handler
+    nop
 
     .global run_user
 run_user:
@@ -134,7 +138,6 @@ trap_return:
     # restore special registers
 	lw   $t1, 8($sp)
 	ori  $t1, $t1, 0x2  # status.exl
-	nop
 	mtc0 $t1, $12      # cp0.status
 
     lw $k0, 16($sp)
