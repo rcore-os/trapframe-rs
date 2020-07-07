@@ -6,6 +6,7 @@
 
 trap_entry:
     b general_trap_vec
+    nop
 
 .org 0x180
 general_trap_vec:
@@ -130,7 +131,7 @@ run_user:
 
     move $t1, $sp
     move $sp, $a0
-    sw $sp, 4($sp)
+    sw $t1, 4($sp)
 
     .global trap_return
 trap_return:
