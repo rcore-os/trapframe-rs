@@ -11,16 +11,38 @@ use x86_64::structures::tss::TaskStateSegment;
 use x86_64::structures::DescriptorTablePointer;
 use x86_64::{PrivilegeLevel, VirtAddr};
 
+const PORT_BITMAP_BYTES: usize = 8193; // Follow linux, one extra element.
+
+/// TSS with port bitmap.
+#[derive(Clone, Copy)]
+#[repr(C, packed)]
+pub struct TaskStateSegmentPortBitmap {
+    pub tss: TaskStateSegment,
+    pub port_bitmap: [u8; PORT_BITMAP_BYTES], // 0: accessible, 1: not accessible
+}
+
+impl TaskStateSegmentPortBitmap {
+    fn new() -> Self {
+//        const DENY_ALL: u8 = !0;
+        const ALLOW_ALL: u8 = 0;
+        Self {
+            tss: TaskStateSegment::new(),
+            port_bitmap: [ALLOW_ALL; PORT_BITMAP_BYTES]
+        }
+    }
+}
+
 /// Init TSS & GDT.
 pub fn init() {
     // allocate stack for trap from user
     // set the stack top to TSS
     // so that when trap from ring3 to ring0, CPU can switch stack correctly
-    let mut tss = Box::new(TaskStateSegment::new());
+    let mut tss = Box::new(TaskStateSegmentPortBitmap::new());
     let trap_stack_top = Box::leak(Box::new([0u8; 0x1000])).as_ptr() as u64 + 0x1000;
-    tss.privilege_stack_table[0] = VirtAddr::new(trap_stack_top);
+    tss.tss.privilege_stack_table[0] = VirtAddr::new(trap_stack_top);
+    tss.tss.iomap_base = ((&tss.port_bitmap as *const _ as usize) - (&tss.tss as *const _ as usize)) as u16;
     let tss: &'static _ = Box::leak(tss);
-    let (tss0, tss1) = match Descriptor::tss_segment(tss) {
+    let (tss0, tss1) = match Descriptor::tss_segment(&tss.tss) {
         Descriptor::SystemSegment(tss0, tss1) => (tss0, tss1),
         _ => unreachable!(),
     };

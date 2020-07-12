@@ -122,4 +122,25 @@ impl UserContext {
     pub fn set_tls(&mut self, tls: usize) {
         self.general.fsbase = tls;
     }
+
+    /// Get ioport bitmap, called after gdt::init().
+    /// Return true for deny, false for allow.
+    pub fn get_ioport_bitmap(&self, port: u16) -> bool {
+        use crate::arch::gdt::TaskStateSegmentPortBitmap;
+        let tss = unsafe { *(self.general.gsbase as *mut TaskStateSegmentPortBitmap) };
+        let idx: usize = (port >> 3) as usize;
+        let bit: u8 = (port & 0x7) as u8;
+        tss.port_bitmap[idx] & (1 << bit) != 0
+    }
+
+    /// Set ioport bitmap, called after gdt::init().
+    pub fn set_ioport_bitmap(&mut self, port: u16, deny: bool) {
+        use crate::arch::gdt::TaskStateSegmentPortBitmap;
+        let mut tss = unsafe { *(self.general.gsbase as *mut TaskStateSegmentPortBitmap) };
+        let idx: usize = (port >> 3) as usize;
+        let bit: u8 = (port & 0x7) as u8;
+        let deny: u8 = if deny { 1 } else { 0 };
+        tss.port_bitmap[idx] &= !(1 << bit);
+        tss.port_bitmap[idx] |= deny << bit;
+    }
 }
