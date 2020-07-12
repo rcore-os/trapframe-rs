@@ -28,13 +28,12 @@ impl TaskStateSegmentPortBitmap {
     pub const PORT_BITMAP_OFFSET: usize = size_of::<TaskStateSegment>();
 
     fn new() -> Self {
-        const ALLOW_ALL: u8 = 0;
+        const DENY_ALL: u8 = !0;
         Self {
             tss: TaskStateSegment::new(),
-            port_bitmap: [ALLOW_ALL; 1 + Self::BITMAP_VALID_SIZE]
+            port_bitmap: [DENY_ALL; 1 + Self::BITMAP_VALID_SIZE]
         }
     }
-
 }
 
 pub fn gsbase_to_bitmap<'a>(gsbase: u64) -> &'a mut [u8] {
