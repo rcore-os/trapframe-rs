@@ -14,6 +14,8 @@ pub use fncall::syscall_fn_entry;
 #[cfg(any(target_os = "none", target_os = "uefi"))]
 pub use trap::TrapFrame;
 
+pub use gdt::gsbase_to_bitmap;
+
 /// Initialize interrupt handling on x86_64.
 ///
 /// # Safety
