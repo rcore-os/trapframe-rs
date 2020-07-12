@@ -17,12 +17,14 @@ use x86_64::{PrivilegeLevel, VirtAddr};
 /// Bit in port_bitmap: 0 indicates accessible, 1 indicated inaccessible.
 #[derive(Clone, Copy)]
 #[repr(C, packed)]
+#[cfg(feature = "ioport_bitmap")]
 pub struct TaskStateSegmentPortBitmap {
     pub tss: TaskStateSegment,
     // Follow linux, add one extra element.
     pub port_bitmap: [u8; 1 + Self::BITMAP_VALID_SIZE],
 }
 
+#[cfg(feature = "ioport_bitmap")]
 impl TaskStateSegmentPortBitmap {
     pub const BITMAP_VALID_SIZE: usize = 8192;
     pub const PORT_BITMAP_OFFSET: usize = size_of::<TaskStateSegment>();
@@ -36,6 +38,7 @@ impl TaskStateSegmentPortBitmap {
     }
 }
 
+#[cfg(feature = "ioport_bitmap")]
 pub fn gsbase_to_bitmap<'a>(gsbase: u64) -> &'a mut [u8] {
     unsafe {
         from_raw_parts_mut(
@@ -49,19 +52,33 @@ pub fn init() {
     // allocate stack for trap from user
     // set the stack top to TSS
     // so that when trap from ring3 to ring0, CPU can switch stack correctly
-    let mut tss = Box::new(TaskStateSegmentPortBitmap::new());
-    let trap_stack_top = Box::leak(Box::new([0u8; 0x1000])).as_ptr() as u64 + 0x1000;
-    tss.tss.privilege_stack_table[0] = VirtAddr::new(trap_stack_top);
-    tss.tss.iomap_base = TaskStateSegmentPortBitmap::PORT_BITMAP_OFFSET as u16;
-    let tss: &'static _ = Box::leak(tss);
-    let (tss0, tss1) = match Descriptor::tss_segment(&tss.tss) {
-        // Extreme hack: the segment limit assumed by x86_64 does not include the port bitmap.
-        Descriptor::SystemSegment(tss0, tss1) => {
-            let tss0  = tss0 & !0xFFFF;
-            let tss0 = tss0 | (size_of::<TaskStateSegmentPortBitmap>() as u64);
-            (tss0, tss1)
-        },
-        _ => unreachable!(),
+
+    let (tss, tss0, tss1) = if cfg!(feature = "ioport_bitmap") {
+        let mut tss = Box::new(TaskStateSegmentPortBitmap::new());
+        let trap_stack_top = Box::leak(Box::new([0u8; 0x1000])).as_ptr() as u64 + 0x1000;
+        tss.tss.privilege_stack_table[0] = VirtAddr::new(trap_stack_top);
+        tss.tss.iomap_base = TaskStateSegmentPortBitmap::PORT_BITMAP_OFFSET as u16;
+        let tss: &'static _ = Box::leak(tss);
+        let (tss0, tss1) = match Descriptor::tss_segment(&tss.tss) {
+            // Extreme hack: the segment limit assumed by x86_64 does not include the port bitmap.
+            Descriptor::SystemSegment(tss0, tss1) => {
+                let tss0 = tss0 & !0xFFFF;
+                let tss0 = tss0 | (size_of::<TaskStateSegmentPortBitmap>() as u64);
+                (tss0, tss1)
+            },
+            _ => unreachable!(),
+        };
+        (&tss.tss, tss0, tss1)
+    } else {
+        let mut tss = Box::new(TaskStateSegment::new());
+        let trap_stack_top = Box::leak(Box::new([0u8; 0x1000])).as_ptr() as u64 + 0x1000;
+        tss.privilege_stack_table[0] = VirtAddr::new(trap_stack_top);
+        let tss: &'static _ = Box::leak(tss);
+        let (tss0, tss1) = match Descriptor::tss_segment(&tss) {
+            Descriptor::SystemSegment(tss0, tss1) => (tss0, tss1),
+            _ => unreachable!(),
+        };
+        (tss, tss0, tss1)
     };
 
     unsafe {
