@@ -43,7 +43,12 @@ pub fn init() {
     tss.tss.iomap_base = ((&tss.port_bitmap as *const _ as usize) - (&tss.tss as *const _ as usize)) as u16;
     let tss: &'static _ = Box::leak(tss);
     let (tss0, tss1) = match Descriptor::tss_segment(&tss.tss) {
-        Descriptor::SystemSegment(tss0, tss1) => (tss0, tss1),
+        // Extreme hack: the segment limit assumed by x86_64 does not include the port bitmap.
+        Descriptor::SystemSegment(tss0, tss1) => {
+            let tss0  = tss0 & !0xFFFF;
+            let tss0 = tss0 | (size_of::<TaskStateSegmentPortBitmap>() as u64);
+            (tss0, tss1)
+        },
         _ => unreachable!(),
     };
 
