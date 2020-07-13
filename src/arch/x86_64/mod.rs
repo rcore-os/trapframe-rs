@@ -14,8 +14,6 @@ pub use fncall::syscall_fn_entry;
 #[cfg(any(target_os = "none", target_os = "uefi"))]
 pub use trap::TrapFrame;
 
-pub use gdt::gsbase_to_bitmap;
-
 /// Initialize interrupt handling on x86_64.
 ///
 /// # Safety
@@ -127,6 +125,7 @@ impl UserContext {
 
     /// Get ioport bitmap, called after gdt::init().
     /// Return true for deny, false for allow.
+    #[cfg(any(target_os = "none", target_os = "uefi"))]
     pub fn get_ioport_bitmap(&self, port: u16) -> bool {
         use crate::arch::gdt::TaskStateSegmentPortBitmap;
         let tss = unsafe { *(self.general.gsbase as *mut TaskStateSegmentPortBitmap) };
@@ -136,6 +135,7 @@ impl UserContext {
     }
 
     /// Set ioport bitmap, called after gdt::init().
+    #[cfg(any(target_os = "none", target_os = "uefi"))]
     pub fn set_ioport_bitmap(&mut self, port: u16, deny: bool) {
         use crate::arch::gdt::TaskStateSegmentPortBitmap;
         let mut tss = unsafe { *(self.general.gsbase as *mut TaskStateSegmentPortBitmap) };

@@ -39,7 +39,8 @@ impl TaskStateSegmentPortBitmap {
 }
 
 #[cfg(feature = "ioport_bitmap")]
-pub fn gsbase_to_bitmap<'a>(gsbase: u64) -> &'a mut [u8] {
+pub fn gsbase_to_bitmap<'a>() -> &'a mut [u8] {
+    let gsbase = unsafe { GsBase::MSR.read() };
     unsafe {
         from_raw_parts_mut(
             (gsbase as usize + TaskStateSegmentPortBitmap::PORT_BITMAP_OFFSET) as *mut u8,
