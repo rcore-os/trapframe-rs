@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["Runji Wang <wangrunji0408@163.com>", "Jiajie Chen <c@jia.je>"]
 edition = "2018"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
@@ -20,3 +20,8 @@ exclude = ["docs", ".idea"]
 [target.'cfg(all(target_arch = "x86_64", target_os = "none"))'.dependencies]
 x86_64 = "0.11"
 raw-cpuid = "8.0"
+
+[features]
+default = []
+# This requires allocating a 64K consecutive memory block.
+ioport_bitmap = []
