@@ -6,12 +6,7 @@
 
 Handle Trap Frame across kernel and user space on multiple ISAs.
 
-Supported ISA:
-
-* ✅ x86_64
-* ✅ AArch64
-* ✅ RISC-V 32/64
-* 🚧 MIPS32
+Supported ISA: x86_64, aarch64, riscv32, riscv64, mipsel
 
 ## Example
 

@@ -1,7 +1,11 @@
 [package]
 name = "trapframe"
-version = "0.4.4"
-authors = ["Runji Wang <wangrunji0408@163.com>", "Jiajie Chen <c@jia.je>"]
+version = "0.5.0"
+authors = [
+    "Runji Wang <wangrunji0408@163.com>",
+    "Jiajie Chen <c@jia.je>",
+    "Hoblovski <daizy19@mails.tsinghua.edu.cn>",
+]
 edition = "2018"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
 homepage = "https://github.com/rcore-os/trapframe-rs"
