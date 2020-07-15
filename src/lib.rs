@@ -1,5 +1,5 @@
 #![no_std]
-#![feature(asm, global_asm, linkage)]
+#![feature(llvm_asm, asm, global_asm, linkage)]
 #![feature(vec_leak)]
 #![deny(warnings)]
 
