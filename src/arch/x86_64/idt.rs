@@ -1,6 +1,7 @@
 use alloc::boxed::Box;
 use x86_64::structures::idt::*;
 use x86_64::structures::DescriptorTablePointer;
+use x86_64::PrivilegeLevel;
 
 pub fn init() {
     extern "C" {
@@ -13,7 +14,11 @@ pub fn init() {
     let entries: &'static mut [Entry<HandlerFunc>; 256] =
         unsafe { core::mem::transmute_copy(&idt) };
     for i in 0..256 {
-        let _opt = entries[i].set_handler_fn(unsafe { core::mem::transmute(VECTORS[i]) });
+        let opt = entries[i].set_handler_fn(unsafe { core::mem::transmute(VECTORS[i]) });
+        // Enable user space `int3` and `into`
+        if i == 3 || i == 4 {
+            opt.set_privilege_level(PrivilegeLevel::Ring3);
+        }
     }
     idt.load();
 }
