@@ -15,8 +15,8 @@ pub fn init() {
         unsafe { core::mem::transmute_copy(&idt) };
     for i in 0..256 {
         let opt = entries[i].set_handler_fn(unsafe { core::mem::transmute(VECTORS[i]) });
-        // Enable user space int 3
-        if i == 3 {
+        // Enable user space `int3` and `into`
+        if i == 3 || i == 4 {
             opt.set_privilege_level(PrivilegeLevel::Ring3);
         }
     }
