@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["read","Returns the current value of the RFLAGS register."],["read_raw","Returns the raw current value of the RFLAGS register."],["write","Writes the RFLAGS register, preserves reserved bits."],["write_raw","Writes the RFLAGS register."]],"struct":[["RFlags","The RFLAGS register."]]});

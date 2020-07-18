@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["PortRead","A helper trait that implements the read port operation."],["PortReadWrite","A helper trait that implements the read/write port operations."],["PortWrite","A helper trait that implements the write port operation."]]});

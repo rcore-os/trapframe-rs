@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["read_rip","Gets the current instruction pointer. Note that this is only approximate as it requires a few instructions to execute."]],"mod":[["control","Functions to read and write control registers."],["model_specific","Functions to read and write model specific registers."],["rflags","Processor state stored in the RFLAGS register."]]});

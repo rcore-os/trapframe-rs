@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.11.1/src/structures/tss.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tss.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! Provides a type for the task state segment structure.</span>
+
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">VirtAddr</span>;
+
+<span class="doccomment">/// In 64-bit mode the TSS holds information that is not</span>
+<span class="doccomment">/// directly related to the task-switch mechanism,</span>
+<span class="doccomment">/// but is used for finding kernel level stack</span>
+<span class="doccomment">/// if interrupts arrive while in kernel mode.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>, <span class="ident">packed</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TaskStateSegment</span> {
+    <span class="ident">reserved_1</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// The full 64-bit canonical forms of the stack pointers (RSP) for privilege levels 0-2.</span>
+    <span class="kw">pub</span> <span class="ident">privilege_stack_table</span>: [<span class="ident">VirtAddr</span>; <span class="number">3</span>],
+    <span class="ident">reserved_2</span>: <span class="ident">u64</span>,
+    <span class="doccomment">/// The full 64-bit canonical forms of the interrupt stack table (IST) pointers.</span>
+    <span class="kw">pub</span> <span class="ident">interrupt_stack_table</span>: [<span class="ident">VirtAddr</span>; <span class="number">7</span>],
+    <span class="ident">reserved_3</span>: <span class="ident">u64</span>,
+    <span class="ident">reserved_4</span>: <span class="ident">u16</span>,
+    <span class="doccomment">/// The 16-bit offset to the I/O permission bit map from the 64-bit TSS base.</span>
+    <span class="kw">pub</span> <span class="ident">iomap_base</span>: <span class="ident">u16</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">TaskStateSegment</span> {
+    <span class="doccomment">/// Creates a new TSS with zeroed privilege and interrupt stack table and a zero</span>
+    <span class="doccomment">/// `iomap_base`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">TaskStateSegment</span> {
+        <span class="ident">TaskStateSegment</span> {
+            <span class="ident">privilege_stack_table</span>: [<span class="ident">VirtAddr</span>::<span class="ident">zero</span>(); <span class="number">3</span>],
+            <span class="ident">interrupt_stack_table</span>: [<span class="ident">VirtAddr</span>::<span class="ident">zero</span>(); <span class="number">7</span>],
+            <span class="ident">iomap_base</span>: <span class="number">0</span>,
+            <span class="ident">reserved_1</span>: <span class="number">0</span>,
+            <span class="ident">reserved_2</span>: <span class="number">0</span>,
+            <span class="ident">reserved_3</span>: <span class="number">0</span>,
+            <span class="ident">reserved_4</span>: <span class="number">0</span>,
+        }
+    }
+}
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "x86_64";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

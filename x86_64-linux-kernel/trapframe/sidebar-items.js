@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["init","Initialize interrupt handling on x86_64."]],"struct":[["GeneralRegs","General registers"],["TrapFrame","Trap frame of kernel interrupt"],["UserContext","User space context"]]});
