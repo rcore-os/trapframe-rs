@@ -1,5 +1,5 @@
 global_asm!(include_str!("trap.S"));
-global_asm!(include_str!("vector.S"));
+global_asm!(include_str!(concat!(env!("OUT_DIR"), "/vector.S")));
 
 /// Trap frame of kernel interrupt
 ///
