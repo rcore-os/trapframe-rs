@@ -91,6 +91,16 @@ impl UserContext {
         self.general.rax = ret;
     }
 
+    /// Set syscall args
+    pub fn set_syscall_args(&mut self, args: [usize; 6]) {
+        self.general.rdi = args[0];
+        self.general.rsi = args[1];
+        self.general.rdx = args[2];
+        self.general.r10 = args[3];
+        self.general.r8 = args[4];
+        self.general.r9 = args[5];
+    }
+
     /// Get syscall args
     pub fn get_syscall_args(&self) -> [usize; 6] {
         [

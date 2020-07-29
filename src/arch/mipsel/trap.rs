@@ -181,6 +181,16 @@ impl UserContext {
         ]
     }
 
+    /// Set syscall args
+    pub fn set_syscall_args(&mut self, args: [usize; 6]) {
+        self.general.a0 = args[0];
+        self.general.a1 = args[1];
+        self.general.a2 = args[2];
+        self.general.a3 = args[3];
+        self.general.t0 = args[4];
+        self.general.t1 = args[5];
+    }
+
     /// Set instruction pointer
     pub fn set_ip(&mut self, ip: usize) {
         self.epc = ip;
