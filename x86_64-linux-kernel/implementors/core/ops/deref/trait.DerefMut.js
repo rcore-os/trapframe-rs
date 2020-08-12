@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["x86_64"] = [{"text":"impl&lt;S:&nbsp;<a class=\"trait\" href=\"x86_64/structures/paging/page/trait.PageSize.html\" title=\"trait x86_64::structures::paging::page::PageSize\">PageSize</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"x86_64/structures/paging/struct.UnusedPhysFrame.html\" title=\"struct x86_64::structures::paging::UnusedPhysFrame\">UnusedPhysFrame</a>&lt;S&gt;","synthetic":false,"types":["x86_64::structures::paging::frame_alloc::UnusedPhysFrame"]}];
+implementors["x86_64"] = [{"text":"impl&lt;S:&nbsp;PageSize&gt; DerefMut for UnusedPhysFrame&lt;S&gt;","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
