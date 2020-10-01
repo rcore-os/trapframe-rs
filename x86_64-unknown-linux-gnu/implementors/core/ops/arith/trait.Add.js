@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["x86_64"] = [{"text":"impl Add&lt;u64&gt; for VirtAddr","synthetic":false,"types":[]},{"text":"impl Add&lt;usize&gt; for VirtAddr","synthetic":false,"types":[]},{"text":"impl Add&lt;u64&gt; for PhysAddr","synthetic":false,"types":[]},{"text":"impl Add&lt;usize&gt; for PhysAddr","synthetic":false,"types":[]},{"text":"impl&lt;S:&nbsp;PageSize&gt; Add&lt;u64&gt; for PhysFrame&lt;S&gt;","synthetic":false,"types":[]},{"text":"impl&lt;S:&nbsp;PageSize&gt; Add&lt;u64&gt; for Page&lt;S&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

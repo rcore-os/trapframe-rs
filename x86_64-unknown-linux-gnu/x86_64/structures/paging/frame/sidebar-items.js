@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PhysFrame","A physical memory frame."],["PhysFrameRange","An range of physical memory frames, exclusive the upper bound."],["PhysFrameRangeInclusive","An range of physical memory frames, inclusive the upper bound."]]});

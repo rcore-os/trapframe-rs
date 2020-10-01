@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["x86_64"] = [{"text":"impl Not for Cr0Flags","synthetic":false,"types":[]},{"text":"impl Not for Cr3Flags","synthetic":false,"types":[]},{"text":"impl Not for Cr4Flags","synthetic":false,"types":[]},{"text":"impl Not for EferFlags","synthetic":false,"types":[]},{"text":"impl Not for RFlags","synthetic":false,"types":[]},{"text":"impl Not for DescriptorFlags","synthetic":false,"types":[]},{"text":"impl Not for PageFaultErrorCode","synthetic":false,"types":[]},{"text":"impl Not for PageTableFlags","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

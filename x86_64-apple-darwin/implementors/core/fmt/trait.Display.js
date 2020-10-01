@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["raw_cpuid"] = [{"text":"impl Display for CacheInfo","synthetic":false,"types":[]},{"text":"impl Display for VendorInfo","synthetic":false,"types":[]},{"text":"impl Display for SoCVendorBrand","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

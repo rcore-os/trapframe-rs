@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/arch/x86_64/gdt.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gdt.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../trapframe/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/arch/x86_64/gdt.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>gdt.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../trapframe/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
                 <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
 <span id="2"> 2</span>
 <span id="3"> 3</span>
@@ -84,6 +86,7 @@
 <span id="83">83</span>
 <span id="84">84</span>
 <span id="85">85</span>
+<span id="86">86</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Configure Global Descriptor Table (GDT)</span>
 
@@ -112,8 +115,8 @@
     <span class="ident">tss</span>.<span class="ident">privilege_stack_table</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="ident">trap_stack_top</span>);
     <span class="kw">let</span> <span class="ident">tss</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">leak</span>(<span class="ident">tss</span>);
     <span class="kw">let</span> (<span class="ident">tss0</span>, <span class="ident">tss1</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">Descriptor</span>::<span class="ident">tss_segment</span>(<span class="ident">tss</span>) {
-        <span class="ident">Descriptor</span>::<span class="ident">SystemSegment</span>(<span class="ident">tss0</span>, <span class="ident">tss1</span>) <span class="op">=&gt;</span> (<span class="ident">tss0</span>, <span class="ident">tss1</span>),
-        <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
+        <span class="ident">Descriptor</span>::<span class="ident">SystemSegment</span>(<span class="ident">tss0</span>, <span class="ident">tss1</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">tss0</span>, <span class="ident">tss1</span>),
+        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
     };
     <span class="comment">// Extreme hack: the segment limit assumed by x86_64 does not include the port bitmap.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ioport_bitmap&quot;</span>)]</span>
@@ -146,6 +149,7 @@
 
         <span class="comment">// for fast syscall:</span>
         <span class="comment">// store address of TSS to kernel_gsbase</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">const_item_mutation</span>)]</span>
         <span class="ident">GsBase</span>::<span class="ident">MSR</span>.<span class="ident">write</span>(<span class="ident">tss</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">u64</span>);
 
         <span class="ident">Star</span>::<span class="ident">write_raw</span>(
@@ -157,7 +161,7 @@
 
 <span class="doccomment">/// Get current GDT register</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">sgdt</span>() <span class="op">-&gt;</span> <span class="ident">DescriptorTablePointer</span> {
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">sgdt</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DescriptorTablePointer</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gdt</span> <span class="op">=</span> <span class="ident">DescriptorTablePointer</span> { <span class="ident">limit</span>: <span class="number">0</span>, <span class="ident">base</span>: <span class="number">0</span> };
     <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;sgdt [{}]&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">gdt</span>);
     <span class="ident">gdt</span>

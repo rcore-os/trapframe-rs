@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["x86_64"] = [{"text":"impl Index&lt;usize&gt; for InterruptDescriptorTable","synthetic":false,"types":[]},{"text":"impl Index&lt;usize&gt; for PageTable","synthetic":false,"types":[]},{"text":"impl Index&lt;PageTableIndex&gt; for PageTable","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
