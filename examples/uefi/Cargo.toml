@@ -8,8 +8,8 @@ edition = "2018"
 
 [dependencies]
 log = "0.4"
-x86_64 = "0.11"
-uefi = "0.4.6"
-uefi-services = "0.2.4"
+x86_64 = "0.12"
+uefi = "0.6.0"
+uefi-services = "0.3.0"
 rlibc = "1.0.0"
 trapframe = { path = "../.." }

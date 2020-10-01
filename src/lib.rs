@@ -1,6 +1,5 @@
 #![no_std]
 #![feature(llvm_asm, asm, global_asm, linkage)]
-#![feature(vec_leak)]
 #![deny(warnings)]
 
 extern crate alloc;

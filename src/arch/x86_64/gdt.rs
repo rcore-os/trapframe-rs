@@ -59,6 +59,7 @@ pub fn init() {
 
         // for fast syscall:
         // store address of TSS to kernel_gsbase
+        #[allow(const_item_mutation)]
         GsBase::MSR.write(tss as *const _ as u64);
 
         Star::write_raw(
