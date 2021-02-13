@@ -36,7 +36,7 @@ pub fn init() {
         // get current GDT
         let gdtp = sgdt();
         let entry_count = (gdtp.limit + 1) as usize / size_of::<u64>();
-        let old_gdt = core::slice::from_raw_parts(gdtp.base as *const u64, entry_count);
+        let old_gdt = core::slice::from_raw_parts(gdtp.base.as_ptr::<u64>(), entry_count);
 
         // allocate new GDT with 7 more entries
         //
@@ -50,7 +50,7 @@ pub fn init() {
         // load new GDT and TSS
         lgdt(&DescriptorTablePointer {
             limit: gdt.len() as u16 * 8 - 1,
-            base: gdt.as_ptr() as _,
+            base: VirtAddr::new(gdt.as_ptr() as _),
         });
         load_tss(SegmentSelector::new(
             entry_count as u16,
@@ -72,7 +72,10 @@ pub fn init() {
 /// Get current GDT register
 #[inline]
 unsafe fn sgdt() -> DescriptorTablePointer {
-    let mut gdt = DescriptorTablePointer { limit: 0, base: 0 };
+    let mut gdt = DescriptorTablePointer {
+        limit: 0,
+        base: VirtAddr::zero(),
+    };
     asm!("sgdt [{}]", in(reg) &mut gdt);
     gdt
 }

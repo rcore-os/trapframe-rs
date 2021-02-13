@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use x86_64::structures::idt::*;
 use x86_64::structures::DescriptorTablePointer;
-use x86_64::PrivilegeLevel;
+use x86_64::{PrivilegeLevel, VirtAddr};
 
 pub fn init() {
     extern "C" {
@@ -27,7 +27,10 @@ pub fn init() {
 #[allow(dead_code)]
 #[inline]
 fn sidt() -> DescriptorTablePointer {
-    let mut dtp = DescriptorTablePointer { limit: 0, base: 0 };
+    let mut dtp = DescriptorTablePointer {
+        limit: 0,
+        base: VirtAddr::zero(),
+    };
     unsafe {
         asm!("sidt [{}]", in(reg) &mut dtp);
     }
