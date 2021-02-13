@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `enable_and_hlt` fn in crate `x86_64`."><meta name="keywords" content="rust, rustlang, rust-lang, enable_and_hlt"><title>x86_64::instructions::interrupts::enable_and_hlt - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="../../index.html">x86_64</a>::<wbr><a href="../index.html">instructions</a>::<wbr><a href="index.html">interrupts</a></p><div id="sidebar-vars" data-name="enable_and_hlt" data-ty="fn" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Function <a href="../../index.html">x86_64</a>::<wbr><a href="../index.html">instructions</a>::<wbr><a href="index.html">interrupts</a>::<wbr><a class="fn" href="">enable_and_hlt</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../../src/x86_64/instructions/interrupts.rs.html#131-140" title="goto source code">[src]</a></span></h1><pre class="rust fn">pub fn enable_and_hlt()</pre><div class="docblock"><p>Atomically enable interrupts and put the CPU to sleep</p>
+<p>Executes the <code>sti; hlt</code> instruction sequence. Since the <code>sti</code> instruction
+keeps interrupts disabled until after the immediately following
+instruction (called &quot;interrupt shadow&quot;), no interrupt can occur between the
+two instructions. (One exception to this are non-maskable interrupts; this
+is explained below.)</p>
+<p>This function is useful to put the CPU to sleep without missing interrupts
+that occur immediately before the <code>hlt</code> instruction:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="comment">// there is a race between the check and the `hlt` instruction here:</span>
+
+<span class="kw">if</span> <span class="ident">nothing_to_do</span>() {
+    <span class="comment">// &lt;- race when the interrupt occurs here</span>
+    <span class="ident">x86_64</span>::<span class="ident">instructions</span>::<span class="ident">hlt</span>(); <span class="comment">// wait for the next interrupt</span>
+}
+
+<span class="comment">// avoid this race by using `enable_and_hlt`:</span>
+
+<span class="ident">x86_64</span>::<span class="ident">instructions</span>::<span class="ident">interrupts</span>::<span class="ident">disable</span>();
+<span class="kw">if</span> <span class="ident">nothing_to_do</span>() {
+    <span class="comment">// &lt;- no interrupts can occur here (interrupts are disabled)</span>
+    <span class="ident">x86_64</span>::<span class="ident">instructions</span>::<span class="ident">interrupts</span>::<span class="ident">enable_and_hlt</span>();
+}
+</pre></div>
+<h2 id="non-maskable-interrupts" class="section-header"><a href="#non-maskable-interrupts">Non-maskable Interrupts</a></h2>
+<p>On some processors, the interrupt shadow of <code>sti</code> does not apply to
+non-maskable interrupts (NMIs). This means that an NMI can occur between
+the <code>sti</code> and <code>hlt</code> instruction, with the result that the CPU is put to
+sleep even though a new interrupt occured.</p>
+<p>To work around this, it is recommended to check in the NMI handler if
+the interrupt occured between <code>sti</code> and <code>hlt</code> instructions. If this is the
+case, the handler should increase the instruction pointer stored in the
+interrupt stack frame so that the <code>hlt</code> instruction is skipped.</p>
+<p>See <a href="http://lkml.iu.edu/hypermail/linux/kernel/1009.2/01406.html">http://lkml.iu.edu/hypermail/linux/kernel/1009.2/01406.html</a> for more
+information.</p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64"></div>
+    <script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>
