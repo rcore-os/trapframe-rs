@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/raw-cpuid-8.1.2/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/raw-cpuid-9.0.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../raw_cpuid/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
@@ -4401,17 +4401,6 @@
 <span id="4398">4398</span>
 <span id="4399">4399</span>
 <span id="4400">4400</span>
-<span id="4401">4401</span>
-<span id="4402">4402</span>
-<span id="4403">4403</span>
-<span id="4404">4404</span>
-<span id="4405">4405</span>
-<span id="4406">4406</span>
-<span id="4407">4407</span>
-<span id="4408">4408</span>
-<span id="4409">4409</span>
-<span id="4410">4410</span>
-<span id="4411">4411</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 <span class="attribute">#![<span class="ident">crate_name</span> <span class="op">=</span> <span class="string">&quot;raw_cpuid&quot;</span>]</span>
@@ -4430,38 +4419,18 @@
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">bitflags</span>;
 
-<span class="doccomment">/// Provides `cpuid` on stable by linking against a C implementation.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_arch&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">native_cpuid</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">CpuIdResult</span>;
-
-    <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> {
-        <span class="kw">fn</span> <span class="ident">cpuid</span>(<span class="ident">a</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u32</span>, <span class="ident">b</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u32</span>, <span class="ident">c</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u32</span>, <span class="ident">d</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u32</span>);
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cpuid_count</span>(<span class="kw-2">mut</span> <span class="ident">eax</span>: <span class="ident">u32</span>, <span class="kw-2">mut</span> <span class="ident">ecx</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CpuIdResult</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ebx</span> <span class="op">=</span> <span class="number">0u32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">edx</span> <span class="op">=</span> <span class="number">0u32</span>;
-
-        <span class="kw">unsafe</span> {
-            <span class="ident">cpuid</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">eax</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ebx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ecx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">edx</span>);
-        }
-
-        <span class="ident">CpuIdResult</span> { <span class="ident">eax</span>, <span class="ident">ebx</span>, <span class="ident">ecx</span>, <span class="ident">edx</span> }
-    }
-}
-
 <span class="doccomment">/// Uses Rust&#39;s `cpuid` function from the `arch` module.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_arch&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">native_cpuid</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">CpuIdResult</span>;
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">not</span>(<span class="ident">target_env</span> <span class="op">=</span> <span class="string">&quot;sgx&quot;</span>), <span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;sse&quot;</span>))]</span>
     <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">arch</span>::<span class="ident">x86</span> <span class="kw">as</span> <span class="ident">arch</span>;
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">not</span>(<span class="ident">target_env</span> <span class="op">=</span> <span class="string">&quot;sgx&quot;</span>)))]</span>
     <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">arch</span>::<span class="ident">x86_64</span> <span class="kw">as</span> <span class="ident">arch</span>;
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cpuid_count</span>(<span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CpuIdResult</span> {
+        <span class="comment">// Safety: CPUID is supported on all x86_64 CPUs and all x86 CPUs with</span>
+        <span class="comment">// SSE, but not by SGX.</span>
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>::<span class="ident">arch</span>::<span class="ident">__cpuid_count</span>(<span class="ident">a</span>, <span class="ident">c</span>) };
 
         <span class="ident">CpuIdResult</span> {
@@ -4475,7 +4444,7 @@
 
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">cmp</span>::<span class="ident">min</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::<span class="ident">transmute</span>;
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::<span class="ident">size_of</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">slice</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">str</span>;
 
@@ -4498,11 +4467,6 @@
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">eax</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ecx</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
         <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">native_cpuid</span>::<span class="ident">cpuid_count</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">eax</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ecx</span> <span class="kw">as</span> <span class="ident">u32</span>)
     };
-}
-
-<span class="kw">fn</span> <span class="ident">as_bytes</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-    <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">v</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u32</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
-    <span class="kw">unsafe</span> { <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">start</span>, <span class="number">4</span>) }
 }
 
 <span class="kw">fn</span> <span class="ident">get_bits</span>(<span class="ident">r</span>: <span class="ident">u32</span>, <span class="ident">from</span>: <span class="ident">u32</span>, <span class="ident">to</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
@@ -4552,6 +4516,7 @@
 <span class="doccomment">/// Low-level data-structure to store result of cpuid instruction.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CpuIdResult</span> {
     <span class="doccomment">/// Return value EAX register</span>
     <span class="kw">pub</span> <span class="ident">eax</span>: <span class="ident">u32</span>,
@@ -5000,6 +4965,7 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VendorInfo</span> {
     <span class="ident">ebx</span>: <span class="ident">u32</span>,
     <span class="ident">edx</span>: <span class="ident">u32</span>,
@@ -5009,11 +4975,14 @@
 <span class="kw">impl</span> <span class="ident">VendorInfo</span> {
     <span class="doccomment">/// Return vendor identification as human readable string.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_string</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
+        <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">VendorInfo</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
         <span class="kw">unsafe</span> {
-            <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">VendorInfo</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
-            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="number">3</span> <span class="op">*</span> <span class="number">4</span>);
-            <span class="kw">let</span> <span class="ident">byte_array</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">transmute</span>(<span class="ident">slice</span>);
-            <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">byte_array</span>)
+            <span class="comment">// Safety: VendorInfo is laid out with repr(C).</span>
+            <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">VendorInfo</span><span class="op">&gt;</span>());
+            <span class="comment">// Safety: The field is specified to be ASCII, and the only safe</span>
+            <span class="comment">// way to construct VendorInfo is from real CPUID data or the</span>
+            <span class="comment">// Default implementation.</span>
+            <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">slice</span>)
         }
     }
 }
@@ -5051,7 +5020,14 @@
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
         };
 
-        <span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> <span class="ident">as_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">reg</span>)[<span class="ident">byte_index</span> <span class="kw">as</span> <span class="ident">usize</span>];
+        <span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">byte_index</span> {
+            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">reg</span>,
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">8</span>,
+            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>,
+            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span>,
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
+        } <span class="kw">as</span> <span class="ident">u8</span>;
+
         <span class="kw">if</span> <span class="ident">byte</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
             <span class="self">self</span>.<span class="ident">current</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="kw">return</span> <span class="self">self</span>.<span class="ident">next</span>();
@@ -8442,19 +8418,21 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SoCVendorBrand</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
     <span class="ident">data</span>: [<span class="ident">CpuIdResult</span>; <span class="number">3</span>],
 }
 
 <span class="kw">impl</span> <span class="ident">SoCVendorBrand</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_string</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span> {
+        <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">SoCVendorBrand</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
         <span class="kw">unsafe</span> {
-            <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">SoCVendorBrand</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
-            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span>
-                <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="ident">core</span>::<span class="ident">mem</span>::<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">SoCVendorBrand</span><span class="op">&gt;</span>());
-            <span class="kw">let</span> <span class="ident">byte_array</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">transmute</span>(<span class="ident">slice</span>);
-            <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">byte_array</span>)
+            <span class="comment">// Safety: SoCVendorBrand is laid out with repr(C).</span>
+            <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">SoCVendorBrand</span><span class="op">&gt;</span>());
+            <span class="comment">// Safety: The field is specified to be ASCII, and the only safe</span>
+            <span class="comment">// way to construct SoCVendorBrand is from real CPUID data or the</span>
+            <span class="comment">// Default implementation.</span>
+            <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">slice</span>)
         }
     }
 }
@@ -8567,18 +8545,18 @@
     <span class="doccomment">/// Retrieve processor brand string.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">processor_brand_string</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">leaf_is_supported</span>(<span class="ident">EAX_EXTENDED_BRAND_STRING</span>) {
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> {
-                <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>[<span class="number">2</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">CpuIdResult</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="number">3</span> <span class="op">*</span> <span class="number">4</span> <span class="op">*</span> <span class="number">4</span>);
+            <span class="kw">let</span> <span class="ident">brand_string_start</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>[<span class="number">2</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">CpuIdResult</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>;
+            <span class="comment">// Safety: CpuIdResult is laid out with repr(C), and the array</span>
+            <span class="comment">// self.data contains 9 continguous elements.</span>
+            <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="number">3</span> <span class="op">*</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">CpuIdResult</span><span class="op">&gt;</span>()) };
 
-                <span class="kw">match</span> <span class="ident">slice</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">brand_string_start</span>, <span class="ident">index</span>),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (),
-                }
+            <span class="comment">// Brand terminated at nul byte or end, whichever comes first.</span>
+            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">split</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
 
-                <span class="kw">let</span> <span class="ident">byte_array</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">transmute</span>(<span class="ident">slice</span>);
-                <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">byte_array</span>)
-            })
+            <span class="comment">// Safety: Field is specified to be ASCII, and the only safe way</span>
+            <span class="comment">// to construct ExtendedFunctionInfo is from real CPUID data</span>
+            <span class="comment">// or the Default implementation.</span>
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">slice</span>) })
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         }
