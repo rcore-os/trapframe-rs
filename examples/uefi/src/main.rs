@@ -7,7 +7,6 @@
 #![deny(warnings)]
 
 extern crate alloc;
-extern crate rlibc;
 
 use core::intrinsics::breakpoint;
 use log::*;
@@ -81,8 +80,7 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
 
 #[naked]
 unsafe extern "C" fn user_entry() {
-    asm!("syscall");
-    asm!("int3");
+    asm!("syscall", "int3", options(noreturn));
 }
 
 /// Set user bit for 4-level PDEs of the `page`.

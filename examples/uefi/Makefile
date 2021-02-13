@@ -3,7 +3,6 @@ TARGET := target
 OVMF := OVMF.fd
 EFI := $(TARGET)/x86_64-unknown-uefi/$(MODE)/uefi.efi
 ESP := $(TARGET)/x86_64-unknown-uefi/$(MODE)/esp
-BUILD_ARGS := -Z build-std=core,alloc
 QEMU_ARGS := -net none -nographic
 OBJDUMP := rust-objdump
 
