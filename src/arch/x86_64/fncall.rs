@@ -237,7 +237,6 @@ mod tests {
     // Mock user program to dump registers at stack.
     global_asm!(
         r#"
-.intel_syntax noprefix
 dump_registers:
     push r15
     push r14
