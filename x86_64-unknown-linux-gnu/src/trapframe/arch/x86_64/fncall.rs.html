@@ -359,7 +359,6 @@
 <span id="359">359</span>
 <span id="360">360</span>
 <span id="361">361</span>
-<span id="362">362</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Switch context by function call within the same privilege level.</span>
 <span class="doccomment">//!</span>
@@ -600,7 +599,6 @@ syscall_fn_return:
     <span class="comment">// Mock user program to dump registers at stack.</span>
     <span class="macro">global_asm!</span>(
         <span class="string">r#&quot;
-.intel_syntax noprefix
 dump_registers:
     push r15
     push r14
