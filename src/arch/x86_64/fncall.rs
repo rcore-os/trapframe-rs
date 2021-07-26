@@ -142,7 +142,6 @@ global_asm!(
 
 global_asm!(
     r#"
-.intel_syntax noprefix
 syscall_fn_entry:
     # save rsp
     lea r11, [rsp + 8]      # save rsp to r11 (clobber)
