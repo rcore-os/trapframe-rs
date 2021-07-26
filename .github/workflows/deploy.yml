@@ -18,7 +18,6 @@ jobs:
         run: |
           mkdir doc
           for target in \
-            x86_64-unknown-linux-gnu \
             x86_64-apple-darwin \
             aarch64-unknown-linux-gnu \
             aarch64-unknown-none-softfloat \
@@ -31,8 +30,10 @@ jobs:
             cargo doc --target ${target}
             mv target/${target}/doc doc/${target}
           done
-          for target in x86_64-linux-kernel
+          for target in x86_64-unknown-linux-gnu 
           do
+            rustup target add ${target}
+            cargo doc --target ${target}
             cargo doc --target ${target} -Z build-std=core,alloc
             mv target/${target}/doc doc/${target}
           done
