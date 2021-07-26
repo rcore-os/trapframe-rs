@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.7.0"
+version = "0.8.0"
 authors = [
     "Runji Wang <wangrunji0408@163.com>",
     "Jiajie Chen <c@jia.je>",
