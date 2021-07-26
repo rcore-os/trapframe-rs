@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.13.2/src/registers/model_specific.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>model_specific.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;x86_64-0.14.4&#x2F;src&#x2F;registers&#x2F;model_specific.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>model_specific.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -406,10 +403,47 @@
 <span id="403">403</span>
 <span id="404">404</span>
 <span id="405">405</span>
-</pre><div class="example-wrap"><pre class="rust ">
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+</pre><pre class="rust">
 <span class="doccomment">//! Functions to read and write model specific registers.</span>
 
-<span class="kw">use</span> <span class="ident">bitflags</span>::<span class="ident">bitflags</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">docsrs</span>)]</span>
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">instructions::segmentation</span>::{<span class="ident">Segment64</span>, <span class="ident">FS</span>, <span class="ident">GS</span>},
+    <span class="ident">registers::control::Cr4Flags</span>,
+};
+
+<span class="kw">use</span> <span class="ident">bitflags::bitflags</span>;
 
 <span class="doccomment">/// A model specific register.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -427,15 +461,19 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Efer</span>;
 
-<span class="doccomment">/// FS.Base Model Specific Register.</span>
+<span class="doccomment">/// [FS].Base Model Specific Register.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FsBase</span>;
 
-<span class="doccomment">/// GS.Base Model Specific Register.</span>
+<span class="doccomment">/// [GS].Base Model Specific Register.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`GS::swap`] swaps this register with [`KernelGsBase`].</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GsBase</span>;
 
 <span class="doccomment">/// KernelGsBase Model Specific Register.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`GS::swap`] swaps this register with [`GsBase`].</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">KernelGsBase</span>;
 
@@ -486,7 +524,7 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MSR</span>: <span class="ident">Msr</span> <span class="op">=</span> <span class="ident">Msr</span>(<span class="number">0xC000_0084</span>);
 }
 
-<span class="macro">bitflags</span><span class="macro">!</span> {
+<span class="macro">bitflags!</span> {
     <span class="doccomment">/// Flags of the Extended Feature Enable Register.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EferFlags</span>: <span class="ident">u64</span> {
         <span class="doccomment">/// Enables the `syscall` and `sysret` instructions.</span>
@@ -511,12 +549,12 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;instructions&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">x86_64</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">addr</span>::<span class="ident">VirtAddr</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">registers</span>::<span class="ident">rflags</span>::<span class="ident">RFlags</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">structures</span>::<span class="ident">gdt</span>::<span class="ident">SegmentSelector</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">PrivilegeLevel</span>;
-    <span class="kw">use</span> <span class="ident">bit_field</span>::<span class="ident">BitField</span>;
-    <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::addr::VirtAddr</span>;
+    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::registers::rflags::RFlags</span>;
+    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::structures::gdt::SegmentSelector</span>;
+    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::PrivilegeLevel</span>;
+    <span class="kw">use</span> <span class="ident">bit_field::BitField</span>;
+    <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 
     <span class="kw">impl</span> <span class="ident">Msr</span> {
         <span class="doccomment">/// Read 64 bits msr register.</span>
@@ -530,12 +568,17 @@
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
             {
                 <span class="kw">let</span> (<span class="ident">high</span>, <span class="ident">low</span>): (<span class="ident">u32</span>, <span class="ident">u32</span>);
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;rdmsr&quot;</span>, <span class="ident">out</span>(<span class="string">&quot;eax&quot;</span>) <span class="ident">low</span>, <span class="ident">out</span>(<span class="string">&quot;edx&quot;</span>) <span class="ident">high</span>, <span class="kw">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="self">self</span>.<span class="number">0</span>, <span class="ident">options</span>(<span class="ident">nostack</span>));
+                <span class="macro">asm!</span>(
+                    <span class="string">&quot;rdmsr&quot;</span>,
+                    <span class="kw">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="self">self</span>.<span class="number">0</span>,
+                    <span class="ident">out</span>(<span class="string">&quot;eax&quot;</span>) <span class="ident">low</span>, <span class="ident">out</span>(<span class="string">&quot;edx&quot;</span>) <span class="ident">high</span>,
+                    <span class="ident">options</span>(<span class="ident">nomem</span>, <span class="ident">nostack</span>, <span class="ident">preserves_flags</span>),
+                );
                 ((<span class="ident">high</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>) <span class="op">|</span> (<span class="ident">low</span> <span class="kw">as</span> <span class="ident">u64</span>)
             }
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
-            <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_rdmsr</span>(<span class="self">self</span>.<span class="number">0</span>)
+            <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_rdmsr</span>(<span class="self">self</span>.<span class="number">0</span>)
         }
 
         <span class="doccomment">/// Write 64 bits to msr register.</span>
@@ -546,15 +589,19 @@
         <span class="doccomment">/// effects.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u64</span>) {
+            <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u32</span>;
+            <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> (<span class="ident">value</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
-            {
-                <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u32</span>;
-                <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> (<span class="ident">value</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>) <span class="kw">as</span> <span class="ident">u32</span>;
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;wrmsr&quot;</span>, <span class="kw">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="self">self</span>.<span class="number">0</span>, <span class="kw">in</span>(<span class="string">&quot;eax&quot;</span>) <span class="ident">low</span>, <span class="kw">in</span>(<span class="string">&quot;edx&quot;</span>) <span class="ident">high</span>, <span class="ident">options</span>(<span class="ident">nostack</span>))
-            }
+            <span class="macro">asm!</span>(
+                <span class="string">&quot;wrmsr&quot;</span>,
+                <span class="kw">in</span>(<span class="string">&quot;ecx&quot;</span>) <span class="self">self</span>.<span class="number">0</span>,
+                <span class="kw">in</span>(<span class="string">&quot;eax&quot;</span>) <span class="ident">low</span>, <span class="kw">in</span>(<span class="string">&quot;edx&quot;</span>) <span class="ident">high</span>,
+                <span class="ident">options</span>(<span class="ident">nostack</span>, <span class="ident">preserves_flags</span>),
+            );
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
-            <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_wrmsr</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">value</span>);
+            <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_wrmsr</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">low</span>, <span class="ident">high</span>);
         }
     }
 
@@ -562,13 +609,13 @@
         <span class="doccomment">/// Read the current EFER flags.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">EferFlags</span> {
-            <span class="ident">EferFlags</span>::<span class="ident">from_bits_truncate</span>(<span class="self">Self</span>::<span class="ident">read_raw</span>())
+            <span class="ident">EferFlags::from_bits_truncate</span>(<span class="self">Self</span><span class="ident">::read_raw</span>())
         }
 
         <span class="doccomment">/// Read the current raw EFER flags.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_raw</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
-            <span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() }
+            <span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() }
         }
 
         <span class="doccomment">/// Write the EFER flags, preserving reserved values.</span>
@@ -581,11 +628,11 @@
         <span class="doccomment">/// safety with wrong flags, e.g. by disabling long mode.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">flags</span>: <span class="ident">EferFlags</span>) {
-            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read_raw</span>();
-            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">EferFlags</span>::<span class="ident">all</span>().<span class="ident">bits</span>());
+            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_raw</span>();
+            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">EferFlags::all</span>().<span class="ident">bits</span>());
             <span class="kw">let</span> <span class="ident">new_value</span> <span class="op">=</span> <span class="ident">reserved</span> <span class="op">|</span> <span class="ident">flags</span>.<span class="ident">bits</span>();
 
-            <span class="self">Self</span>::<span class="ident">write_raw</span>(<span class="ident">new_value</span>);
+            <span class="self">Self</span><span class="ident">::write_raw</span>(<span class="ident">new_value</span>);
         }
 
         <span class="doccomment">/// Write the EFER flags.</span>
@@ -598,7 +645,7 @@
         <span class="doccomment">/// break memory safety with wrong flags, e.g. by disabling long mode.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write_raw</span>(<span class="ident">flags</span>: <span class="ident">u64</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">flags</span>);
         }
 
@@ -615,38 +662,50 @@
         <span class="kw">where</span>
             <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EferFlags</span>),
         {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read</span>();
             <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">flags</span>);
-            <span class="self">Self</span>::<span class="ident">write</span>(<span class="ident">flags</span>);
+            <span class="self">Self</span><span class="ident">::write</span>(<span class="ident">flags</span>);
         }
     }
 
     <span class="kw">impl</span> <span class="ident">FsBase</span> {
         <span class="doccomment">/// Read the current FsBase register.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If [`CR4.FSGSBASE`][Cr4Flags::FSGSBASE] is set, the more efficient</span>
+        <span class="doccomment">/// [`FS::read_base`] can be used instead.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VirtAddr</span> {
-            <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() })
+            <span class="ident">VirtAddr::new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() })
         }
 
         <span class="doccomment">/// Write a given virtual address to the FS.Base register.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If [`CR4.FSGSBASE`][Cr4Flags::FSGSBASE] is set, the more efficient</span>
+        <span class="doccomment">/// [`FS::write_base`] can be used instead.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">address</span>: <span class="ident">VirtAddr</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="kw">unsafe</span> { <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">address</span>.<span class="ident">as_u64</span>()) };
         }
     }
 
     <span class="kw">impl</span> <span class="ident">GsBase</span> {
         <span class="doccomment">/// Read the current GsBase register.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If [`CR4.FSGSBASE`][Cr4Flags::FSGSBASE] is set, the more efficient</span>
+        <span class="doccomment">/// [`GS::read_base`] can be used instead.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VirtAddr</span> {
-            <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() })
+            <span class="ident">VirtAddr::new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() })
         }
 
         <span class="doccomment">/// Write a given virtual address to the GS.Base register.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If [`CR4.FSGSBASE`][Cr4Flags::FSGSBASE] is set, the more efficient</span>
+        <span class="doccomment">/// [`GS::write_base`] can be used instead.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">address</span>: <span class="ident">VirtAddr</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="kw">unsafe</span> { <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">address</span>.<span class="ident">as_u64</span>()) };
         }
     }
@@ -655,13 +714,13 @@
         <span class="doccomment">/// Read the current KernelGsBase register.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VirtAddr</span> {
-            <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() })
+            <span class="ident">VirtAddr::new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() })
         }
 
         <span class="doccomment">/// Write a given virtual address to the KernelGsBase register.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">address</span>: <span class="ident">VirtAddr</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="kw">unsafe</span> { <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">address</span>.<span class="ident">as_u64</span>()) };
         }
     }
@@ -680,7 +739,7 @@
         <span class="doccomment">/// 33:32 should be initialized to 00b.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_raw</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u16</span>, <span class="ident">u16</span>) {
-            <span class="kw">let</span> <span class="ident">msr_value</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() };
+            <span class="kw">let</span> <span class="ident">msr_value</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() };
             <span class="kw">let</span> <span class="ident">sysret</span> <span class="op">=</span> <span class="ident">msr_value</span>.<span class="ident">get_bits</span>(<span class="number">48</span>..<span class="number">64</span>);
             <span class="kw">let</span> <span class="ident">syscall</span> <span class="op">=</span> <span class="ident">msr_value</span>.<span class="ident">get_bits</span>(<span class="number">32</span>..<span class="number">48</span>);
             (<span class="ident">sysret</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>(), <span class="ident">syscall</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
@@ -699,7 +758,7 @@
             <span class="ident">SegmentSelector</span>,
             <span class="ident">SegmentSelector</span>,
         ) {
-            <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read_raw</span>();
+            <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_raw</span>();
             (
                 <span class="ident">SegmentSelector</span>(<span class="ident">raw</span>.<span class="number">0</span> <span class="op">+</span> <span class="number">16</span>),
                 <span class="ident">SegmentSelector</span>(<span class="ident">raw</span>.<span class="number">0</span> <span class="op">+</span> <span class="number">8</span>),
@@ -729,7 +788,7 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_value</span> <span class="op">=</span> <span class="number">0u64</span>;
             <span class="ident">msr_value</span>.<span class="ident">set_bits</span>(<span class="number">48</span>..<span class="number">64</span>, <span class="ident">sysret</span>.<span class="ident">into</span>());
             <span class="ident">msr_value</span>.<span class="ident">set_bits</span>(<span class="number">32</span>..<span class="number">48</span>, <span class="ident">syscall</span>.<span class="ident">into</span>());
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">msr_value</span>);
         }
 
@@ -754,15 +813,15 @@
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Syscall CS and SS is not offset by 8.&quot;</span>);
             }
 
-            <span class="kw">if</span> <span class="ident">ss_sysret</span>.<span class="ident">rpl</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">PrivilegeLevel</span>::<span class="ident">Ring3</span> {
+            <span class="kw">if</span> <span class="ident">ss_sysret</span>.<span class="ident">rpl</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">PrivilegeLevel::Ring3</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Sysret&#39;s segment must be a Ring3 segment.&quot;</span>);
             }
 
-            <span class="kw">if</span> <span class="ident">ss_syscall</span>.<span class="ident">rpl</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">PrivilegeLevel</span>::<span class="ident">Ring0</span> {
+            <span class="kw">if</span> <span class="ident">ss_syscall</span>.<span class="ident">rpl</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">PrivilegeLevel::Ring0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Syscall&#39;s segment must be a Ring0 segment.&quot;</span>);
             }
 
-            <span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">write_raw</span>(<span class="ident">ss_sysret</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">8</span>, <span class="ident">cs_syscall</span>.<span class="number">0</span>) };
+            <span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::write_raw</span>(<span class="ident">ss_sysret</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">8</span>, <span class="ident">cs_syscall</span>.<span class="number">0</span>) };
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -773,14 +832,14 @@
         <span class="doccomment">/// This holds the target RIP of a syscall.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VirtAddr</span> {
-            <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() })
+            <span class="ident">VirtAddr::new</span>(<span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() })
         }
 
         <span class="doccomment">/// Write a given virtual address to the LStar register.</span>
         <span class="doccomment">/// This holds the target RIP of a syscall.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">address</span>: <span class="ident">VirtAddr</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="kw">unsafe</span> { <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">address</span>.<span class="ident">as_u64</span>()) };
         }
     }
@@ -795,7 +854,7 @@
         <span class="doccomment">/// to 0, the corresponding rFLAGS bit is not modified.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RFlags</span> {
-            <span class="ident">RFlags</span>::<span class="ident">from_bits</span>(<span class="kw">unsafe</span> { <span class="self">Self</span>::<span class="ident">MSR</span>.<span class="ident">read</span>() }).<span class="ident">unwrap</span>()
+            <span class="ident">RFlags::from_bits</span>(<span class="kw">unsafe</span> { <span class="self">Self</span><span class="ident">::MSR</span>.<span class="ident">read</span>() }).<span class="ident">unwrap</span>()
         }
 
         <span class="doccomment">/// Write to the SFMask register.</span>
@@ -807,11 +866,12 @@
         <span class="doccomment">/// to 0, the corresponding rFLAGS bit is not modified.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">value</span>: <span class="ident">RFlags</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">MSR</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MSR</span>;
             <span class="kw">unsafe</span> { <span class="ident">msr</span>.<span class="ident">write</span>(<span class="ident">value</span>.<span class="ident">bits</span>()) };
         }
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>

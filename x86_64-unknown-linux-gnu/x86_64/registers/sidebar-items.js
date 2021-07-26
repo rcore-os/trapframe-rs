@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["control","Functions to read and write control registers."],["model_specific","Functions to read and write model specific registers."],["rflags","Processor state stored in the RFLAGS register."]]});
+initSidebarItems({"mod":[["control","Functions to read and write control registers."],["model_specific","Functions to read and write model specific registers."],["rflags","Processor state stored in the RFLAGS register."],["xcontrol","Access to various extended system registers"]]});

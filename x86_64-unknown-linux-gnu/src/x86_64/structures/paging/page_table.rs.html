@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.13.2/src/structures/paging/page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>page_table.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;x86_64-0.14.4&#x2F;src&#x2F;structures&#x2F;paging&#x2F;page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>page_table.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -367,22 +364,16 @@
 <span id="364">364</span>
 <span id="365">365</span>
 <span id="366">366</span>
-<span id="367">367</span>
-<span id="368">368</span>
-<span id="369">369</span>
-<span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-</pre><div class="example-wrap"><pre class="rust ">
+</pre><pre class="rust">
 <span class="doccomment">//! Abstractions for page tables and page table entries.</span>
 
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
+<span class="kw">use</span> <span class="ident">core::fmt</span>;
+<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">PageSize</span>, <span class="ident">PhysFrame</span>, <span class="ident">Size4KiB</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">addr</span>::<span class="ident">PhysAddr</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::addr::PhysAddr</span>;
 
-<span class="kw">use</span> <span class="ident">bitflags</span>::<span class="ident">bitflags</span>;
+<span class="kw">use</span> <span class="ident">bitflags::bitflags</span>;
 
 <span class="doccomment">/// The error returned by the `PageTableEntry::frame` method.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
@@ -423,13 +414,13 @@
     <span class="doccomment">/// Returns the flags of this entry.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PageTableFlags</span> {
-        <span class="ident">PageTableFlags</span>::<span class="ident">from_bits_truncate</span>(<span class="self">self</span>.<span class="ident">entry</span>)
+        <span class="ident">PageTableFlags::from_bits_truncate</span>(<span class="self">self</span>.<span class="ident">entry</span>)
     }
 
     <span class="doccomment">/// Returns the physical address mapped by this entry, might be zero.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PhysAddr</span> {
-        <span class="ident">PhysAddr</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">entry</span> <span class="op">&amp;</span> <span class="number">0x000f_ffff_ffff_f000</span>)
+        <span class="ident">PhysAddr::new</span>(<span class="self">self</span>.<span class="ident">entry</span> <span class="op">&amp;</span> <span class="number">0x000f_ffff_ffff_f000</span>)
     }
 
     <span class="doccomment">/// Returns the physical frame mapped by this entry.</span>
@@ -441,26 +432,26 @@
     <span class="doccomment">///    `addr` function must be used)</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">frame</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span>, <span class="ident">FrameError</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">flags</span>().<span class="ident">contains</span>(<span class="ident">PageTableFlags</span>::<span class="ident">PRESENT</span>) {
-            <span class="prelude-val">Err</span>(<span class="ident">FrameError</span>::<span class="ident">FrameNotPresent</span>)
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">flags</span>().<span class="ident">contains</span>(<span class="ident">PageTableFlags</span>::<span class="ident">HUGE_PAGE</span>) {
-            <span class="prelude-val">Err</span>(<span class="ident">FrameError</span>::<span class="ident">HugeFrame</span>)
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">flags</span>().<span class="ident">contains</span>(<span class="ident">PageTableFlags::PRESENT</span>) {
+            <span class="prelude-val">Err</span>(<span class="ident">FrameError::FrameNotPresent</span>)
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">flags</span>().<span class="ident">contains</span>(<span class="ident">PageTableFlags::HUGE_PAGE</span>) {
+            <span class="prelude-val">Err</span>(<span class="ident">FrameError::HugeFrame</span>)
         } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">PhysFrame</span>::<span class="ident">containing_address</span>(<span class="self">self</span>.<span class="ident">addr</span>()))
+            <span class="prelude-val">Ok</span>(<span class="ident">PhysFrame::containing_address</span>(<span class="self">self</span>.<span class="ident">addr</span>()))
         }
     }
 
     <span class="doccomment">/// Map the entry to the specified physical address with the specified flags.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_addr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">PhysAddr</span>, <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>) {
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">addr</span>.<span class="ident">is_aligned</span>(<span class="ident">Size4KiB</span>::<span class="ident">SIZE</span>));
+        <span class="macro">assert!</span>(<span class="ident">addr</span>.<span class="ident">is_aligned</span>(<span class="ident">Size4KiB::SIZE</span>));
         <span class="self">self</span>.<span class="ident">entry</span> <span class="op">=</span> (<span class="ident">addr</span>.<span class="ident">as_u64</span>()) <span class="op">|</span> <span class="ident">flags</span>.<span class="ident">bits</span>();
     }
 
     <span class="doccomment">/// Map the entry to the specified physical frame with the specified flags.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">frame</span>: <span class="ident">PhysFrame</span>, <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>) {
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">PageTableFlags</span>::<span class="ident">HUGE_PAGE</span>));
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">PageTableFlags::HUGE_PAGE</span>));
         <span class="self">self</span>.<span class="ident">set_addr</span>(<span class="ident">frame</span>.<span class="ident">start_address</span>(), <span class="ident">flags</span>)
     }
 
@@ -471,8 +462,8 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">PageTableEntry</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+<span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">PageTableEntry</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;PageTableEntry&quot;</span>);
         <span class="ident">f</span>.<span class="ident">field</span>(<span class="string">&quot;addr&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">addr</span>());
         <span class="ident">f</span>.<span class="ident">field</span>(<span class="string">&quot;flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>());
@@ -480,7 +471,7 @@
     }
 }
 
-<span class="macro">bitflags</span><span class="macro">!</span> {
+<span class="macro">bitflags!</span> {
     <span class="doccomment">/// Possible flags for a page table entry.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PageTableFlags</span>: <span class="ident">u64</span> {
         <span class="doccomment">/// Specifies whether the mapped frame or page table is loaded in memory.</span>
@@ -553,27 +544,21 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// This struct implements the `Index` and `IndexMut` traits, so the entries can be accessed</span>
 <span class="doccomment">/// through index operations. For example, `page_table[15]` returns the 15th page table entry.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Note that while this type implements [`Clone`], the users must be careful not to introduce</span>
+<span class="doccomment">/// mutable aliasing by using the cloned page tables.</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">align</span>(<span class="number">4096</span>))]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PageTable</span> {
     <span class="ident">entries</span>: [<span class="ident">PageTableEntry</span>; <span class="ident">ENTRY_COUNT</span>],
 }
 
 <span class="kw">impl</span> <span class="ident">PageTable</span> {
     <span class="doccomment">/// Creates an empty page table.</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;const_fn&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">const</span> <span class="ident">EMPTY</span>: <span class="ident">PageTableEntry</span> <span class="op">=</span> <span class="ident">PageTableEntry</span>::<span class="ident">new</span>();
-        <span class="ident">PageTable</span> {
-            <span class="ident">entries</span>: [<span class="ident">EMPTY</span>; <span class="ident">ENTRY_COUNT</span>],
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;const_fn&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">const</span> <span class="ident">EMPTY</span>: <span class="ident">PageTableEntry</span> <span class="op">=</span> <span class="ident">PageTableEntry</span>::<span class="ident">new</span>();
+        <span class="kw">const</span> <span class="ident">EMPTY</span>: <span class="ident">PageTableEntry</span> <span class="op">=</span> <span class="ident">PageTableEntry::new</span>();
         <span class="ident">PageTable</span> {
             <span class="ident">entries</span>: [<span class="ident">EMPTY</span>; <span class="ident">ENTRY_COUNT</span>],
         }
@@ -604,14 +589,14 @@
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">PageTableEntry</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Output</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Output</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">index</span>]
     }
 }
 
 <span class="kw">impl</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PageTable</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Output</span> {
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Output</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">index</span>]
     }
 }
@@ -620,27 +605,27 @@
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">PageTableEntry</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Output</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">index</span>)]
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Output</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">usize::from</span>(<span class="ident">index</span>)]
     }
 }
 
 <span class="kw">impl</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">PageTableIndex</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PageTable</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Output</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">index</span>)]
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Output</span> {
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">usize::from</span>(<span class="ident">index</span>)]
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">PageTable</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">new</span>()
+        <span class="self">Self</span><span class="ident">::new</span>()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">PageTable</span> {
+<span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">PageTable</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
         <span class="self">self</span>.<span class="ident">entries</span>[..].<span class="ident">fmt</span>(<span class="ident">f</span>)
     }
 }
@@ -657,7 +642,7 @@
     <span class="doccomment">/// Creates a new index from the given `u16`. Panics if the given value is &gt;=512.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">index</span>) <span class="op">&lt;</span> <span class="ident">ENTRY_COUNT</span>);
+        <span class="macro">assert!</span>(<span class="ident">usize::from</span>(<span class="ident">index</span>) <span class="op">&lt;</span> <span class="ident">ENTRY_COUNT</span>);
         <span class="self">Self</span>(<span class="ident">index</span>)
     }
 
@@ -678,21 +663,21 @@
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageTableIndex</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">u32</span>::<span class="ident">from</span>(<span class="ident">index</span>.<span class="number">0</span>)
+        <span class="ident">u32::from</span>(<span class="ident">index</span>.<span class="number">0</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageTableIndex</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u64</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">u64</span>::<span class="ident">from</span>(<span class="ident">index</span>.<span class="number">0</span>)
+        <span class="ident">u64::from</span>(<span class="ident">index</span>.<span class="number">0</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageTableIndex</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">index</span>: <span class="ident">PageTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">index</span>.<span class="number">0</span>)
+        <span class="ident">usize::from</span>(<span class="ident">index</span>.<span class="number">0</span>)
     }
 }
 
@@ -708,7 +693,7 @@
     <span class="doccomment">/// Creates a new offset from the given `u16`. Panics if the passed value is &gt;=4096.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">offset</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">offset</span> <span class="op">&lt;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>));
+        <span class="macro">assert!</span>(<span class="ident">offset</span> <span class="op">&lt;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>));
         <span class="self">Self</span>(<span class="ident">offset</span>)
     }
 
@@ -729,23 +714,24 @@
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageOffset</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">offset</span>: <span class="ident">PageOffset</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">u32</span>::<span class="ident">from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
+        <span class="ident">u32::from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageOffset</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u64</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">offset</span>: <span class="ident">PageOffset</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">u64</span>::<span class="ident">from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
+        <span class="ident">u64::from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageOffset</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">offset</span>: <span class="ident">PageOffset</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
+        <span class="ident">usize::from</span>(<span class="ident">offset</span>.<span class="number">0</span>)
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="x86_64"></div>
-    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="x86_64" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script>
+</body></html>

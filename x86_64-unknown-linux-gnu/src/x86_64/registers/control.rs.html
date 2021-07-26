@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.13.2/src/registers/control.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>control.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;x86_64-0.14.4&#x2F;src&#x2F;registers&#x2F;control.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>control.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -388,144 +385,204 @@
 <span id="385">385</span>
 <span id="386">386</span>
 <span id="387">387</span>
-</pre><div class="example-wrap"><pre class="rust ">
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+</pre><pre class="rust">
 <span class="doccomment">//! Functions to read and write control registers.</span>
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">model_specific</span>::{<span class="ident">Efer</span>, <span class="ident">EferFlags</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span><span class="ident">::model_specific</span>::{<span class="ident">Efer</span>, <span class="ident">EferFlags</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">docsrs</span>)]</span>
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">registers::rflags::RFlags</span>, <span class="ident">structures::paging::PageTableFlags</span>};
 
-<span class="kw">use</span> <span class="ident">bitflags</span>::<span class="ident">bitflags</span>;
+<span class="kw">use</span> <span class="ident">bitflags::bitflags</span>;
 
 <span class="doccomment">/// Various control flags modifying the basic operation of the CPU.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr0</span>;
 
-<span class="macro">bitflags</span><span class="macro">!</span> {
-    <span class="doccomment">/// Configuration flags of the Cr0 register.</span>
+<span class="macro">bitflags!</span> {
+    <span class="doccomment">/// Configuration flags of the [`Cr0`] register.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr0Flags</span>: <span class="ident">u64</span> {
         <span class="doccomment">/// Enables protected mode.</span>
         <span class="kw">const</span> <span class="ident">PROTECTED_MODE_ENABLE</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="doccomment">/// Enables monitoring of the coprocessor, typical for x87 instructions.</span>
         <span class="doccomment">///</span>
-        <span class="doccomment">/// Controls together with the `TASK_SWITCHED` flag whether a `wait` or `fwait`</span>
-        <span class="doccomment">/// instruction should cause a device-not-available exception.</span>
+        <span class="doccomment">/// Controls (together with the [`TASK_SWITCHED`](Cr0Flags::TASK_SWITCHED)</span>
+        <span class="doccomment">/// flag) whether a `wait` or `fwait` instruction should cause an `#NE` exception.</span>
         <span class="kw">const</span> <span class="ident">MONITOR_COPROCESSOR</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
-        <span class="doccomment">/// Force all x87 and MMX instructions to cause an exception.</span>
+        <span class="doccomment">/// Force all x87 and MMX instructions to cause an `#NE` exception.</span>
         <span class="kw">const</span> <span class="ident">EMULATE_COPROCESSOR</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>;
         <span class="doccomment">/// Automatically set to 1 on _hardware_ task switch.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// This flags allows lazily saving x87/MMX/SSE instructions on hardware context switches.</span>
         <span class="kw">const</span> <span class="ident">TASK_SWITCHED</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
-        <span class="doccomment">/// Enables the native error reporting mechanism for x87 FPU errors.</span>
+        <span class="doccomment">/// Indicates support of 387DX math coprocessor instructions.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Always set on all recent x86 processors, cannot be cleared.</span>
+        <span class="kw">const</span> <span class="ident">EXTENSION_TYPE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
+        <span class="doccomment">/// Enables the native (internal) error reporting mechanism for x87 FPU errors.</span>
         <span class="kw">const</span> <span class="ident">NUMERIC_ERROR</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
         <span class="doccomment">/// Controls whether supervisor-level writes to read-only pages are inhibited.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// When set, it is not possible to write to read-only pages from ring 0.</span>
         <span class="kw">const</span> <span class="ident">WRITE_PROTECT</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>;
-        <span class="doccomment">/// Enables automatic alignment checking.</span>
+        <span class="doccomment">/// Enables automatic usermode alignment checking if [`RFlags::ALIGNMENT_CHECK`] is also set.</span>
         <span class="kw">const</span> <span class="ident">ALIGNMENT_MASK</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">18</span>;
-        <span class="doccomment">/// Ignored. Used to control write-back/write-through cache strategy on older CPUs.</span>
+        <span class="doccomment">/// Ignored, should always be unset.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Must be unset if [`CACHE_DISABLE`](Cr0Flags::CACHE_DISABLE) is unset.</span>
+        <span class="doccomment">/// Older CPUs used this to control write-back/write-through cache strategy.</span>
         <span class="kw">const</span> <span class="ident">NOT_WRITE_THROUGH</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">29</span>;
-        <span class="doccomment">/// Disables internal caches (only for some cases).</span>
+        <span class="doccomment">/// Disables some processor caches, specifics are model-dependent.</span>
         <span class="kw">const</span> <span class="ident">CACHE_DISABLE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">30</span>;
-        <span class="doccomment">/// Enables page translation.</span>
+        <span class="doccomment">/// Enables paging.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If this bit is set, [`PROTECTED_MODE_ENABLE`](Cr0Flags::PROTECTED_MODE_ENABLE) must be set.</span>
         <span class="kw">const</span> <span class="ident">PAGING</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">31</span>;
     }
 }
 
 <span class="doccomment">/// Contains the Page Fault Linear Address (PFLA).</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// When page fault occurs, the CPU sets this register to the accessed address.</span>
+<span class="doccomment">/// When a page fault occurs, the CPU sets this register to the faulting virtual address.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr2</span>;
 
-<span class="doccomment">/// Contains the physical address of the level 4 page table.</span>
+<span class="doccomment">/// Contains the physical address of the highest-level page table.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr3</span>;
 
-<span class="macro">bitflags</span><span class="macro">!</span> {
-    <span class="doccomment">/// Controls cache settings for the level 4 page table.</span>
+<span class="macro">bitflags!</span> {
+    <span class="doccomment">/// Controls cache settings for the highest-level page table.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Unused if paging is disabled or if [`PCID`](Cr4Flags::PCID) is enabled.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr3Flags</span>: <span class="ident">u64</span> {
-        <span class="doccomment">/// Use a writethrough cache policy for the P4 table (else a writeback policy is used).</span>
+        <span class="doccomment">/// Use a writethrough cache policy for the table (otherwise a writeback policy is used).</span>
         <span class="kw">const</span> <span class="ident">PAGE_LEVEL_WRITETHROUGH</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
-        <span class="doccomment">/// Disable caching for the P4 table.</span>
+        <span class="doccomment">/// Disable caching for the table.</span>
         <span class="kw">const</span> <span class="ident">PAGE_LEVEL_CACHE_DISABLE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
     }
 }
 
-<span class="doccomment">/// Various control flags modifying the basic operation of the CPU while in protected mode.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note: The documention for the individual fields is taken from the AMD64 and Intel x86_64</span>
-<span class="doccomment">/// manuals.</span>
+<span class="doccomment">/// Contains various control flags that enable architectural extensions, and</span>
+<span class="doccomment">/// indicate support for specific processor capabilities.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr4</span>;
 
-<span class="macro">bitflags</span><span class="macro">!</span> {
-    <span class="doccomment">/// Controls cache settings for the level 4 page table.</span>
+<span class="macro">bitflags!</span> {
+    <span class="doccomment">/// Configuration flags of the [`Cr4`] register.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cr4Flags</span>: <span class="ident">u64</span> {
         <span class="doccomment">/// Enables hardware-supported performance enhancements for software running in</span>
         <span class="doccomment">/// virtual-8086 mode.</span>
         <span class="kw">const</span> <span class="ident">VIRTUAL_8086_MODE_EXTENSIONS</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="doccomment">/// Enables support for protected-mode virtual interrupts.</span>
         <span class="kw">const</span> <span class="ident">PROTECTED_MODE_VIRTUAL_INTERRUPTS</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
-        <span class="doccomment">/// When set, only privilege-level 0 can execute the RDTSC or RDTSCP instructions.</span>
+        <span class="doccomment">/// When set, only privilege-level 0 can execute the `RDTSC` or `RDTSCP` instructions.</span>
         <span class="kw">const</span> <span class="ident">TIMESTAMP_DISABLE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>;
-        <span class="doccomment">/// Enables I/O breakpoint capability and enforces treatment of DR4 and DR5 registers</span>
+        <span class="doccomment">/// Enables I/O breakpoint capability and enforces treatment of `DR4` and `DR5` registers</span>
         <span class="doccomment">/// as reserved.</span>
         <span class="kw">const</span> <span class="ident">DEBUGGING_EXTENSIONS</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
-        <span class="doccomment">/// Enables the use of 4MB physical frames; ignored in long mode.</span>
+        <span class="doccomment">/// Enables the use of 4MB physical frames; ignored if</span>
+        <span class="doccomment">/// [`PHYSICAL_ADDRESS_EXTENSION`](Cr4Flags::PHYSICAL_ADDRESS_EXTENSION)</span>
+        <span class="doccomment">/// is set (so always ignored in long mode).</span>
         <span class="kw">const</span> <span class="ident">PAGE_SIZE_EXTENSION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
-        <span class="doccomment">/// Enables physical address extension and 2MB physical frames; required in long mode.</span>
+        <span class="doccomment">/// Enables physical address extensions and 2MB physical frames. Required in long mode.</span>
         <span class="kw">const</span> <span class="ident">PHYSICAL_ADDRESS_EXTENSION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
         <span class="doccomment">/// Enables the machine-check exception mechanism.</span>
         <span class="kw">const</span> <span class="ident">MACHINE_CHECK_EXCEPTION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span>;
-        <span class="doccomment">/// Enables the global-page mechanism, which allows to make page translations global</span>
-        <span class="doccomment">/// to all processes.</span>
+        <span class="doccomment">/// Enables the global page feature, allowing some page translations to</span>
+        <span class="doccomment">/// be marked as global (see [`PageTableFlags::GLOBAL`]).</span>
         <span class="kw">const</span> <span class="ident">PAGE_GLOBAL</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>;
-        <span class="doccomment">/// Allows software running at any privilege level to use the RDPMC instruction.</span>
+        <span class="doccomment">/// Allows software running at any privilege level to use the `RDPMC` instruction.</span>
         <span class="kw">const</span> <span class="ident">PERFORMANCE_MONITOR_COUNTER</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
-        <span class="doccomment">/// Enable the use of legacy SSE instructions; allows using FXSAVE/FXRSTOR for saving</span>
+        <span class="doccomment">/// Enables the use of legacy SSE instructions; allows using `FXSAVE`/`FXRSTOR` for saving</span>
         <span class="doccomment">/// processor state of 128-bit media instructions.</span>
         <span class="kw">const</span> <span class="ident">OSFXSR</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>;
-        <span class="doccomment">/// Enables the SIMD floating-point exception (#XF) for handling unmasked 256-bit and</span>
+        <span class="doccomment">/// Enables the SIMD floating-point exception (`#XF`) for handling unmasked 256-bit and</span>
         <span class="doccomment">/// 128-bit media floating-point errors.</span>
         <span class="kw">const</span> <span class="ident">OSXMMEXCPT_ENABLE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">10</span>;
-        <span class="doccomment">/// Prevents the execution of the SGDT, SIDT, SLDT, SMSW, and STR instructions by</span>
+        <span class="doccomment">/// Prevents the execution of the `SGDT`, `SIDT`, `SLDT`, `SMSW`, and `STR` instructions by</span>
         <span class="doccomment">/// user-mode software.</span>
         <span class="kw">const</span> <span class="ident">USER_MODE_INSTRUCTION_PREVENTION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">11</span>;
-        <span class="doccomment">/// Enables 5-level paging on supported CPUs.</span>
+        <span class="doccomment">/// Enables 5-level paging on supported CPUs (Intel Only).</span>
         <span class="kw">const</span> <span class="ident">L5_PAGING</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>;
-        <span class="doccomment">/// Enables VMX insturctions.</span>
+        <span class="doccomment">/// Enables VMX instructions (Intel Only).</span>
         <span class="kw">const</span> <span class="ident">VIRTUAL_MACHINE_EXTENSIONS</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">13</span>;
-        <span class="doccomment">/// Enables SMX instructions.</span>
+        <span class="doccomment">/// Enables SMX instructions (Intel Only).</span>
         <span class="kw">const</span> <span class="ident">SAFER_MODE_EXTENSIONS</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">14</span>;
         <span class="doccomment">/// Enables software running in 64-bit mode at any privilege level to read and write</span>
         <span class="doccomment">/// the FS.base and GS.base hidden segment register state.</span>
         <span class="kw">const</span> <span class="ident">FSGSBASE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>;
         <span class="doccomment">/// Enables process-context identifiers (PCIDs).</span>
         <span class="kw">const</span> <span class="ident">PCID</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">17</span>;
-        <span class="doccomment">/// Enables extendet processor state management instructions, including XGETBV and XSAVE.</span>
+        <span class="doccomment">/// Enables extended processor state management instructions, including `XGETBV` and `XSAVE`.</span>
         <span class="kw">const</span> <span class="ident">OSXSAVE</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">18</span>;
+        <span class="doccomment">/// Enables the Key Locker feature (Intel Only).</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// This enables creation and use of opaque AES key handles; see the</span>
+        <span class="doccomment">/// [Intel Key Locker Specification](https://software.intel.com/content/www/us/en/develop/download/intel-key-locker-specification.html)</span>
+        <span class="doccomment">/// for more information.</span>
+        <span class="kw">const</span> <span class="ident">KEY_LOCKER</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">19</span>;
         <span class="doccomment">/// Prevents the execution of instructions that reside in pages accessible by user-mode</span>
         <span class="doccomment">/// software when the processor is in supervisor-mode.</span>
         <span class="kw">const</span> <span class="ident">SUPERVISOR_MODE_EXECUTION_PROTECTION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
         <span class="doccomment">/// Enables restrictions for supervisor-mode software when reading data from user-mode</span>
         <span class="doccomment">/// pages.</span>
         <span class="kw">const</span> <span class="ident">SUPERVISOR_MODE_ACCESS_PREVENTION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
-        <span class="doccomment">/// Enables 4-level paging to associate each linear address with a protection key.</span>
+        <span class="doccomment">/// Enables protection keys for user-mode pages.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Also enables access to the PKRU register (via the `RDPKRU`/`WRPKRU`</span>
+        <span class="doccomment">/// instructions) to set user-mode protection key access controls.</span>
         <span class="kw">const</span> <span class="ident">PROTECTION_KEY</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">22</span>;
+        <span class="doccomment">/// Enables Control-flow Enforcement Technology (CET)</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// This enables the shadow stack feature, ensuring return addresses read</span>
+        <span class="doccomment">/// via `RET` and `IRET` have not been corrupted.</span>
+        <span class="kw">const</span> <span class="ident">CONTROL_FLOW_ENFORCEMENT</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>;
+        <span class="doccomment">/// Enables protection keys for supervisor-mode pages (Intel Only).</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Also enables the `IA32_PKRS` MSR to set supervisor-mode protection</span>
+        <span class="doccomment">/// key access controls.</span>
+        <span class="kw">const</span> <span class="ident">PROTECTION_KEY_SUPERVISOR</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>;
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;instructions&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">x86_64</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">instructions</span>::<span class="ident">tlb</span>::<span class="ident">Pcid</span>, <span class="ident">structures</span>::<span class="ident">paging</span>::<span class="ident">PhysFrame</span>, <span class="ident">PhysAddr</span>, <span class="ident">VirtAddr</span>};
+    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">instructions::tlb::Pcid</span>, <span class="ident">structures::paging::PhysFrame</span>, <span class="ident">PhysAddr</span>, <span class="ident">VirtAddr</span>};
 
     <span class="kw">impl</span> <span class="ident">Cr0</span> {
         <span class="doccomment">/// Read the current set of CR0 flags.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cr0Flags</span> {
-            <span class="ident">Cr0Flags</span>::<span class="ident">from_bits_truncate</span>(<span class="self">Self</span>::<span class="ident">read_raw</span>())
+            <span class="ident">Cr0Flags::from_bits_truncate</span>(<span class="self">Self</span><span class="ident">::read_raw</span>())
         }
 
         <span class="doccomment">/// Read the current raw CR0 value.</span>
@@ -535,12 +592,11 @@
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
             <span class="kw">unsafe</span> {
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov {}, cr0&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>));
+                <span class="macro">asm!</span>(<span class="string">&quot;mov {}, cr0&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>, <span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
             }
-
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
             <span class="kw">unsafe</span> {
-                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_read_cr0</span>();
+                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_read_cr0</span>();
             }
 
             <span class="ident">value</span>
@@ -556,11 +612,11 @@
         <span class="doccomment">/// safety through it, e.g. by disabling paging.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">flags</span>: <span class="ident">Cr0Flags</span>) {
-            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read_raw</span>();
-            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">Cr0Flags</span>::<span class="ident">all</span>().<span class="ident">bits</span>());
+            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_raw</span>();
+            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">Cr0Flags::all</span>().<span class="ident">bits</span>());
             <span class="kw">let</span> <span class="ident">new_value</span> <span class="op">=</span> <span class="ident">reserved</span> <span class="op">|</span> <span class="ident">flags</span>.<span class="ident">bits</span>();
 
-            <span class="self">Self</span>::<span class="ident">write_raw</span>(<span class="ident">new_value</span>);
+            <span class="self">Self</span><span class="ident">::write_raw</span>(<span class="ident">new_value</span>);
         }
 
         <span class="doccomment">/// Write raw CR0 flags.</span>
@@ -574,10 +630,10 @@
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write_raw</span>(<span class="ident">value</span>: <span class="ident">u64</span>) {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
-            <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov cr0, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>));
+            <span class="macro">asm!</span>(<span class="string">&quot;mov cr0, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
-            <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_write_cr0</span>(<span class="ident">value</span>);
+            <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_write_cr0</span>(<span class="ident">value</span>);
         }
 
         <span class="doccomment">/// Updates CR0 flags.</span>
@@ -593,9 +649,9 @@
         <span class="kw">where</span>
             <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cr0Flags</span>),
         {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read</span>();
             <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">flags</span>);
-            <span class="self">Self</span>::<span class="ident">write</span>(<span class="ident">flags</span>);
+            <span class="self">Self</span><span class="ident">::write</span>(<span class="ident">flags</span>);
         }
     }
 
@@ -607,15 +663,14 @@
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
             <span class="kw">unsafe</span> {
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov {}, cr2&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>));
+                <span class="macro">asm!</span>(<span class="string">&quot;mov {}, cr2&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>, <span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
             }
-
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
             <span class="kw">unsafe</span> {
-                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_read_cr2</span>();
+                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_read_cr2</span>();
             }
 
-            <span class="ident">VirtAddr</span>::<span class="ident">new</span>(<span class="ident">value</span>)
+            <span class="ident">VirtAddr::new</span>(<span class="ident">value</span>)
         }
     }
 
@@ -623,8 +678,8 @@
         <span class="doccomment">/// Read the current P4 table address from the CR3 register.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PhysFrame</span>, <span class="ident">Cr3Flags</span>) {
-            <span class="kw">let</span> (<span class="ident">frame</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">Cr3</span>::<span class="ident">read_raw</span>();
-            <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">Cr3Flags</span>::<span class="ident">from_bits_truncate</span>(<span class="ident">value</span>.<span class="ident">into</span>());
+            <span class="kw">let</span> (<span class="ident">frame</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">Cr3::read_raw</span>();
+            <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">Cr3Flags::from_bits_truncate</span>(<span class="ident">value</span>.<span class="ident">into</span>());
             (<span class="ident">frame</span>, <span class="ident">flags</span>)
         }
 
@@ -635,16 +690,15 @@
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
             <span class="kw">unsafe</span> {
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov {}, cr3&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>));
+                <span class="macro">asm!</span>(<span class="string">&quot;mov {}, cr3&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>, <span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
             }
-
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
             <span class="kw">unsafe</span> {
-                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_read_cr3</span>();
+                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_read_cr3</span>();
             }
 
-            <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">PhysAddr</span>::<span class="ident">new</span>(<span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x_000f_ffff_ffff_f000</span>);
-            <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">PhysFrame</span>::<span class="ident">containing_address</span>(<span class="ident">addr</span>);
+            <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">PhysAddr::new</span>(<span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x_000f_ffff_ffff_f000</span>);
+            <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">PhysFrame::containing_address</span>(<span class="ident">addr</span>);
             (<span class="ident">frame</span>, (<span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0xFFF</span>) <span class="kw">as</span> <span class="ident">u16</span>)
         }
 
@@ -653,8 +707,8 @@
         <span class="doccomment">/// See [`Cr4Flags::PCID`]</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_pcid</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PhysFrame</span>, <span class="ident">Pcid</span>) {
-            <span class="kw">let</span> (<span class="ident">frame</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">Cr3</span>::<span class="ident">read_raw</span>();
-            (<span class="ident">frame</span>, <span class="ident">Pcid</span>::<span class="ident">new</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">u16</span>).<span class="ident">unwrap</span>())
+            <span class="kw">let</span> (<span class="ident">frame</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">Cr3::read_raw</span>();
+            (<span class="ident">frame</span>, <span class="ident">Pcid::new</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">u16</span>).<span class="ident">unwrap</span>())
         }
 
         <span class="doccomment">/// Write a new P4 table address into the CR3 register.</span>
@@ -664,7 +718,7 @@
         <span class="doccomment">/// changing the page mapping.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">frame</span>: <span class="ident">PhysFrame</span>, <span class="ident">flags</span>: <span class="ident">Cr3Flags</span>) {
-            <span class="ident">Cr3</span>::<span class="ident">write_raw</span>(<span class="ident">frame</span>, <span class="ident">flags</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u16</span>);
+            <span class="ident">Cr3::write_raw</span>(<span class="ident">frame</span>, <span class="ident">flags</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u16</span>);
         }
 
         <span class="doccomment">/// Write a new P4 table address into the CR3 register.</span>
@@ -675,7 +729,7 @@
         <span class="doccomment">/// [`Cr4Flags::PCID`] must be set before calling this method.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write_pcid</span>(<span class="ident">frame</span>: <span class="ident">PhysFrame</span>, <span class="ident">pcid</span>: <span class="ident">Pcid</span>) {
-            <span class="ident">Cr3</span>::<span class="ident">write_raw</span>(<span class="ident">frame</span>, <span class="ident">pcid</span>.<span class="ident">value</span>());
+            <span class="ident">Cr3::write_raw</span>(<span class="ident">frame</span>, <span class="ident">pcid</span>.<span class="ident">value</span>());
         }
 
         <span class="doccomment">/// Write a new P4 table address into the CR3 register.</span>
@@ -689,10 +743,10 @@
             <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">as_u64</span>() <span class="op">|</span> <span class="ident">val</span> <span class="kw">as</span> <span class="ident">u64</span>;
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
-            <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov cr3, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>));
+            <span class="macro">asm!</span>(<span class="string">&quot;mov cr3, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
-            <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_write_cr3</span>(<span class="ident">value</span>)
+            <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_write_cr3</span>(<span class="ident">value</span>)
         }
     }
 
@@ -700,7 +754,7 @@
         <span class="doccomment">/// Read the current set of CR4 flags.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cr4Flags</span> {
-            <span class="ident">Cr4Flags</span>::<span class="ident">from_bits_truncate</span>(<span class="self">Self</span>::<span class="ident">read_raw</span>())
+            <span class="ident">Cr4Flags::from_bits_truncate</span>(<span class="self">Self</span><span class="ident">::read_raw</span>())
         }
 
         <span class="doccomment">/// Read the current raw CR4 value.</span>
@@ -710,12 +764,11 @@
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
             <span class="kw">unsafe</span> {
-                <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov {}, cr4&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>));
+                <span class="macro">asm!</span>(<span class="string">&quot;mov {}, cr4&quot;</span>, <span class="ident">out</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nomem</span>, <span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
             }
-
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
             <span class="kw">unsafe</span> {
-                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_read_cr4</span>();
+                <span class="ident">value</span> <span class="op">=</span> <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_read_cr4</span>();
             }
 
             <span class="ident">value</span>
@@ -732,11 +785,11 @@
         <span class="doccomment">/// flag.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">flags</span>: <span class="ident">Cr4Flags</span>) {
-            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read_raw</span>();
-            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">Cr4Flags</span>::<span class="ident">all</span>().<span class="ident">bits</span>());
+            <span class="kw">let</span> <span class="ident">old_value</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_raw</span>();
+            <span class="kw">let</span> <span class="ident">reserved</span> <span class="op">=</span> <span class="ident">old_value</span> <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">Cr4Flags::all</span>().<span class="ident">bits</span>());
             <span class="kw">let</span> <span class="ident">new_value</span> <span class="op">=</span> <span class="ident">reserved</span> <span class="op">|</span> <span class="ident">flags</span>.<span class="ident">bits</span>();
 
-            <span class="self">Self</span>::<span class="ident">write_raw</span>(<span class="ident">new_value</span>);
+            <span class="self">Self</span><span class="ident">::write_raw</span>(<span class="ident">new_value</span>);
         }
 
         <span class="doccomment">/// Write raw CR4 flags.</span>
@@ -751,10 +804,10 @@
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">write_raw</span>(<span class="ident">value</span>: <span class="ident">u64</span>) {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>)]</span>
-            <span class="macro">asm</span><span class="macro">!</span>(<span class="string">&quot;mov cr4, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>));
+            <span class="macro">asm!</span>(<span class="string">&quot;mov cr4, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">value</span>, <span class="ident">options</span>(<span class="ident">nostack</span>, <span class="ident">preserves_flags</span>));
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;inline_asm&quot;</span>))]</span>
-            <span class="kw">crate</span>::<span class="ident">asm</span>::<span class="ident">x86_64_asm_write_cr4</span>(<span class="ident">value</span>);
+            <span class="kw">crate</span><span class="ident">::asm::x86_64_asm_write_cr4</span>(<span class="ident">value</span>);
         }
 
         <span class="doccomment">/// Updates CR4 flags.</span>
@@ -770,12 +823,13 @@
         <span class="kw">where</span>
             <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cr4Flags</span>),
         {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">read</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read</span>();
             <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">flags</span>);
-            <span class="self">Self</span>::<span class="ident">write</span>(<span class="ident">flags</span>);
+            <span class="self">Self</span><span class="ident">::write</span>(<span class="ident">flags</span>);
         }
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>

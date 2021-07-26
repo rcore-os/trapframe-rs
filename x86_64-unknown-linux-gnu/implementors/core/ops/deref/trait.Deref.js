@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["x86_64"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"x86_64/structures/idt/struct.InterruptStackFrame.html\" title=\"struct x86_64::structures::idt::InterruptStackFrame\">InterruptStackFrame</a>","synthetic":false,"types":["x86_64::structures::idt::InterruptStackFrame"]}];
+implementors["x86_64"] = [{"text":"impl Deref for <a class=\"struct\" href=\"x86_64/structures/idt/struct.InterruptStackFrame.html\" title=\"struct x86_64::structures::idt::InterruptStackFrame\">InterruptStackFrame</a>","synthetic":false,"types":["x86_64::structures::idt::InterruptStackFrame"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

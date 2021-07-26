@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["access","Allows creating read-only and write-only `Volatile` values."]],"struct":[["Volatile","Wraps a reference to make accesses to the referenced value volatile."]]});
