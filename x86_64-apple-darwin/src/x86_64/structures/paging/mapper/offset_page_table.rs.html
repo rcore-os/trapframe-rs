@@ -1,4 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;x86_64-0.14.4&#x2F;src&#x2F;structures&#x2F;paging&#x2F;mapper&#x2F;offset_page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>offset_page_table.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.14.8/src/structures/paging/mapper/offset_page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>offset_page_table.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><script defer src="../../../../../main.js"></script><script defer src="../../../../../source-script.js"></script><script defer src="../../../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../../x86_64/index.html"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -264,11 +269,39 @@
 <span id="264">264</span>
 <span id="265">265</span>
 <span id="266">266</span>
-</pre><pre class="rust">
-<span class="attribute">#![<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+</pre><pre class="rust"><code><span class="attribute">#![<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::structures::paging</span>::{
-    <span class="ident">frame::PhysFrame</span>, <span class="ident">mapper</span>::<span class="kw-2">*</span>, <span class="ident">page_table::PageTable</span>, <span class="ident">Page</span>, <span class="ident">PageTableFlags</span>,
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::structures::paging</span>::{
+    <span class="ident">frame::PhysFrame</span>, <span class="ident">mapper</span>::<span class="kw-2">*</span>, <span class="ident">page::PageRangeInclusive</span>, <span class="ident">page_table::PageTable</span>, <span class="ident">FrameDeallocator</span>,
+    <span class="ident">Page</span>, <span class="ident">PageTableFlags</span>,
 };
 
 <span class="doccomment">/// A Mapper implementation that requires that the complete physically memory is mapped at some</span>
@@ -295,17 +328,17 @@
     <span class="doccomment">/// of a valid page table hierarchy. Otherwise this function might break memory safety, e.g.</span>
     <span class="doccomment">/// by writing to an illegal memory location.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">level_4_table</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">PageTable</span>, <span class="ident">phys_offset</span>: <span class="ident">VirtAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">level_4_table</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">PageTable</span>, <span class="ident">phys_offset</span>: <span class="ident">VirtAddr</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">phys_offset</span> <span class="op">=</span> <span class="ident">PhysOffset</span> {
             <span class="ident">offset</span>: <span class="ident">phys_offset</span>,
         };
         <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">MappedPageTable::new</span>(<span class="ident">level_4_table</span>, <span class="ident">phys_offset</span>),
+            <span class="ident">inner</span>: <span class="kw">unsafe</span> { <span class="ident">MappedPageTable::new</span>(<span class="ident">level_4_table</span>, <span class="ident">phys_offset</span>) },
         }
     }
 
     <span class="doccomment">/// Returns a mutable reference to the wrapped level 4 `PageTable` instance.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">level_4_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">PageTable</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">level_4_table</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">PageTable</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">level_4_table</span>()
     }
 }
@@ -316,7 +349,7 @@
 }
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">PageTableFrameMapping</span> <span class="kw">for</span> <span class="ident">PhysOffset</span> {
-    <span class="kw">fn</span> <span class="ident">frame_to_pointer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">frame</span>: <span class="ident">PhysFrame</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">PageTable</span> {
+    <span class="kw">fn</span> <span class="ident">frame_to_pointer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">frame</span>: <span class="ident">PhysFrame</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">PageTable</span> {
         <span class="kw">let</span> <span class="ident">virt</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">offset</span> <span class="op">+</span> <span class="ident">frame</span>.<span class="ident">start_address</span>().<span class="ident">as_u64</span>();
         <span class="ident">virt</span>.<span class="ident">as_mut_ptr</span>()
     }
@@ -327,66 +360,68 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Mapper</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OffsetPageTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_to_with_table_flags</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
         <span class="ident">parent_table_flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">inner</span>
+                .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">unmap</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">unmap</span>(<span class="ident">page</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">update_flags</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p4_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p3_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p2_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size1GiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">translate_page</span>(<span class="ident">page</span>)
     }
 }
@@ -394,66 +429,68 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Mapper</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OffsetPageTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_to_with_table_flags</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
         <span class="ident">parent_table_flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">inner</span>
+                .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">unmap</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">unmap</span>(<span class="ident">page</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">update_flags</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p4_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p3_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p2_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size2MiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">translate_page</span>(<span class="ident">page</span>)
     }
 }
@@ -461,77 +498,99 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Mapper</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OffsetPageTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_to_with_table_flags</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
         <span class="ident">parent_table_flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">inner</span>
+                .<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">allocator</span>)
+        }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">unmap</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">unmap</span>(<span class="ident">page</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">update_flags</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">update_flags</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p4_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p4_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p3_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p3_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p2_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>)
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_flags_p2_entry</span>(<span class="ident">page</span>, <span class="ident">flags</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">translate_page</span>(<span class="ident">page</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Translate</span> <span class="kw">for</span> <span class="ident">OffsetPageTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TranslateResult</span> {
+    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) -&gt; <span class="ident">TranslateResult</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">translate</span>(<span class="ident">addr</span>)
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="x86_64" data-search-index-js="../../../../../search-index.js" data-search-js="../../../../../search.js"></div>
-    <script src="../../../../../main.js"></script><script src="../../../../../source-script.js"></script><script src="../../../../../source-files.js"></script>
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CleanUp</span> <span class="kw">for</span> <span class="ident">OffsetPageTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clean_up</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">frame_deallocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">D</span>)
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">FrameDeallocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clean_up</span>(<span class="ident">frame_deallocator</span>) }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clean_up_addr_range</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">range</span>: <span class="ident">PageRangeInclusive</span>,
+        <span class="ident">frame_deallocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">D</span>,
+    ) <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">FrameDeallocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clean_up_addr_range</span>(<span class="ident">range</span>, <span class="ident">frame_deallocator</span>) }
+    }
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0-nightly (4b043faba 2022-02-24)" ></div>
 </body></html>

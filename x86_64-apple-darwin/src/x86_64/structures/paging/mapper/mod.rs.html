@@ -1,4 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;x86_64-0.14.4&#x2F;src&#x2F;structures&#x2F;paging&#x2F;mapper&#x2F;mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../../x86_64/index.html'><div class='logo-container rust-logo'><img src='../../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.14.8/src/structures/paging/mapper/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><script defer src="../../../../../main.js"></script><script defer src="../../../../../source-script.js"></script><script defer src="../../../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../../x86_64/index.html"><img class="rust-logo" src="../../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -474,18 +479,71 @@
 <span id="474">474</span>
 <span id="475">475</span>
 <span id="476">476</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Abstractions for reading and modifying the mapping of pages.</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Abstractions for reading and modifying the mapping of pages.</span>
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span><span class="ident">::mapped_page_table</span>::{<span class="ident">MappedPageTable</span>, <span class="ident">PageTableFrameMapping</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::mapped_page_table</span>::{<span class="ident">MappedPageTable</span>, <span class="ident">PageTableFrameMapping</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span><span class="ident">::offset_page_table::OffsetPageTable</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::offset_page_table::OffsetPageTable</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;instructions&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span><span class="ident">::recursive_page_table</span>::{<span class="ident">InvalidPageTable</span>, <span class="ident">RecursivePageTable</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::recursive_page_table</span>::{<span class="ident">InvalidPageTable</span>, <span class="ident">RecursivePageTable</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::structures::paging</span>::{
-    <span class="ident">frame_alloc::FrameAllocator</span>, <span class="ident">page_table::PageTableFlags</span>, <span class="ident">Page</span>, <span class="ident">PageSize</span>, <span class="ident">PhysFrame</span>, <span class="ident">Size1GiB</span>,
-    <span class="ident">Size2MiB</span>, <span class="ident">Size4KiB</span>,
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::structures::paging</span>::{
+    <span class="ident">frame_alloc</span>::{<span class="ident">FrameAllocator</span>, <span class="ident">FrameDeallocator</span>},
+    <span class="ident">page::PageRangeInclusive</span>,
+    <span class="ident">page_table::PageTableFlags</span>,
+    <span class="ident">Page</span>, <span class="ident">PageSize</span>, <span class="ident">PhysFrame</span>, <span class="ident">Size1GiB</span>, <span class="ident">Size2MiB</span>, <span class="ident">Size4KiB</span>,
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">PhysAddr</span>, <span class="ident">VirtAddr</span>};
 
@@ -508,7 +566,7 @@
     <span class="doccomment">/// frame is returned. Otherwise an error value is returned.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function works with huge pages of all sizes.</span>
-    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TranslateResult</span>;
+    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) -&gt; <span class="ident">TranslateResult</span>;
 
     <span class="doccomment">/// Translates the given virtual address to the physical address that it maps to.</span>
     <span class="doccomment">///</span>
@@ -517,10 +575,10 @@
     <span class="doccomment">/// This is a convenience method. For more information about a mapping see the</span>
     <span class="doccomment">/// [`translate`](Translate::translate) method.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">translate_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PhysAddr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">VirtAddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PhysAddr</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">translate</span>(<span class="ident">addr</span>) {
-            <span class="ident">TranslateResult::NotMapped</span> <span class="op">|</span> <span class="ident">TranslateResult::InvalidFrameAddress</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">TranslateResult::Mapped</span> { <span class="ident">frame</span>, <span class="ident">offset</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">frame</span>.<span class="ident">start_address</span>() <span class="op">+</span> <span class="ident">offset</span>),
+            <span class="ident">TranslateResult::NotMapped</span> <span class="op">|</span> <span class="ident">TranslateResult::InvalidFrameAddress</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">TranslateResult::Mapped</span> { <span class="ident">frame</span>, <span class="ident">offset</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">frame</span>.<span class="ident">start_address</span>() <span class="op">+</span> <span class="ident">offset</span>),
         }
     }
 }
@@ -563,20 +621,20 @@
 
 <span class="kw">impl</span> <span class="ident">MappedFrame</span> {
     <span class="doccomment">/// Returns the start address of the frame.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">start_address</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PhysAddr</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">start_address</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">PhysAddr</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MappedFrame::Size4KiB</span>(<span class="ident">frame</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">frame</span>.<span class="ident">start_address</span>,
-            <span class="ident">MappedFrame::Size2MiB</span>(<span class="ident">frame</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">frame</span>.<span class="ident">start_address</span>,
-            <span class="ident">MappedFrame::Size1GiB</span>(<span class="ident">frame</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">frame</span>.<span class="ident">start_address</span>,
+            <span class="ident">MappedFrame::Size4KiB</span>(<span class="ident">frame</span>) =&gt; <span class="ident">frame</span>.<span class="ident">start_address</span>,
+            <span class="ident">MappedFrame::Size2MiB</span>(<span class="ident">frame</span>) =&gt; <span class="ident">frame</span>.<span class="ident">start_address</span>,
+            <span class="ident">MappedFrame::Size1GiB</span>(<span class="ident">frame</span>) =&gt; <span class="ident">frame</span>.<span class="ident">start_address</span>,
         }
     }
 
     <span class="doccomment">/// Returns the size the frame (4KB, 2MB or 1GB).</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MappedFrame::Size4KiB</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Size4KiB::SIZE</span>,
-            <span class="ident">MappedFrame::Size2MiB</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Size2MiB::SIZE</span>,
-            <span class="ident">MappedFrame::Size1GiB</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Size1GiB::SIZE</span>,
+            <span class="ident">MappedFrame::Size4KiB</span>(<span class="kw">_</span>) =&gt; <span class="ident">Size4KiB::SIZE</span>,
+            <span class="ident">MappedFrame::Size2MiB</span>(<span class="kw">_</span>) =&gt; <span class="ident">Size2MiB::SIZE</span>,
+            <span class="ident">MappedFrame::Size1GiB</span>(<span class="kw">_</span>) =&gt; <span class="ident">Size1GiB::SIZE</span>,
         }
     }
 }
@@ -652,12 +710,12 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_to</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
@@ -667,7 +725,9 @@
                 <span class="op">|</span> <span class="ident">PageTableFlags::WRITABLE</span>
                 <span class="op">|</span> <span class="ident">PageTableFlags::USER_ACCESSIBLE</span>);
 
-        <span class="self">self</span>.<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">frame_allocator</span>)
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">map_to_with_table_flags</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">parent_table_flags</span>, <span class="ident">frame_allocator</span>)
+        }
     }
 
     <span class="doccomment">/// Creates a new mapping in the page table.</span>
@@ -741,13 +801,13 @@
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_to_with_table_flags</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
         <span class="ident">parent_table_flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>;
@@ -755,7 +815,7 @@
     <span class="doccomment">/// Removes a mapping from the page table and returns the frame that used to be mapped.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that no page tables or pages are deallocated.</span>
-    <span class="kw">fn</span> <span class="ident">unmap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">unmap</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>), <span class="ident">UnmapError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Updates the flags of an existing mapping.</span>
     <span class="doccomment">///</span>
@@ -767,10 +827,10 @@
     <span class="doccomment">/// of values stored in that page from processes running in other address</span>
     <span class="doccomment">/// spaces.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">update_flags</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set the flags of an existing page level 4 table entry</span>
     <span class="doccomment">///</span>
@@ -782,10 +842,10 @@
     <span class="doccomment">/// of values stored in that page from processes running in other address</span>
     <span class="doccomment">/// spaces.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p4_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set the flags of an existing page table level 3 entry</span>
     <span class="doccomment">///</span>
@@ -797,10 +857,10 @@
     <span class="doccomment">/// of values stored in that page from processes running in other address</span>
     <span class="doccomment">/// spaces.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p3_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set the flags of an existing page table level 2 entry</span>
     <span class="doccomment">///</span>
@@ -812,16 +872,16 @@
     <span class="doccomment">/// of values stored in that page from processes running in other address</span>
     <span class="doccomment">/// spaces.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_flags_p2_entry</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlushAll</span>, <span class="ident">FlagUpdateError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return the frame that the specified page is mapped to.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function assumes that the page is mapped to a frame of size `S` and returns an</span>
     <span class="doccomment">/// error otherwise.</span>
-    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">translate_page</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">TranslateError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Maps the given frame to the virtual page with the same address.</span>
     <span class="doccomment">///</span>
@@ -831,11 +891,11 @@
     <span class="doccomment">/// all safety requirements of it also apply for this function.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">identity_map</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">frame</span>: <span class="ident">PhysFrame</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
         <span class="ident">flags</span>: <span class="ident">PageTableFlags</span>,
-        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">frame_allocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">A</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, <span class="ident">MapToError</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
         <span class="ident">A</span>: <span class="ident">FrameAllocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
@@ -843,7 +903,7 @@
         <span class="self">Self</span>: <span class="ident">Mapper</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="ident">page</span> <span class="op">=</span> <span class="ident">Page::containing_address</span>(<span class="ident">VirtAddr::new</span>(<span class="ident">frame</span>.<span class="ident">start_address</span>().<span class="ident">as_u64</span>()));
-        <span class="self">self</span>.<span class="ident">map_to</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">frame_allocator</span>)
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">map_to</span>(<span class="ident">page</span>, <span class="ident">frame</span>, <span class="ident">flags</span>, <span class="ident">frame_allocator</span>) }
     }
 }
 
@@ -858,8 +918,11 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">PageSize</span><span class="op">&gt;</span> <span class="ident">MapperFlush</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a new flush promise</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Note that this method is intended for implementing the [`Mapper`] trait and no other uses</span>
+    <span class="doccomment">/// are expected.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">page</span>: <span class="ident">Page</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">MapperFlush</span>(<span class="ident">page</span>)
     }
 
@@ -867,7 +930,7 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;instructions&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="self">self</span>) {
-        <span class="kw">crate</span><span class="ident">::instructions::tlb::flush</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">start_address</span>());
+        <span class="ident"><span class="kw">crate</span>::instructions::tlb::flush</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">start_address</span>());
     }
 
     <span class="doccomment">/// Don&#39;t flush the TLB and silence the “must be used” warning.</span>
@@ -880,14 +943,17 @@
 <span class="doccomment">/// The old mapping might be still cached in the translation lookaside buffer (TLB), so it needs</span>
 <span class="doccomment">/// to be flushed from the TLB before it&#39;s accessed. This type is returned from a function that</span>
 <span class="doccomment">/// made the change to ensure that the TLB flush is not forgotten.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">must_use</span> <span class="op">=</span> <span class="string">&quot;Page Table changes must be flushed or ignored.&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MapperFlushAll</span>(());
 
 <span class="kw">impl</span> <span class="ident">MapperFlushAll</span> {
     <span class="doccomment">/// Create a new flush promise</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Note that this method is intended for implementing the [`Mapper`] trait and no other uses</span>
+    <span class="doccomment">/// are expected.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">MapperFlushAll</span>(())
     }
 
@@ -895,7 +961,7 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;instructions&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_all</span>(<span class="self">self</span>) {
-        <span class="kw">crate</span><span class="ident">::instructions::tlb::flush_all</span>()
+        <span class="ident"><span class="kw">crate</span>::instructions::tlb::flush_all</span>()
     }
 
     <span class="doccomment">/// Don&#39;t flush the TLB and silence the “must be used” warning.</span>
@@ -951,7 +1017,48 @@
 }
 
 <span class="kw">static</span> <span class="ident">_ASSERT_OBJECT_SAFE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">Translate</span> <span class="op">+</span> <span class="ident">Sync</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="x86_64" data-search-index-js="../../../../../search-index.js" data-search-js="../../../../../search.js"></div>
-    <script src="../../../../../main.js"></script><script src="../../../../../source-script.js"></script><script src="../../../../../source-files.js"></script>
+
+<span class="doccomment">/// Provides methods for cleaning up unused entries.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CleanUp</span> {
+    <span class="doccomment">/// Remove all empty P1-P3 tables</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ## Safety</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The caller has to guarantee that it&#39;s safe to free page table frames:</span>
+    <span class="doccomment">/// All page table frames must only be used once and only in this page table</span>
+    <span class="doccomment">/// (e.g. no reference counted page tables or reusing the same page tables for different virtual addresses ranges in the same page table).</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clean_up</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">frame_deallocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">D</span>)
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">FrameDeallocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Remove all empty P1-P3 tables in a certain range</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # use core::ops::RangeInclusive;</span>
+    <span class="doccomment">/// # use x86_64::{VirtAddr, structures::paging::{</span>
+    <span class="doccomment">/// #    FrameDeallocator, Size4KiB, MappedPageTable, mapper::{RecursivePageTable, CleanUp}, page::{Page, PageRangeInclusive},</span>
+    <span class="doccomment">/// # }};</span>
+    <span class="doccomment">/// # unsafe fn test(page_table: &amp;mut RecursivePageTable, frame_deallocator: &amp;mut impl FrameDeallocator&lt;Size4KiB&gt;) {</span>
+    <span class="doccomment">/// // clean up all page tables in the lower half of the address space</span>
+    <span class="doccomment">/// let lower_half = Page::range_inclusive(</span>
+    <span class="doccomment">///     Page::containing_address(VirtAddr::new(0)),</span>
+    <span class="doccomment">///     Page::containing_address(VirtAddr::new(0x0000_7fff_ffff_ffff)),</span>
+    <span class="doccomment">/// );</span>
+    <span class="doccomment">/// page_table.clean_up_addr_range(lower_half, frame_deallocator);</span>
+    <span class="doccomment">/// # }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ## Safety</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The caller has to guarantee that it&#39;s safe to free page table frames:</span>
+    <span class="doccomment">/// All page table frames must only be used once and only in this page table</span>
+    <span class="doccomment">/// (e.g. no reference counted page tables or reusing the same page tables for different virtual addresses ranges in the same page table).</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clean_up_addr_range</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">range</span>: <span class="ident">PageRangeInclusive</span>,
+        <span class="ident">frame_deallocator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">D</span>,
+    ) <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">FrameDeallocator</span><span class="op">&lt;</span><span class="ident">Size4KiB</span><span class="op">&gt;</span>;
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0-nightly (4b043faba 2022-02-24)" ></div>
 </body></html>
