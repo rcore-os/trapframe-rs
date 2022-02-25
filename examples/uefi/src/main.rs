@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(asm)]
 #![feature(abi_efiapi)]
 #![feature(core_intrinsics)]
 #![feature(naked_functions)]
@@ -8,6 +7,7 @@
 
 extern crate alloc;
 
+use core::arch::asm;
 use core::intrinsics::breakpoint;
 use log::*;
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
@@ -17,8 +17,8 @@ use x86_64::structures::paging::{PageTable, PageTableFlags};
 use core::arch::asm;
 
 #[entry]
-fn efi_main(_image: Handle, st: SystemTable<Boot>) -> uefi::Status {
-    uefi_services::init(&st).expect_success("Failed to initialize utilities");
+fn efi_main(_image: Handle, mut st: SystemTable<Boot>) -> uefi::Status {
+    uefi_services::init(&mut st).expect_success("Failed to initialize utilities");
     check_and_set_cpu_features();
     allow_user_access(user_entry as usize);
     unsafe {
