@@ -8,6 +8,7 @@
 //! Because we will store values in their pthread structure.
 
 use super::UserContext;
+use core::arch::global_asm;
 
 global_asm!(include_str!("fncall.S"));
 
@@ -41,6 +42,7 @@ impl UserContext {
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use core::arch::global_asm;
 
     // Mock user program to dump registers at stack.
     global_asm!(

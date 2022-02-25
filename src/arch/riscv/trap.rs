@@ -1,3 +1,5 @@
+use core::arch::{asm, global_asm};
+
 #[cfg(target_arch = "riscv32")]
 global_asm!(
     r"

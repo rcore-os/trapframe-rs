@@ -8,6 +8,7 @@
 //! Because we will store values in their pthread structure.
 
 use super::UserContext;
+use core::arch::global_asm;
 
 extern "sysv64" {
     /// The syscall entry of function call.
@@ -230,6 +231,7 @@ syscall_fn_return:
 #[cfg(test)]
 mod tests {
     use crate::*;
+    use core::arch::global_asm;
 
     #[cfg(target_os = "macos")]
     global_asm!(".set _dump_registers, dump_registers");

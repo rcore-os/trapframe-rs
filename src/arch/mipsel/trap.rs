@@ -1,3 +1,5 @@
+use core::arch::{asm, global_asm};
+
 global_asm!(include_str!("trap.S"));
 
 /// Initialize interrupt handling for the current HART.
@@ -11,7 +13,10 @@ global_asm!(include_str!("trap.S"));
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set cp0 ebase(15, 1) register to trap entry
-    llvm_asm!("mtc0 $0, $$15, 1":: "r"(trap_entry as usize) :: "volatile");
+    asm!(
+        "mtc0 {trap_entry}, $15, 1",
+        trap_entry = in(reg) trap_entry,
+    );
 }
 
 #[no_mangle]

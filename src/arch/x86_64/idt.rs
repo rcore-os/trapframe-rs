@@ -1,4 +1,5 @@
 use alloc::boxed::Box;
+use core::arch::asm;
 use x86_64::structures::idt::*;
 use x86_64::structures::DescriptorTablePointer;
 use x86_64::{PrivilegeLevel, VirtAddr};
