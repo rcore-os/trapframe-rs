@@ -2,6 +2,7 @@
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
+use core::arch::asm;
 use core::mem::size_of;
 
 use x86_64::instructions::tables::{lgdt, load_tss};

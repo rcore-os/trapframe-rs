@@ -8,6 +8,7 @@ extern crate opensbi_rt;
 use riscv::register::scause::{Exception as E, Scause, Trap};
 use riscv::register::{scause, stval};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
+use core::arch::asm;
 
 #[no_mangle]
 extern "C" fn main() {

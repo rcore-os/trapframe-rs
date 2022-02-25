@@ -1,4 +1,5 @@
 use super::UserContext;
+use core::arch::global_asm;
 use x86_64::registers::model_specific::{Efer, EferFlags, LStar, SFMask};
 use x86_64::registers::rflags::RFlags;
 use x86_64::VirtAddr;
