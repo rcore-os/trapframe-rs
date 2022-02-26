@@ -1,13 +1,13 @@
 [package]
 name = "trapframe"
-version = "0.8.0"
+version = "0.9.0"
 authors = [
     "Runji Wang <wangrunji0408@163.com>",
     "Jiajie Chen <c@jia.je>",
     "Hoblovski <daizy19@mails.tsinghua.edu.cn>",
     "Ben Pig Chu <benpichu@gmail.com>",
 ]
-edition = "2018"
+edition = "2021"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
 homepage = "https://github.com/rcore-os/trapframe-rs"
 documentation = "https://docs.rs/trapframe"
@@ -23,8 +23,8 @@ exclude = ["docs", ".idea"]
 [dependencies]
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-x86_64 = "0.14"
-raw-cpuid = "9.0"
+x86_64 = "0.14.8"
+raw-cpuid = "10"
 
 [features]
 default = []

@@ -1,5 +1,3 @@
-.intel_syntax noprefix
-
 .text
 .global __alltraps
 __alltraps:

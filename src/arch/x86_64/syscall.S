@@ -1,5 +1,3 @@
-.intel_syntax noprefix
-
 .text
     # extern "sysv64" fn syscall_return(&mut GeneralRegs)
 .global syscall_return

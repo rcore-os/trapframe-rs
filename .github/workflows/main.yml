@@ -11,7 +11,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2022-01-20
           override: true
           components: rustfmt, clippy
       - name: Check code format
@@ -38,7 +38,7 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: nightly
+        toolchain: nightly-2022-01-20
         target: ${{ matrix.target }}
         components: clippy
     - name: Build
@@ -64,7 +64,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2022-01-20
           components: rust-src
       - name: Build
         uses: actions-rs/cargo@v1
@@ -88,7 +88,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2022-01-20
           override: true
       - name: Test
         uses: actions-rs/cargo@v1
@@ -104,7 +104,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2022-01-20
           target: aarch64-unknown-linux-gnu
           override: true
       - uses: actions-rs/cargo@v1

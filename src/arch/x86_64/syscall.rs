@@ -11,7 +11,7 @@ pub fn init() {
     unsafe {
         // enable `syscall` instruction
         assert!(cpuid
-            .get_extended_function_info()
+            .get_extended_processor_and_feature_identifiers()
             .unwrap()
             .has_syscall_sysret());
         Efer::update(|efer| {
