@@ -8,9 +8,6 @@ Handle Trap Frame across kernel and user space on multiple ISAs.
 
 Supported ISA: x86_64, aarch64, riscv32, riscv64, mipsel
 
-## info
-- Ver 0.8.0 was tested for x86_64 ISA by rustc 1.55+ nightly
-
 ## Example
 
 ### Go to user space
