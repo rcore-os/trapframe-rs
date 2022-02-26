@@ -14,7 +14,6 @@ use trapframe::{GeneralRegs, TrapFrame, UserContext};
 use uefi::prelude::*;
 use x86_64::registers::control::*;
 use x86_64::structures::paging::{PageTable, PageTableFlags};
-use core::arch::asm;
 
 #[entry]
 fn efi_main(_image: Handle, mut st: SystemTable<Boot>) -> uefi::Status {

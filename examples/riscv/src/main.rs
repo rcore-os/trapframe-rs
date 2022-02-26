@@ -1,11 +1,10 @@
 #![no_std]
 #![no_main]
-#![feature(asm)]
 
 #[macro_use]
 extern crate opensbi_rt;
 
-use riscv::register::scause::{Exception as E, Scause, Trap};
+use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 use core::arch::asm;
@@ -92,5 +91,5 @@ extern "C" fn trap_handler(tf: &mut TrapFrame) {
 }
 
 unsafe extern "C" fn user_entry() {
-    opensbi_rt::sbi::console_putchar(1);
+    opensbi_rt::sbi::legacy::console_putchar(1);
 }
