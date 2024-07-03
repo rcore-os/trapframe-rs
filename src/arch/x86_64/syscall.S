@@ -6,16 +6,15 @@ syscall_return:
     cli
 
     # save callee-saved registers
-    mov ecx, 0xC0000100
-    rdmsr
-    shl rdx, 32
-    or  rax, rdx
-    push rax                # push fsbase
     push r15
     push r14
     push r13
     push r12
     push rbp
+    push rbx
+
+    # save fsbase, kernel may use
+    rdfsbase rbx
     push rbx
 
     push rdi
@@ -25,14 +24,10 @@ syscall_return:
 
     # pop fsbase gsbase
     swapgs                  # store kernel gsbase
-    mov ecx, 0xC0000100
-    mov edx, [rsp + 18*8+4]
-    mov eax, [rsp + 18*8]
-    wrmsr                   # pop fsbase
-    mov ecx, 0xC0000101
-    mov edx, [rsp + 19*8+4]
-    mov eax, [rsp + 19*8]
-    wrmsr                   # pop gsbase
+    mov rax, [rsp + 18*8]
+    wrfsbase rax
+    mov rax, [rsp + 19*8]
+    wrgsbase rax
 
     pop rax
     pop rbx
@@ -61,24 +56,12 @@ syscall_return:
     cmp dword ptr [rsp + 4*8], 0x100  # syscall?
     je sysret
 iret:
-    # get user cs from STAR MSR
-    mov ecx, 0xC0000081
-    rdmsr                   # msr[ecx] => edx:eax
-    shr edx, 16             # dx = user_cs32
-    lea ax, [edx + 8]       # ax = user_ss
-    add dx, 16              # dx = user_cs64
-
     # construct trap frame
-    push rax                # push ss
+    push [USER_SS]          # push ss
     push [rsp - 8*8]        # push rsp
     push [rsp + 3*8]        # push rflags
-    push rdx                # push cs
+    push [USER_CS]          # push cs
     push [rsp + 4*8]        # push rip
-
-    # recover rcx, rdx, rax
-    mov rax, [rsp - 11*8]
-    mov rcx, [rsp - 9*8]
-    mov rdx, [rsp - 8*8]
 
     iretq
 
@@ -137,32 +120,29 @@ trap_syscall_entry:
     push rbx
     push rax
 
-    # push fsbase gsbase
-    mov ecx, 0xC0000100
-    rdmsr
-    mov [rsp + 18*8+4], edx
-    mov [rsp + 18*8], eax
-    mov ecx, 0xC0000102     # kernelgs
-    rdmsr
-    mov [rsp + 19*8+4], edx
-    mov [rsp + 19*8], eax
+    # save user fsbase/gsbase
+    rdfsbase rbx
+    mov [rsp + 18*8], rbx
+    swapgs
+    rdgsbase rbx
+    mov [rsp + 19*8], rbx
+    swapgs
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
     pop rbx
     pop rbx
+
+    # restore fsbase of kernel
+    pop rbx
+    wrfsbase rbx
+
     pop rbx
     pop rbp
     pop r12
     pop r13
     pop r14
     pop r15
-
-    pop rax
-    mov ecx, 0xC0000100
-    mov rdx, rax
-    shr rdx, 32
-    wrmsr                   # pop fsbase
 
     # go back to Rust
     ret
