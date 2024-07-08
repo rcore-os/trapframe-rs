@@ -1,5 +1,6 @@
 use super::UserContext;
 use core::arch::global_asm;
+use x86_64::registers::control::{Cr4, Cr4Flags};
 use x86_64::registers::model_specific::{Efer, EferFlags, LStar, SFMask};
 use x86_64::registers::rflags::RFlags;
 use x86_64::VirtAddr;
@@ -16,6 +17,12 @@ pub fn init() {
             .has_syscall_sysret());
         Efer::update(|efer| {
             efer.insert(EferFlags::SYSTEM_CALL_EXTENSIONS);
+        });
+
+        // enable `FSGSBASE` instructions
+        assert!(cpuid.get_extended_feature_info().unwrap().has_fsgsbase());
+        Cr4::update(|cr4| {
+            cr4.insert(Cr4Flags::FSGSBASE);
         });
 
         // flags to clear on syscall

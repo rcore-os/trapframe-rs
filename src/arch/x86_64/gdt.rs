@@ -63,10 +63,12 @@ pub fn init() {
         #[allow(const_item_mutation)]
         GsBase::MSR.write(tss as *const _ as u64);
 
-        Star::write_raw(
-            SegmentSelector::new(entry_count as u16 + 4, PrivilegeLevel::Ring3).0,
-            SegmentSelector::new(entry_count as u16 + 2, PrivilegeLevel::Ring0).0,
-        );
+        let sysret = SegmentSelector::new(entry_count as u16 + 4, PrivilegeLevel::Ring3).0;
+        let syscall = SegmentSelector::new(entry_count as u16 + 2, PrivilegeLevel::Ring0).0;
+        Star::write_raw(sysret, syscall);
+
+        USER_SS = sysret + 8;
+        USER_CS = sysret + 16;
     }
 }
 
@@ -80,6 +82,11 @@ unsafe fn sgdt() -> DescriptorTablePointer {
     asm!("sgdt [{}]", in(reg) &mut gdt);
     gdt
 }
+
+#[no_mangle]
+static mut USER_SS: u16 = 0;
+#[no_mangle]
+static mut USER_CS: u16 = 0;
 
 const KCODE64: u64 = 0x00209800_00000000; // EXECUTABLE | USER_SEGMENT | PRESENT | LONG_MODE
 const UCODE64: u64 = 0x0020F800_00000000; // EXECUTABLE | USER_SEGMENT | USER_MODE | PRESENT | LONG_MODE
