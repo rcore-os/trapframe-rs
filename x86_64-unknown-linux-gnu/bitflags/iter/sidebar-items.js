@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Iter","An iterator over flags values."],["IterNames","An iterator over flags values."]]});

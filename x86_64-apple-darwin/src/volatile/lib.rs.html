@@ -1,9 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/volatile-0.4.4/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/volatile-0.4.6/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
     <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../volatile/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"></h2>
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../volatile/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../volatile/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../volatile/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div>
+                                <input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -875,6 +876,8 @@
 <span id="870">870</span>
 <span id="871">871</span>
 <span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Provides the wrapper type `Volatile`, which wraps a reference to any copy-able type and allows</span>
 <span class="doccomment">//! for volatile memory access to wrapped value. Volatile memory accesses are never optimized away</span>
 <span class="doccomment">//! by the compiler, and are useful in many low-level systems programming and concurrent contexts.</span>
@@ -884,17 +887,16 @@
 
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">feature</span>(<span class="ident">core_intrinsics</span>))]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">feature</span>(<span class="ident">const_generics</span>))]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">feature</span>(<span class="ident">slice_range</span>))]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">allow</span>(<span class="ident">incomplete_features</span>))]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">test</span>), <span class="ident">feature</span>(<span class="ident">slice_as_chunks</span>))]</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">access</span>::{<span class="ident">ReadOnly</span>, <span class="ident">ReadWrite</span>, <span class="ident">Readable</span>, <span class="ident">Writable</span>, <span class="ident">WriteOnly</span>};
 <span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">fmt</span>,
     <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops::Deref</span>,
-    <span class="ident">ops</span>::{<span class="ident">DerefMut</span>, <span class="ident">Index</span>, <span class="ident">IndexMut</span>},
+    <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>, <span class="ident">Index</span>, <span class="ident">IndexMut</span>},
     <span class="ident">ptr</span>,
     <span class="ident">slice::SliceIndex</span>,
 };
@@ -1391,16 +1393,17 @@
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Copy</span>,
     {
+        <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">deref</span>();
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>(),
+            <span class="ident">src</span>.<span class="ident">len</span>(),
             <span class="ident">dst</span>.<span class="ident">len</span>(),
             <span class="string">&quot;destination and source slices have different lengths&quot;</span>
         );
         <span class="kw">unsafe</span> {
             <span class="ident">intrinsics::volatile_copy_nonoverlapping_memory</span>(
                 <span class="ident">dst</span>.<span class="ident">as_mut_ptr</span>(),
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">as_ptr</span>(),
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>(),
+                <span class="ident">src</span>.<span class="ident">as_ptr</span>(),
+                <span class="ident">src</span>.<span class="ident">len</span>(),
             );
         }
     }
@@ -1446,16 +1449,17 @@
         <span class="ident">T</span>: <span class="ident">Copy</span>,
         <span class="ident">R</span>: <span class="ident">DerefMut</span>,
     {
+        <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">deref_mut</span>();
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>(),
+            <span class="ident">dest</span>.<span class="ident">len</span>(),
             <span class="ident">src</span>.<span class="ident">len</span>(),
             <span class="string">&quot;destination and source slices have different lengths&quot;</span>
         );
         <span class="kw">unsafe</span> {
             <span class="ident">intrinsics::volatile_copy_nonoverlapping_memory</span>(
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">as_mut_ptr</span>(),
+                <span class="ident">dest</span>.<span class="ident">as_mut_ptr</span>(),
                 <span class="ident">src</span>.<span class="ident">as_ptr</span>(),
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>(),
+                <span class="ident">dest</span>.<span class="ident">len</span>(),
             );
         }
     }
@@ -1498,22 +1502,20 @@
         <span class="ident">T</span>: <span class="ident">Copy</span>,
         <span class="ident">R</span>: <span class="ident">DerefMut</span>,
     {
+        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">deref_mut</span>();
         <span class="comment">// implementation taken from https://github.com/rust-lang/rust/blob/683d1bcd405727fcc9209f64845bd3b9104878b8/library/core/src/slice/mod.rs#L2726-L2738</span>
         <span class="kw">let</span> <span class="ident">Range</span> {
             <span class="ident">start</span>: <span class="ident">src_start</span>,
             <span class="ident">end</span>: <span class="ident">src_end</span>,
-        } <span class="op">=</span> <span class="ident">range</span>(<span class="ident">src</span>, ..<span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>());
+        } <span class="op">=</span> <span class="ident">range</span>(<span class="ident">src</span>, ..<span class="ident">slice</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">src_end</span> <span class="op">-</span> <span class="ident">src_start</span>;
-        <span class="macro">assert!</span>(
-            <span class="ident">dest</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">count</span>,
-            <span class="string">&quot;dest is out of bounds&quot;</span>
-        );
+        <span class="macro">assert!</span>(<span class="ident">dest</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">count</span>, <span class="string">&quot;dest is out of bounds&quot;</span>);
         <span class="comment">// SAFETY: the conditions for `volatile_copy_memory` have all been checked above,</span>
         <span class="comment">// as have those for `ptr::add`.</span>
         <span class="kw">unsafe</span> {
             <span class="ident">intrinsics::volatile_copy_memory</span>(
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">add</span>(<span class="ident">dest</span>),
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">src_start</span>),
+                <span class="ident">slice</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">add</span>(<span class="ident">dest</span>),
+                <span class="ident">slice</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">src_start</span>),
                 <span class="ident">count</span>,
             );
         }
@@ -1549,21 +1551,14 @@
     <span class="kw">where</span>
         <span class="ident">R</span>: <span class="ident">DerefMut</span>,
     {
+        <span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">deref_mut</span>();
         <span class="kw">unsafe</span> {
-            <span class="ident">intrinsics::volatile_set_memory</span>(
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">as_mut_ptr</span>(),
-                <span class="ident">value</span>,
-                <span class="self">self</span>.<span class="ident">reference</span>.<span class="ident">len</span>(),
-            );
+            <span class="ident">intrinsics::volatile_set_memory</span>(<span class="ident">dest</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">value</span>, <span class="ident">dest</span>.<span class="ident">len</span>());
         }
     }
 }
 
 <span class="doccomment">/// Methods for converting arrays to slices</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These methods are only available with the `unstable` feature enabled (requires a nightly</span>
-<span class="doccomment">/// Rust compiler).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">A</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Volatile</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">A</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">Deref</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="op">=</span> [<span class="ident">T</span>; <span class="ident">N</span>]<span class="op">&gt;</span>,
@@ -1574,21 +1569,21 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Example</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Copying two elements from a volatile array reference using `copy_into_slice`:</span>
+    <span class="doccomment">/// Reading a subslice from a volatile array reference using `index`:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use volatile::Volatile;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let src = [1, 2];</span>
+    <span class="doccomment">/// let src = [1, 2, 3, 4];</span>
     <span class="doccomment">/// let volatile = Volatile::new(&amp;src);</span>
-    <span class="doccomment">/// let mut dst = [0, 0];</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // convert the `Volatile&lt;&amp;[i32; 2]&gt;` array reference to a `Volatile&lt;&amp;[i32]&gt;` slice</span>
+    <span class="doccomment">/// // convert the `Volatile&lt;&amp;[i32; 4]&gt;` array reference to a `Volatile&lt;&amp;[i32]&gt;` slice</span>
     <span class="doccomment">/// let volatile_slice = volatile.as_slice();</span>
     <span class="doccomment">/// // we can now use the slice methods</span>
-    <span class="doccomment">/// volatile_slice.copy_into_slice(&amp;mut dst);</span>
+    <span class="doccomment">/// let subslice = volatile_slice.index(2..);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(dst, [1, 2]);</span>
+    <span class="doccomment">/// assert_eq!(subslice.index(0).read(), 3);</span>
+    <span class="doccomment">/// assert_eq!(subslice.index(1).read(), 4);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Volatile</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">T</span>], <span class="ident">A</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">array</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">array</span>[..])
@@ -1600,21 +1595,20 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Example</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Copying two elements from a slice into a mutable array reference:</span>
+    <span class="doccomment">/// Writing to an index of a mutable array reference:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use volatile::Volatile;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let src = [1, 2, 3, 4];</span>
     <span class="doccomment">/// let mut dst = [0, 0];</span>
     <span class="doccomment">/// let mut volatile = Volatile::new(&amp;mut dst);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // convert the `Volatile&lt;&amp;mut [i32; 2]&gt;` array reference to a `Volatile&lt;&amp;mut [i32]&gt;` slice</span>
     <span class="doccomment">/// let mut volatile_slice = volatile.as_mut_slice();</span>
     <span class="doccomment">/// // we can now use the slice methods</span>
-    <span class="doccomment">/// volatile_slice.copy_from_slice(&amp;src[2..]);</span>
+    <span class="doccomment">/// volatile_slice.index_mut(1).write(1);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(dst, [3, 4]);</span>
+    <span class="doccomment">/// assert_eq!(dst, [0, 1]);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">Volatile</span><span class="op">&lt;</span><span class="kw-2">&amp;mut</span> [<span class="ident">T</span>], <span class="ident">A</span><span class="op">&gt;</span>
     <span class="kw">where</span>
@@ -1746,7 +1740,18 @@
         <span class="macro">assert_eq!</span>(<span class="ident">volatile</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">field_1</span>).<span class="ident">read</span>(), <span class="number">61</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">volatile</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">field_2</span>).<span class="ident">read</span>(), <span class="bool-val">false</span>);
     }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_chunks</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val</span> <span class="op">=</span> [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">volatile</span> <span class="op">=</span> <span class="ident">Volatile::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">val</span>[..]);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="ident">volatile</span>.<span class="ident">map_mut</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">as_chunks_mut</span>().<span class="number">0</span>);
+        <span class="ident">chunks</span>.<span class="ident">index_mut</span>(<span class="number">1</span>).<span class="ident">write</span>([<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">chunks</span>.<span class="ident">index</span>(<span class="number">0</span>).<span class="ident">read</span>(), [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">chunks</span>.<span class="ident">index</span>(<span class="number">1</span>).<span class="ident">read</span>(), [<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>]);
+    }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="volatile" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0-nightly (4b043faba 2022-02-24)" ></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="volatile" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (5e57faa78 2022-01-19)" ></div>
 </body></html>

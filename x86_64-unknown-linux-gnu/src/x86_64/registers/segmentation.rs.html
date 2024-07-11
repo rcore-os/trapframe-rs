@@ -1,9 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.14.8/src/registers/segmentation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>segmentation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.15.1/src/registers/segmentation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>segmentation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
     <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"></h2>
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../x86_64/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../x86_64/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div>
+                                <input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -158,6 +159,21 @@
 <span id="153">153</span>
 <span id="154">154</span>
 <span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstractions for segment registers.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::model_specific::Msr</span>;
@@ -166,13 +182,15 @@
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="comment">// imports for intra doc links</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doc</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::registers::control::Cr4Flags</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">registers::control::Cr4Flags</span>,
+    <span class="ident">structures::gdt</span>::{<span class="ident">Descriptor</span>, <span class="ident">DescriptorFlags</span>, <span class="ident">GlobalDescriptorTable</span>},
+};
 
 <span class="doccomment">/// An x86 segment</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Segment registers on x86 are 16-bit [`SegmentSelector`]s, which index into</span>
-<span class="doccomment">/// the [`GlobalDescriptorTable`](crate::structures::gdt::GlobalDescriptorTable). The</span>
-<span class="doccomment">/// corresponding GDT entry is used to</span>
+<span class="doccomment">/// the [`GlobalDescriptorTable`]. The corresponding GDT entry is used to</span>
 <span class="doccomment">/// configure the segment itself. Note that most segmentation functionality is</span>
 <span class="doccomment">/// disabled in 64-bit mode. See the individual segments for more information.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Segment</span> {
@@ -237,6 +255,10 @@
         <span class="ident">SegmentSelector</span>(<span class="ident">index</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span> <span class="op">|</span> (<span class="ident">rpl</span> <span class="kw">as</span> <span class="ident">u16</span>))
     }
 
+    <span class="doccomment">/// Can be used as a selector into a non-existent segment and assigned to segment registers,</span>
+    <span class="doccomment">/// e.g. data segment register in ring 0</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NULL</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="number">0</span>, <span class="ident">PrivilegeLevel::Ring0</span>);
+
     <span class="doccomment">/// Returns the GDT index.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) -&gt; <span class="ident">u16</span> {
@@ -267,10 +289,19 @@
 
 <span class="doccomment">/// Code Segment</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The segment base and limit are unused in 64-bit mode. Only the L (long), D</span>
-<span class="doccomment">/// (default operation size), and DPL (descriptor privilege-level) fields of the</span>
-<span class="doccomment">/// descriptor are recognized. So changing the segment register can be used to</span>
-<span class="doccomment">/// change privilege level or enable/disable long mode.</span>
+<span class="doccomment">/// While most fields in the Code-Segment [`Descriptor`] are unused in 64-bit</span>
+<span class="doccomment">/// long mode, some of them must be set to a specific value. The</span>
+<span class="doccomment">/// [`EXECUTABLE`](DescriptorFlags::EXECUTABLE),</span>
+<span class="doccomment">/// [`USER_SEGMENT`](DescriptorFlags::USER_SEGMENT), and</span>
+<span class="doccomment">/// [`LONG_MODE`](DescriptorFlags::LONG_MODE) bits must be set, while the</span>
+<span class="doccomment">/// [`DEFAULT_SIZE`](DescriptorFlags::DEFAULT_SIZE) bit must be unset.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The [`DPL_RING_3`](DescriptorFlags::DPL_RING_3) field can be used to change</span>
+<span class="doccomment">/// privilege level. The [`PRESENT`](DescriptorFlags::PRESENT) bit can be used</span>
+<span class="doccomment">/// to make a segment present or not present.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// All other fields (like the segment base and limit) are ignored by the</span>
+<span class="doccomment">/// processor and setting them has no effect.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CS</span>;
 
@@ -278,7 +309,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Entirely unused in 64-bit mode; setting the segment register does nothing.</span>
 <span class="doccomment">/// However, in ring 3, the SS register still has to point to a valid</span>
-<span class="doccomment">/// [`Descriptor`](crate::structures::gdt::Descriptor) (it cannot be zero). This</span>
+<span class="doccomment">/// [`Descriptor`] (it cannot be zero). This</span>
 <span class="doccomment">/// means a user-mode read/write segment descriptor must be present in the GDT.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This register is also set by the `syscall`/`sysret` and</span>
@@ -314,5 +345,5 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GS</span>;
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0-nightly (4b043faba 2022-02-24)" ></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (5e57faa78 2022-01-19)" ></div>
 </body></html>

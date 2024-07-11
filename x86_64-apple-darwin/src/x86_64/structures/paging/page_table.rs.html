@@ -1,9 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.14.8/src/structures/paging/page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>page_table.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/x86_64-0.15.1/src/structures/paging/page_table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>page_table.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
     <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"></h2>
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../../../x86_64/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../x86_64/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../x86_64/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div>
+                                <input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -404,9 +405,70 @@
 <span id="399">399</span>
 <span id="400">400</span>
 <span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstractions for page tables and page table entries.</span>
 
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;step_trait&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">core::iter::Step</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">PageSize</span>, <span class="ident">PhysFrame</span>, <span class="ident">Size4KiB</span>};
@@ -512,6 +574,7 @@
 
 <span class="macro">bitflags!</span> {
     <span class="doccomment">/// Possible flags for a page table entry.</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PageTableFlags</span>: <span class="ident">u64</span> {
         <span class="doccomment">/// Specifies whether the mapped frame or page table is loaded in memory.</span>
         <span class="kw">const</span> <span class="ident">PRESENT</span> <span class="op">=</span>         <span class="number">1</span>;
@@ -582,7 +645,7 @@
 <span class="doccomment">/// Always page-sized.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This struct implements the `Index` and `IndexMut` traits, so the entries can be accessed</span>
-<span class="doccomment">/// through index operations. For example, `page_table[15]` returns the 15th page table entry.</span>
+<span class="doccomment">/// through index operations. For example, `page_table[15]` returns the 16th page table entry.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note that while this type implements [`Clone`], the users must be careful not to introduce</span>
 <span class="doccomment">/// mutable aliasing by using the cloned page tables.</span>
@@ -606,7 +669,7 @@
     <span class="doccomment">/// Clears all entries.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zero</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter_mut</span>() {
+        <span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter_mut</span>() {
             <span class="ident">entry</span>.<span class="ident">set_unused</span>();
         }
     }
@@ -614,13 +677,34 @@
     <span class="doccomment">/// Returns an iterator over the entries of the page table.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PageTableEntry</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter</span>()
+        (<span class="number">0</span>..<span class="number">512</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entries</span>[<span class="ident">i</span>])
     }
 
     <span class="doccomment">/// Returns an iterator that allows modifying the entries of the page table.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">PageTableEntry</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">iter_mut</span>()
+        <span class="comment">// Note that we intentionally don&#39;t just return `self.entries.iter()`:</span>
+        <span class="comment">// Some users may choose to create a reference to a page table at</span>
+        <span class="comment">// `0xffff_ffff_ffff_f000`. This causes problems because calculating</span>
+        <span class="comment">// the end pointer of the page tables causes an overflow. Therefore</span>
+        <span class="comment">// creating page tables at that address is unsound and must be avoided.</span>
+        <span class="comment">// Unfortunately creating such page tables is quite common when</span>
+        <span class="comment">// recursive page tables are used, so we try to avoid calculating the</span>
+        <span class="comment">// end pointer if possible. `core::slice::Iter` calculates the end</span>
+        <span class="comment">// pointer to determine when it should stop yielding elements. Because</span>
+        <span class="comment">// we want to avoid calculating the end pointer, we don&#39;t use</span>
+        <span class="comment">// `core::slice::Iter`, we implement our own iterator that doesn&#39;t</span>
+        <span class="comment">// calculate the end pointer. This doesn&#39;t make creating page tables at</span>
+        <span class="comment">// that address sound, but it avoids some easy to trigger</span>
+        <span class="comment">// miscompilations.</span>
+        <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">as_mut_ptr</span>();
+        (<span class="number">0</span>..<span class="number">512</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">ptr</span>.<span class="ident">add</span>(<span class="ident">i</span>) })
+    }
+
+    <span class="doccomment">/// Checks if the page table is empty (all entries are zero).</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="ident">entry</span>.<span class="ident">is_unused</span>())
     }
 }
 
@@ -680,8 +764,8 @@
 <span class="kw">impl</span> <span class="ident">PageTableIndex</span> {
     <span class="doccomment">/// Creates a new index from the given `u16`. Panics if the given value is &gt;=512.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
-        <span class="macro">assert!</span>(<span class="ident">usize::from</span>(<span class="ident">index</span>) <span class="op">&lt;</span> <span class="ident">ENTRY_COUNT</span>);
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
+        <span class="macro">assert!</span>((<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">ENTRY_COUNT</span>);
         <span class="self">Self</span>(<span class="ident">index</span>)
     }
 
@@ -689,6 +773,11 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_truncate</span>(<span class="ident">index</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">index</span> <span class="op">%</span> <span class="ident">ENTRY_COUNT</span> <span class="kw">as</span> <span class="ident">u16</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">into_u64</span>(<span class="self">self</span>) -&gt; <span class="ident">u64</span> {
+        <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u64</span>
     }
 }
 
@@ -709,7 +798,7 @@
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PageTableIndex</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u64</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">index</span>: <span class="ident">PageTableIndex</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">u64::from</span>(<span class="ident">index</span>.<span class="number">0</span>)
+        <span class="ident">index</span>.<span class="ident">into_u64</span>()
     }
 }
 
@@ -717,6 +806,26 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">index</span>: <span class="ident">PageTableIndex</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">usize::from</span>(<span class="ident">index</span>.<span class="number">0</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;step_trait&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">Step</span> <span class="kw">for</span> <span class="ident">PageTableIndex</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">steps_between</span>(<span class="ident">start</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">end</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="ident">end</span>.<span class="number">0</span>.<span class="ident">checked_sub</span>(<span class="ident">start</span>.<span class="number">0</span>).<span class="ident">map</span>(<span class="ident">usize::from</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">forward_checked</span>(<span class="ident">start</span>: <span class="self">Self</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">start</span>).<span class="ident">checked_add</span>(<span class="ident">count</span>)<span class="question-mark">?</span>;
+        (<span class="ident">idx</span> <span class="op">&lt;</span> <span class="ident">ENTRY_COUNT</span>).<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">idx</span> <span class="kw">as</span> <span class="ident">u16</span>))
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">backward_checked</span>(<span class="ident">start</span>: <span class="self">Self</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">start</span>).<span class="ident">checked_sub</span>(<span class="ident">count</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">idx</span> <span class="kw">as</span> <span class="ident">u16</span>))
     }
 }
 
@@ -795,6 +904,16 @@
         }
     }
 
+    <span class="doccomment">/// Returns the next higher level or `None` for level 4</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">next_higher_level</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">PageTableLevel::Four</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">PageTableLevel::Three</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">PageTableLevel::Four</span>),
+            <span class="ident">PageTableLevel::Two</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">PageTableLevel::Three</span>),
+            <span class="ident">PageTableLevel::One</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">PageTableLevel::Two</span>),
+        }
+    }
+
     <span class="doccomment">/// Returns the alignment for the address space described by a table of this level.</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">table_address_space_alignment</span>(<span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="number">1u64</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="self">self</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">*</span> <span class="number">9</span> <span class="op">+</span> <span class="number">12</span>)
@@ -806,5 +925,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0-nightly (4b043faba 2022-02-24)" ></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="x86_64" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (5e57faa78 2022-01-19)" ></div>
 </body></html>
