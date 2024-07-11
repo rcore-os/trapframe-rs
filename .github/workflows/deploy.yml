@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2022-01-20
           profile: minimal
           components: rust-src
       - name: Build docs
@@ -30,7 +30,7 @@ jobs:
             cargo doc --target ${target}
             mv target/${target}/doc doc/${target}
           done
-          for target in x86_64-unknown-linux-gnu 
+          for target in x86_64-unknown-linux-gnu
           do
             rustup target add ${target}
             cargo doc --target ${target}

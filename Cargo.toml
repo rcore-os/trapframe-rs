@@ -1,6 +1,6 @@
 [package]
 name = "trapframe"
-version = "0.9.0"
+version = "0.10.0"
 authors = [
     "Runji Wang <wangrunji0408@163.com>",
     "Jiajie Chen <c@jia.je>",
@@ -23,8 +23,8 @@ exclude = ["docs", ".idea"]
 [dependencies]
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-x86_64 = "0.14.8"
-raw-cpuid = "10"
+x86_64 = "0.15"
+raw-cpuid = "11.0"
 
 [features]
 default = []
