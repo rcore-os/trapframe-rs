@@ -10,7 +10,8 @@ global_asm!(
     .macro STORE_SP a1, a2
         sw \a1, \a2*XLENB(sp)
     .endm
-"
+",
+    include_str!("trap.S")
 );
 #[cfg(target_arch = "riscv64")]
 global_asm!(
@@ -22,10 +23,9 @@ global_asm!(
     .macro STORE_SP a1, a2
         sd \a1, \a2*XLENB(sp)
     .endm
-"
+",
+    include_str!("trap.S")
 );
-
-global_asm!(include_str!("trap.S"));
 
 /// Initialize interrupt handling for the current HART.
 ///
