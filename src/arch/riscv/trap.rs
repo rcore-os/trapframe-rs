@@ -41,7 +41,7 @@ pub unsafe fn init() {
     // presently executing in the kernel
     asm!("csrw sscratch, zero");
     // Set the exception vector address
-    asm!("csrw stvec, {}", in(reg) trap_entry as usize);
+    asm!("csrw stvec, {}", in(reg) trap_entry);
 }
 
 #[no_mangle]
