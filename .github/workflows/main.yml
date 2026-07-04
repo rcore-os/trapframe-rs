@@ -30,7 +30,6 @@ jobs:
           aarch64-unknown-none-softfloat,
           riscv32imac-unknown-none-elf,
           riscv64imac-unknown-none-elf,
-          mipsel-unknown-linux-gnu,
         ]
     steps:
     - uses: actions/checkout@v2
@@ -66,15 +65,9 @@ jobs:
           toolchain: nightly
           components: rust-src
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
+        run: cargo +nightly build --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
       - name: Docs
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --all-features --target x86_64-unknown-linux-gnu  -Z build-std=core,alloc
+        run: cargo +nightly doc --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
 
   test-x86_64:
     runs-on: ${{ matrix.os }}
