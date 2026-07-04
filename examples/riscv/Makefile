@@ -2,7 +2,6 @@ arch ?= riscv64
 target := $(arch)imac-unknown-none-elf
 mode := debug
 kernel := target/$(target)/$(mode)/riscv
-bin := target/$(target)/$(mode)/kernel.bin
 
 sysroot := $(shell rustc --print sysroot)
 objdump := $(shell find $(sysroot) -name llvm-objdump) --arch-name=$(arch)
@@ -21,17 +20,14 @@ endif
 
 .PHONY: kernel build clean qemu run env
 
-build: $(bin)
+build: kernel
 
 env:
-	rustup component add llvm-tools-preview rustfmt
-	rustup target add $(target)
+	rustup component add llvm-tools-preview rustfmt --toolchain nightly
+	rustup target add $(target) --toolchain nightly
 
 kernel:
-	cargo build $(BUILD_ARGS)
-
-$(bin): kernel
-	$(objcopy) $(kernel) --strip-all -O binary $@
+	cargo +nightly build $(BUILD_ARGS)
 
 asm:
 	$(objdump) -d $(kernel) | less
@@ -50,6 +46,6 @@ qemu: $(bin)
 		-machine virt \
 		-nographic \
 		-bios default \
-		-device loader,file=$(bin),addr=$(START_ADDR)
+		-kernel $(kernel)
 
 run: build qemu

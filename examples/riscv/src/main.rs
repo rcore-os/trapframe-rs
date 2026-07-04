@@ -52,7 +52,7 @@ extern "C" fn main() {
             t6: 31,
         },
         sstatus: 0xdead_beaf,
-        sepc: user_entry as usize,
+        sepc: user_entry as *const () as usize,
     };
     println!("Go to user: {:#x?}", regs);
     regs.run();
