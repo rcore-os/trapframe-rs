@@ -1,7 +1,5 @@
 #![no_std]
-#![feature(linkage)]
 #![deny(warnings)]
-#![cfg_attr(target_arch = "mips", feature(asm_experimental_arch))]
 
 extern crate alloc;
 

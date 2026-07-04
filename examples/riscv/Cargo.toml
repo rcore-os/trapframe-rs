@@ -9,5 +9,5 @@ edition = "2018"
 [dependencies]
 log = "0.4"
 riscv = "0.7"
-opensbi-rt = { git = "https://github.com/rcore-os/opensbi-rt.git", rev = "abdfeb7" }
+opensbi-rt = { git = "https://github.com/rcore-os/opensbi-rt.git", rev = "6d44fced33f6116bfea68d52b0e027bea6414e85" }
 trapframe = { path = "../.." }

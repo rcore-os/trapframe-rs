@@ -4,24 +4,16 @@ on: [push, pull_request]
 
 jobs:
   check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: rm rust-toolchain
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: nightly-2022-01-20
-          override: true
           components: rustfmt, clippy
-      - name: Check code format
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - run: cargo fmt --all -- --check
 
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         target: [
@@ -31,84 +23,47 @@ jobs:
           aarch64-unknown-none-softfloat,
           riscv32imac-unknown-none-elf,
           riscv64imac-unknown-none-elf,
-          mipsel-unknown-linux-gnu,
         ]
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
       with:
-        profile: minimal
-        toolchain: nightly-2022-01-20
-        target: ${{ matrix.target }}
+        targets: ${{ matrix.target }}
         components: clippy
-    - name: Build
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --all-features --target ${{ matrix.target }}
-    - name: Clippy
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: --target ${{ matrix.target }}
-    - name: Docs
-      uses: actions-rs/cargo@v1
-      with:
-        command: doc
-        args: --target ${{ matrix.target }}
+    - run: cargo build --all-features --target ${{ matrix.target }}
+    - run: cargo clippy --target ${{ matrix.target }}
+    - run: cargo doc --target ${{ matrix.target }}
 
   build-x86_64-none:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          profile: minimal
-          toolchain: nightly-2022-01-20
           components: rust-src
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
-      - name: Docs
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --all-features --target x86_64-unknown-linux-gnu  -Z build-std=core,alloc
+      - run: cargo +nightly build --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
+      - run: cargo +nightly doc --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
 
   test-x86_64:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v2
-      - run: rm rust-toolchain
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly-2022-01-20
-          override: true
-      - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --all-features
 
   test-aarch64:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: rm rust-toolchain
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: nightly-2022-01-20
-          target: aarch64-unknown-linux-gnu
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: test
-          args: --target aarch64-unknown-linux-gnu
+          targets: aarch64-unknown-linux-gnu
+      - run: sudo apt-get update && sudo apt-get install -y qemu-user gcc-aarch64-linux-gnu
+      - run: cargo test --target aarch64-unknown-linux-gnu
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUNNER: qemu-aarch64
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          QEMU_LD_PREFIX: /usr/aarch64-linux-gnu

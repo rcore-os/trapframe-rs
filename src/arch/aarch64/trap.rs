@@ -13,7 +13,7 @@ global_asm!(include_str!("trap.S"));
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set the exception vector address
-    asm!("msr VBAR_EL1, {}", in(reg) __vectors as usize);
+    asm!("msr VBAR_EL1, {}", in(reg) __vectors as *const () as usize);
 }
 
 /// Trap frame of kernel interrupt

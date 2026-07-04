@@ -1,25 +1,34 @@
 #![no_std]
 #![no_main]
-#![feature(abi_efiapi)]
-#![feature(core_intrinsics)]
-#![feature(naked_functions)]
 #![deny(warnings)]
 
 extern crate alloc;
 
 use core::arch::asm;
-use core::intrinsics::breakpoint;
 use log::*;
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 use uefi::prelude::*;
 use x86_64::registers::control::*;
 use x86_64::structures::paging::{PageTable, PageTableFlags};
 
+core::arch::global_asm!(
+    r#"
+.global user_entry
+user_entry:
+    syscall
+    int3
+"#
+);
+
+extern "C" {
+    fn user_entry();
+}
+
 #[entry]
-fn efi_main(_image: Handle, mut st: SystemTable<Boot>) -> uefi::Status {
-    uefi_services::init(&mut st).expect_success("Failed to initialize utilities");
+fn efi_main() -> Status {
+    uefi::helpers::init().expect("Failed to initialize utilities");
     check_and_set_cpu_features();
-    allow_user_access(user_entry as usize);
+    allow_user_access(user_entry as *const () as usize);
     unsafe {
         trapframe::init();
     }
@@ -42,7 +51,7 @@ fn efi_main(_image: Handle, mut st: SystemTable<Boot>) -> uefi::Status {
             r13: 13,
             r14: 14,
             r15: 15,
-            rip: user_entry as usize,
+            rip: user_entry as *const () as usize,
             rflags: 0x202,
             fsbase: 18,
             gsbase: 19,
@@ -62,7 +71,7 @@ fn efi_main(_image: Handle, mut st: SystemTable<Boot>) -> uefi::Status {
 
     // trap from kernel
     unsafe {
-        breakpoint();
+        asm!("int3", options(nomem, nostack));
     }
     unimplemented!()
 }
@@ -76,11 +85,6 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
         0x68 => {} // UEFI timer
         _ => panic!("TRAP: {:#x?}", tf),
     }
-}
-
-#[naked]
-unsafe extern "C" fn user_entry() {
-    asm!("syscall", "int3", options(noreturn));
 }
 
 /// Set user bit for 4-level PDEs of the `page`.

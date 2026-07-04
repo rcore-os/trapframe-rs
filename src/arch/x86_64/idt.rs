@@ -11,11 +11,12 @@ pub fn init() {
     }
 
     let idt = Box::leak(Box::new(InterruptDescriptorTable::new()));
-    // let idt = sidt().base;
-    let entries: &'static mut [Entry<HandlerFunc>; 256] =
-        unsafe { core::mem::transmute_copy(&idt) };
+    let entries = idt as *mut InterruptDescriptorTable as *mut Entry<()>;
     for i in 0..256 {
-        let opt = entries[i].set_handler_fn(unsafe { core::mem::transmute(VECTORS[i]) });
+        let opt = unsafe {
+            (*entries.add(i))
+                .set_handler_addr(VirtAddr::new(VECTORS[i] as *const () as usize as u64))
+        };
         // Enable user space `int3` and `into`
         if i == 3 || i == 4 {
             opt.set_privilege_level(PrivilegeLevel::Ring3);
