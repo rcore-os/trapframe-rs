@@ -8,11 +8,10 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: stable
-          profile: minimal
           components: rust-src
       - name: Build docs
         run: |
@@ -23,8 +22,7 @@ jobs:
             aarch64-unknown-none-softfloat \
             riscv32imac-unknown-none-elf \
             riscv64imac-unknown-none-elf \
-            riscv64imac-unknown-none-elf \
-            mipsel-unknown-linux-gnu
+            riscv64imac-unknown-none-elf
           do
             rustup target add ${target}
             cargo doc --target ${target}
