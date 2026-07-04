@@ -1,1 +1,1 @@
-initSidebarItems({"macro":[["bitflags","Generate a flags type."]],"mod":[["iter","Yield the bits of a source flags value in a set of contained flags values."],["parser","Parsing flags from text."]],"struct":[["Flag","A defined flags value that may be named or unnamed."]],"trait":[["Bits","A bits type that can be used as storage for a flags type."],["Flags","A set of defined flags using a bits type as storage."]]});
+window.SIDEBAR_ITEMS = {"macro":["bitflags","bitflags_match"],"mod":["iter","parser"],"struct":["Flag"],"trait":["Bits","Flags"]};

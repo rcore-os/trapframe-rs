@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Iter","An iterator over flags values."],["IterNames","An iterator over flags values."]]});
+window.SIDEBAR_ITEMS = {"struct":["Iter","IterDefinedNames","IterEqualNames","IterNames"]};

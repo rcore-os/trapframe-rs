@@ -1,181 +1,87 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/arch/aarch64/trap.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>trap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../trapframe/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../../../trapframe/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../trapframe/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div>
-                                <input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
-<span id="10">10</span>
-<span id="11">11</span>
-<span id="12">12</span>
-<span id="13">13</span>
-<span id="14">14</span>
-<span id="15">15</span>
-<span id="16">16</span>
-<span id="17">17</span>
-<span id="18">18</span>
-<span id="19">19</span>
-<span id="20">20</span>
-<span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-<span id="35">35</span>
-<span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-<span id="79">79</span>
-<span id="80">80</span>
-<span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
-<span id="84">84</span>
-<span id="85">85</span>
-<span id="86">86</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">core::arch</span>::{<span class="ident">asm</span>, <span class="ident">global_asm</span>};
-
-<span class="macro">global_asm!</span>(<span class="macro">include_str!</span>(<span class="string">&quot;trap.S&quot;</span>));
-
-<span class="doccomment">/// Initialize interrupt handling for the current HART.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This function will:</span>
-<span class="doccomment">/// - Set `vbar_el1` to internal exception vector.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// You **MUST NOT** modify these registers later.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">init</span>() {
-    <span class="comment">// Set the exception vector address</span>
-    <span class="macro">asm!</span>(<span class="string">&quot;msr VBAR_EL1, {}&quot;</span>, <span class="kw">in</span>(<span class="ident">reg</span>) <span class="ident">__vectors</span> <span class="kw">as</span> <span class="ident">usize</span>);
-}
-
-<span class="doccomment">/// Trap frame of kernel interrupt</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Trap handler</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// You need to define a handler function like this:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```no_run</span>
-<span class="doccomment">/// use trapframe::TrapFrame;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// #[no_mangle]</span>
-<span class="doccomment">/// pub extern &quot;C&quot; fn trap_handler(tf: &amp;mut TrapFrame) {</span>
-<span class="doccomment">///     println!(&quot;TRAP! tf: {:#x?}&quot;, tf);</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TrapFrame</span> {
-    <span class="doccomment">/// Trap num: Source and Kind</span>
-    <span class="kw">pub</span> <span class="ident">trap_num</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Reserved for internal use</span>
-    <span class="kw">pub</span> <span class="ident">__reserved</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Exception Link Register, elr_el1</span>
-    <span class="kw">pub</span> <span class="ident">elr</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Saved Process Status Register, spsr_el1</span>
-    <span class="kw">pub</span> <span class="ident">spsr</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Stack Pointer, sp_el1</span>
-    <span class="kw">pub</span> <span class="ident">sp</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Software Thread ID Register, tpidr_el1</span>
-    <span class="kw">pub</span> <span class="ident">tpidr</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// General registers</span>
-    <span class="doccomment">/// Must be last in this struct</span>
-    <span class="kw">pub</span> <span class="ident">general</span>: <span class="ident">GeneralRegs</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">UserContext</span> {
-    <span class="doccomment">/// Go to user space with the context, and come back when a trap occurs.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// On return, the context will be reset to the status before the trap.</span>
-    <span class="doccomment">/// Trap reason and error code will be returned.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">/// ```no_run</span>
-    <span class="doccomment">/// use trapframe::{UserContext, GeneralRegs};</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // init user space context</span>
-    <span class="doccomment">/// let mut context = UserContext {</span>
-    <span class="doccomment">///     general: GeneralRegs {</span>
-    <span class="doccomment">///         ..Default::default()</span>
-    <span class="doccomment">///     },</span>
-    <span class="doccomment">///     sp: 0x10000,</span>
-    <span class="doccomment">///     elr: 0x1000,</span>
-    <span class="doccomment">///     ..Default::default()</span>
-    <span class="doccomment">/// };</span>
-    <span class="doccomment">/// // go to user</span>
-    <span class="doccomment">/// context.run();</span>
-    <span class="doccomment">/// // back from user</span>
-    <span class="doccomment">/// println!(&quot;back from user: {:#x?}&quot;, context);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">unsafe</span> { <span class="ident">run_user</span>(<span class="self">self</span>) }
-    }
-}
-
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">improper_ctypes</span>)]</span>
-<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> {
-    <span class="kw">fn</span> <span class="ident">__vectors</span>();
-    <span class="kw">fn</span> <span class="ident">run_user</span>(<span class="ident">regs</span>: <span class="kw-2">&amp;mut</span> <span class="ident">UserContext</span>);
-}
-</code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="trapframe" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (5e57faa78 2022-01-19)" ></div>
-</body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/arch/aarch64/trap.rs`."><title>trap.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="trapframe" data-themes="" data-resource-suffix="" data-rustdoc-version="1.96.1 (31fca3adb 2026-06-26)" data-channel="1.96.1" data-search-js="search-b5634cc7.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">trapframe/arch/aarch64/</div>trap.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-2"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>super::<span class="kw-2">*</span>;
+<a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span>core::arch::{asm, global_asm};
+<a href=#3 id=3 data-nosnippet>3</a>
+<a href=#4 id=4 data-nosnippet>4</a><span class="macro">global_asm!</span>(<span class="macro">include_str!</span>(<span class="string">"trap.S"</span>));
+<a href=#5 id=5 data-nosnippet>5</a>
+<a href=#6 id=6 data-nosnippet>6</a><span class="doccomment">/// Initialize interrupt handling for the current HART.
+<a href=#7 id=7 data-nosnippet>7</a>///
+<a href=#8 id=8 data-nosnippet>8</a>/// # Safety
+<a href=#9 id=9 data-nosnippet>9</a>///
+<a href=#10 id=10 data-nosnippet>10</a>/// This function will:
+<a href=#11 id=11 data-nosnippet>11</a>/// - Set `vbar_el1` to internal exception vector.
+<a href=#12 id=12 data-nosnippet>12</a>///
+<a href=#13 id=13 data-nosnippet>13</a>/// You **MUST NOT** modify these registers later.
+<a href=#14 id=14 data-nosnippet>14</a></span><span class="kw">pub unsafe fn </span>init() {
+<a href=#15 id=15 data-nosnippet>15</a>    <span class="comment">// Set the exception vector address
+<a href=#16 id=16 data-nosnippet>16</a>    </span><span class="macro">asm!</span>(<span class="string">"msr VBAR_EL1, {}"</span>, <span class="kw">in</span>(reg) __vectors <span class="kw">as </span><span class="kw-2">*const </span>() <span class="kw">as </span>usize);
+<a href=#17 id=17 data-nosnippet>17</a>}
+<a href=#18 id=18 data-nosnippet>18</a>
+<a href=#19 id=19 data-nosnippet>19</a><span class="doccomment">/// Trap frame of kernel interrupt
+<a href=#20 id=20 data-nosnippet>20</a>///
+<a href=#21 id=21 data-nosnippet>21</a>/// # Trap handler
+<a href=#22 id=22 data-nosnippet>22</a>///
+<a href=#23 id=23 data-nosnippet>23</a>/// You need to define a handler function like this:
+<a href=#24 id=24 data-nosnippet>24</a>///
+<a href=#25 id=25 data-nosnippet>25</a>/// ```no_run
+<a href=#26 id=26 data-nosnippet>26</a>/// use trapframe::TrapFrame;
+<a href=#27 id=27 data-nosnippet>27</a>///
+<a href=#28 id=28 data-nosnippet>28</a>/// #[no_mangle]
+<a href=#29 id=29 data-nosnippet>29</a>/// pub extern "C" fn trap_handler(tf: &amp;mut TrapFrame) {
+<a href=#30 id=30 data-nosnippet>30</a>///     println!("TRAP! tf: {:#x?}", tf);
+<a href=#31 id=31 data-nosnippet>31</a>/// }
+<a href=#32 id=32 data-nosnippet>32</a>/// ```
+<a href=#33 id=33 data-nosnippet>33</a></span><span class="attr">#[derive(Debug, Default, Clone, Copy)]
+<a href=#34 id=34 data-nosnippet>34</a>#[repr(C)]
+<a href=#35 id=35 data-nosnippet>35</a></span><span class="kw">pub struct </span>TrapFrame {
+<a href=#36 id=36 data-nosnippet>36</a>    <span class="doccomment">/// Trap num: Source and Kind
+<a href=#37 id=37 data-nosnippet>37</a>    </span><span class="kw">pub </span>trap_num: usize,
+<a href=#38 id=38 data-nosnippet>38</a>    <span class="doccomment">/// Reserved for internal use
+<a href=#39 id=39 data-nosnippet>39</a>    </span><span class="kw">pub </span>__reserved: usize,
+<a href=#40 id=40 data-nosnippet>40</a>    <span class="doccomment">/// Exception Link Register, elr_el1
+<a href=#41 id=41 data-nosnippet>41</a>    </span><span class="kw">pub </span>elr: usize,
+<a href=#42 id=42 data-nosnippet>42</a>    <span class="doccomment">/// Saved Process Status Register, spsr_el1
+<a href=#43 id=43 data-nosnippet>43</a>    </span><span class="kw">pub </span>spsr: usize,
+<a href=#44 id=44 data-nosnippet>44</a>    <span class="doccomment">/// Stack Pointer, sp_el1
+<a href=#45 id=45 data-nosnippet>45</a>    </span><span class="kw">pub </span>sp: usize,
+<a href=#46 id=46 data-nosnippet>46</a>    <span class="doccomment">/// Software Thread ID Register, tpidr_el1
+<a href=#47 id=47 data-nosnippet>47</a>    </span><span class="kw">pub </span>tpidr: usize,
+<a href=#48 id=48 data-nosnippet>48</a>    <span class="doccomment">/// General registers
+<a href=#49 id=49 data-nosnippet>49</a>    /// Must be last in this struct
+<a href=#50 id=50 data-nosnippet>50</a>    </span><span class="kw">pub </span>general: GeneralRegs,
+<a href=#51 id=51 data-nosnippet>51</a>}
+<a href=#52 id=52 data-nosnippet>52</a>
+<a href=#53 id=53 data-nosnippet>53</a><span class="kw">impl </span>UserContext {
+<a href=#54 id=54 data-nosnippet>54</a>    <span class="doccomment">/// Go to user space with the context, and come back when a trap occurs.
+<a href=#55 id=55 data-nosnippet>55</a>    ///
+<a href=#56 id=56 data-nosnippet>56</a>    /// On return, the context will be reset to the status before the trap.
+<a href=#57 id=57 data-nosnippet>57</a>    /// Trap reason and error code will be returned.
+<a href=#58 id=58 data-nosnippet>58</a>    ///
+<a href=#59 id=59 data-nosnippet>59</a>    /// # Example
+<a href=#60 id=60 data-nosnippet>60</a>    /// ```no_run
+<a href=#61 id=61 data-nosnippet>61</a>    /// use trapframe::{UserContext, GeneralRegs};
+<a href=#62 id=62 data-nosnippet>62</a>    ///
+<a href=#63 id=63 data-nosnippet>63</a>    /// // init user space context
+<a href=#64 id=64 data-nosnippet>64</a>    /// let mut context = UserContext {
+<a href=#65 id=65 data-nosnippet>65</a>    ///     general: GeneralRegs {
+<a href=#66 id=66 data-nosnippet>66</a>    ///         ..Default::default()
+<a href=#67 id=67 data-nosnippet>67</a>    ///     },
+<a href=#68 id=68 data-nosnippet>68</a>    ///     sp: 0x10000,
+<a href=#69 id=69 data-nosnippet>69</a>    ///     elr: 0x1000,
+<a href=#70 id=70 data-nosnippet>70</a>    ///     ..Default::default()
+<a href=#71 id=71 data-nosnippet>71</a>    /// };
+<a href=#72 id=72 data-nosnippet>72</a>    /// // go to user
+<a href=#73 id=73 data-nosnippet>73</a>    /// context.run();
+<a href=#74 id=74 data-nosnippet>74</a>    /// // back from user
+<a href=#75 id=75 data-nosnippet>75</a>    /// println!("back from user: {:#x?}", context);
+<a href=#76 id=76 data-nosnippet>76</a>    /// ```
+<a href=#77 id=77 data-nosnippet>77</a>    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+<a href=#78 id=78 data-nosnippet>78</a>        <span class="kw">unsafe </span>{ run_user(<span class="self">self</span>) }
+<a href=#79 id=79 data-nosnippet>79</a>    }
+<a href=#80 id=80 data-nosnippet>80</a>}
+<a href=#81 id=81 data-nosnippet>81</a>
+<a href=#82 id=82 data-nosnippet>82</a><span class="attr">#[allow(improper_ctypes)]
+<a href=#83 id=83 data-nosnippet>83</a></span><span class="kw">extern </span><span class="string">"C" </span>{
+<a href=#84 id=84 data-nosnippet>84</a>    <span class="kw">fn </span>__vectors();
+<a href=#85 id=85 data-nosnippet>85</a>    <span class="kw">fn </span>run_user(regs: <span class="kw-2">&amp;mut </span>UserContext);
+<a href=#86 id=86 data-nosnippet>86</a>}
+</code></pre></div></section></main></body></html>

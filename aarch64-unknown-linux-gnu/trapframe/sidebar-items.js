@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["arch",""]]});
+window.SIDEBAR_ITEMS = {"mod":["arch"]};

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["init","Initialize interrupt handling for the current HART."]],"struct":[["GeneralRegs","General registers"],["TrapFrame","Trap frame of kernel interrupt"],["UserContext","Saved registers on a trap."]]});
+window.SIDEBAR_ITEMS = {"fn":["init"],"struct":["GeneralRegs","TrapFrame","UserContext"]};

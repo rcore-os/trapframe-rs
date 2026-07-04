@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cpuid_count",""]],"struct":[["CpuIdReaderNative","The native reader uses the cpuid instruction to read the cpuid data from the CPU we’re currently running on directly."]]});
+window.SIDEBAR_ITEMS = {"fn":["cpuid_count"],"struct":["CpuIdReaderNative"]};

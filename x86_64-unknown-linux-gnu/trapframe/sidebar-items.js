@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["syscall_fn_entry","The syscall entry of function call."]],"struct":[["GeneralRegs","General registers"],["UserContext","User space context"]]});
+window.SIDEBAR_ITEMS = {"fn":["syscall_fn_entry"],"struct":["GeneralRegs","UserContext"]};
