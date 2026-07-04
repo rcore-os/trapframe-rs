@@ -30,7 +30,7 @@ pub fn init() {
         // TF|DF|IF|IOPL|AC|NT
         const RFLAGS_MASK: u64 = 0x47700;
 
-        LStar::write(VirtAddr::new(syscall_entry as usize as u64));
+        LStar::write(VirtAddr::new(syscall_entry as *const () as usize as u64));
         SFMask::write(RFlags::from_bits(RFLAGS_MASK).unwrap());
     }
 }

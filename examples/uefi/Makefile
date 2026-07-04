@@ -3,7 +3,7 @@ TARGET := target
 OVMF := OVMF.fd
 EFI := $(TARGET)/x86_64-unknown-uefi/$(MODE)/uefi.efi
 ESP := $(TARGET)/x86_64-unknown-uefi/$(MODE)/esp
-QEMU_ARGS := -net none -nographic
+QEMU_ARGS := -net none -nographic -cpu max
 OBJDUMP := rust-objdump
 
 ifeq (${MODE}, release)

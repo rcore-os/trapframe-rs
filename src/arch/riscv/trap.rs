@@ -41,13 +41,7 @@ pub unsafe fn init() {
     // presently executing in the kernel
     asm!("csrw sscratch, zero");
     // Set the exception vector address
-    asm!("csrw stvec, {}", in(reg) trap_entry as usize);
-}
-
-#[no_mangle]
-#[linkage = "weak"]
-extern "C" fn trap_handler(tf: &mut TrapFrame) {
-    unimplemented!("TRAP: tf={:#x?}", tf);
+    asm!("csrw stvec, {}", in(reg) trap_entry as *const () as usize);
 }
 
 /// Trap frame of kernel interrupt

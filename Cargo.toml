@@ -23,7 +23,7 @@ exclude = ["docs", ".idea"]
 [dependencies]
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-x86_64 = "0.15"
+x86_64 = { version = "0.15", default-features = false, features = ["instructions"] }
 raw-cpuid = "11.0"
 
 [features]

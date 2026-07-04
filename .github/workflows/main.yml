@@ -7,11 +7,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - run: rm rust-toolchain
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-01-20
+          toolchain: stable
           override: true
           components: rustfmt, clippy
       - name: Check code format
@@ -38,7 +37,7 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: nightly-2022-01-20
+        toolchain: stable
         target: ${{ matrix.target }}
         components: clippy
     - name: Build
@@ -64,7 +63,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-01-20
+          toolchain: nightly
           components: rust-src
       - name: Build
         uses: actions-rs/cargo@v1
@@ -84,11 +83,10 @@ jobs:
         os: [ubuntu-20.04, macos-latest]
     steps:
       - uses: actions/checkout@v2
-      - run: rm rust-toolchain
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-01-20
+          toolchain: stable
           override: true
       - name: Test
         uses: actions-rs/cargo@v1
@@ -100,11 +98,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - run: rm rust-toolchain
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-01-20
+          toolchain: stable
           target: aarch64-unknown-linux-gnu
           override: true
       - uses: actions-rs/cargo@v1

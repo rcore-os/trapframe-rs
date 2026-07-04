@@ -301,7 +301,7 @@ dump_registers:
                 r13: 13,
                 r14: 14,
                 r15: 15,
-                rip: dump_registers as usize,
+                rip: dump_registers as *const () as usize,
                 rflags: 0,
                 fsbase: 0, // don't set to non-zero garbage value
                 gsbase: 0,

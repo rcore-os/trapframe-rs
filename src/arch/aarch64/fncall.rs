@@ -148,7 +148,7 @@ elr_location:
         let mut cx = UserContext {
             general,
             sp: stack.as_mut_ptr() as usize + 0x1000,
-            elr: dump_registers as usize,
+            elr: dump_registers as *const () as usize,
             ..Default::default()
         };
         cx.run_fncall();
@@ -157,7 +157,7 @@ elr_location:
         assert_eq!(
             general_dump,
             GeneralRegs {
-                x30: dump_registers as usize,
+                x30: dump_registers as *const () as usize,
                 ..general
             }
         );
@@ -195,10 +195,10 @@ elr_location:
                 x27: 100 + 27,
                 x28: 100 + 28,
                 x29: 100 + 29,
-                x30: elr_location as usize,
+                x30: elr_location as *const () as usize,
                 ..cx.general
             }
         );
-        assert_eq!(cx.elr, elr_location as usize);
+        assert_eq!(cx.elr, elr_location as *const () as usize);
     }
 }
