@@ -21,7 +21,6 @@ jobs:
             aarch64-unknown-linux-gnu \
             aarch64-unknown-none-softfloat \
             riscv32imac-unknown-none-elf \
-            riscv64imac-unknown-none-elf \
             riscv64imac-unknown-none-elf
           do
             rustup target add ${target}

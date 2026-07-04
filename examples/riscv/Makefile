@@ -41,7 +41,7 @@ header:
 clean:
 	cargo clean
 
-qemu: $(bin)
+qemu: kernel
 	qemu-system-$(arch) \
 		-machine virt \
 		-nographic \

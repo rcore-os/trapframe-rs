@@ -54,7 +54,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --all-features
 
-  test-aarch64:
+  build-aarch64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
