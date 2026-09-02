@@ -9,7 +9,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -28,7 +28,7 @@ jobs:
           riscv64imac-unknown-none-elf,
         ]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }}
@@ -40,7 +40,7 @@ jobs:
   build-x86_64-none:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-none
@@ -53,14 +53,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --all-features
 
   test-aarch64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
       - run: cross test --target aarch64-unknown-linux-gnu
@@ -71,7 +71,7 @@ jobs:
       matrix:
         arch: [riscv32, riscv64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.arch }}imac-unknown-none-elf
@@ -104,12 +104,16 @@ jobs:
   test-mipsel:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly-2026-09-01
           components: rust-src
-      - run: sudo apt-get update && sudo apt-get install -y qemu-system-mips
+      - name: Install cached QEMU
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.3
+        with:
+          packages: qemu-system-mips
+          version: 1
       - name: Run trap round-trip test
         working-directory: examples/mipsel
         run: |
