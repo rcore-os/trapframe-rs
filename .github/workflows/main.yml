@@ -60,6 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          lfs: true
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-uefi
