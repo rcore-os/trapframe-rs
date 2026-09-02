@@ -279,7 +279,7 @@ dump_registers:
 
     #[test]
     fn run_fncall() {
-        extern "sysv64" {
+        unsafe extern "sysv64" {
             fn dump_registers();
         }
         let mut stack = [0u8; 0x1000];
