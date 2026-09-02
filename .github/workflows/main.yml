@@ -67,3 +67,39 @@ jobs:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUNNER: qemu-aarch64
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
           QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
+
+  test-riscv:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [riscv32, riscv64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.arch }}imac-unknown-none-elf
+      - run: sudo apt-get update && sudo apt-get install -y qemu-system-misc
+      - name: Run trap round-trip test
+        working-directory: examples/riscv
+        run: |
+          target=${{ matrix.arch }}imac-unknown-none-elf
+          cargo +nightly build --target "$target"
+          timeout 30 qemu-system-${{ matrix.arch }} \
+            -machine virt \
+            -nographic \
+            -bios default \
+            -kernel "target/$target/debug/riscv" | tee qemu.log
+          grep -q 'Back from user: Exception(UserEnvCall)' qemu.log
+          grep -q 'TRAP: Breakpoint' qemu.log
+          grep -q 'Exit...' qemu.log
+
+  test-mipsel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2022-01-20
+          targets: mipsel-unknown-linux-gnu
+      - uses: taiki-e/install-action@cross
+      - run: cross +nightly-2022-01-20 test --target mipsel-unknown-linux-gnu
