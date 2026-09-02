@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["PhysFrame","PhysFrameRange","PhysFrameRangeInclusive"]};
+window.SIDEBAR_ITEMS = {"struct":["PfnNotValid","PhysFrame","PhysFrameRange","PhysFrameRangeInclusive"]};
