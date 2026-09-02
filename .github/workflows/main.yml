@@ -118,7 +118,7 @@ jobs:
         run: |
           cargo build
           set +e
-          timeout 30 qemu-system-mipsel \
+          timeout 5 qemu-system-mipsel \
             -machine malta \
             -nographic \
             -kernel target/mipsel-unknown-none/debug/mipsel | tee qemu.log
