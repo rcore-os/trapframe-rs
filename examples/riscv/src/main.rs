@@ -1,15 +1,72 @@
 #![no_std]
 #![no_main]
 
-#[macro_use]
-extern crate opensbi_rt;
-
+use core::arch::{asm, global_asm};
+use core::fmt::{self, Write};
+use core::panic::PanicInfo;
 use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
-use core::arch::asm;
 
-#[no_mangle]
+global_asm!(
+    r#"
+    .section .text.entry
+    .globl _start
+_start:
+    la sp, bootstacktop
+    call main
+
+    .section .bss.stack
+    .align 12
+bootstack:
+    .space 4096 * 16
+bootstacktop:
+"#
+);
+
+struct Stdout;
+
+impl Write for Stdout {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for byte in s.bytes() {
+            console_putchar(byte);
+        }
+        Ok(())
+    }
+}
+
+macro_rules! println {
+    () => {
+        writeln!(Stdout).unwrap()
+    };
+    ($($arg:tt)*) => {{
+        writeln!(Stdout, $($arg)*).unwrap()
+    }};
+}
+
+fn console_putchar(byte: u8) {
+    unsafe {
+        asm!(
+            "ecall",
+            inlateout("a0") byte as usize => _,
+            in("a7") 1,
+        );
+    }
+}
+
+fn shutdown() -> ! {
+    unsafe {
+        asm!("ecall", in("a7") 8, options(noreturn));
+    }
+}
+
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    println!("{info}");
+    shutdown()
+}
+
+#[unsafe(no_mangle)]
 extern "C" fn main() {
     unsafe {
         trapframe::init();
@@ -70,9 +127,10 @@ extern "C" fn main() {
     }
 
     println!("Exit...");
+    shutdown();
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn trap_handler(tf: &mut TrapFrame) {
     let scause = scause::read();
     let stval = stval::read();
@@ -91,5 +149,5 @@ extern "C" fn trap_handler(tf: &mut TrapFrame) {
 }
 
 unsafe extern "C" fn user_entry() {
-    opensbi_rt::sbi::legacy::console_putchar(1);
+    console_putchar(1);
 }

@@ -23,11 +23,11 @@ endif
 build: kernel
 
 env:
-	rustup component add llvm-tools-preview rustfmt --toolchain nightly
-	rustup target add $(target) --toolchain nightly
+	rustup component add llvm-tools-preview rustfmt --toolchain stable
+	rustup target add $(target) --toolchain stable
 
 kernel:
-	cargo +nightly build $(BUILD_ARGS)
+	cargo build $(BUILD_ARGS)
 
 asm:
 	$(objdump) -d $(kernel) | less

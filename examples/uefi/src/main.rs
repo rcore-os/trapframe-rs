@@ -20,7 +20,7 @@ user_entry:
 "#
 );
 
-extern "C" {
+unsafe extern "C" {
     fn user_entry();
 }
 
@@ -76,7 +76,7 @@ fn efi_main() -> Status {
     unimplemented!()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
     match tf.trap_num {
         3 => {

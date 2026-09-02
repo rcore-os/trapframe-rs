@@ -12,7 +12,7 @@ global_asm!(include_str!(concat!(env!("OUT_DIR"), "/vector.S")));
 /// ```
 /// use trapframe::TrapFrame;
 ///
-/// #[no_mangle]
+/// #[unsafe(no_mangle)]
 /// extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
 ///     match tf.trap_num {
 ///         3 => {

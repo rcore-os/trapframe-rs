@@ -1,0 +1,8 @@
+[build]
+target = "mipsel-unknown-none"
+
+[target.mipsel-unknown-none]
+rustflags = ["-C", "link-arg=-Tlinker.ld"]
+
+[unstable]
+build-std = ["core"]

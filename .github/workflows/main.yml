@@ -1,12 +1,15 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -25,24 +28,23 @@ jobs:
           riscv64imac-unknown-none-elf,
         ]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }}
         components: clippy
-    - run: cargo build --all-features --target ${{ matrix.target }}
-    - run: cargo clippy --target ${{ matrix.target }}
-    - run: cargo doc --target ${{ matrix.target }}
+    - run: cargo clippy --all-features --target ${{ matrix.target }}
+    - run: cargo doc --all-features --target ${{ matrix.target }}
 
   build-x86_64-none:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rust-src
-      - run: cargo +nightly build --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
-      - run: cargo +nightly doc --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
+          targets: x86_64-unknown-none
+      - run: cargo build --all-features --target x86_64-unknown-none
+      - run: cargo doc --all-features --target x86_64-unknown-none
 
   test-x86_64:
     runs-on: ${{ matrix.os }}
@@ -50,20 +52,109 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --all-features
+
+  test-x86_64-bare-metal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-uefi
+      - name: Install QEMU
+        uses: pkgxdev/setup@v5
+        with:
+          +: qemu.org
+      - name: Run trap round-trip test
+        working-directory: examples/uefi
+        run: |
+          cargo build
+          mkdir -p target/x86_64-unknown-uefi/debug/esp/EFI/Boot
+          cp target/x86_64-unknown-uefi/debug/uefi.efi \
+            target/x86_64-unknown-uefi/debug/esp/EFI/Boot/BootX64.efi
+          set +e
+          timeout 5 qemu-system-x86_64 \
+            -bios "$PWD/OVMF.fd" \
+            -drive format=raw,file=fat:rw:target/x86_64-unknown-uefi/debug/esp \
+            -cpu max \
+            -net none \
+            -nographic | tee qemu.log
+          qemu_status=${PIPESTATUS[0]}
+          set -e
+          test "$qemu_status" -eq 124
+          grep -q 'back from user' qemu.log
+          grep -q 'TRAP: BreakPoint' qemu.log
 
   test-aarch64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@cross
+      - run: cross test --target aarch64-unknown-linux-gnu
+
+  test-riscv:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [riscv32, riscv64]
+    steps:
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-unknown-linux-gnu
-      - run: sudo apt-get update && sudo apt-get install -y qemu-user gcc-aarch64-linux-gnu
-      - run: cargo test --target aarch64-unknown-linux-gnu
-        env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUNNER: qemu-aarch64
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-          QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
+          targets: ${{ matrix.arch }}imac-unknown-none-elf
+      - run: sudo apt-get update && sudo apt-get install -y qemu-system-misc
+      - name: Install 32-bit OpenSBI firmware
+        if: matrix.arch == 'riscv32'
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/riscv-software-src/opensbi/releases/download/v1.9/opensbi-1.9-rv-bin.tar.xz \
+            --output "$RUNNER_TEMP/opensbi.tar.xz"
+          tar -xJf "$RUNNER_TEMP/opensbi.tar.xz" -C "$RUNNER_TEMP"
+      - name: Run trap round-trip test
+        working-directory: examples/riscv
+        run: |
+          target=${{ matrix.arch }}imac-unknown-none-elf
+          bios=default
+          if [ "${{ matrix.arch }}" = riscv32 ]; then
+            bios="$RUNNER_TEMP/opensbi-1.9-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin"
+          fi
+          cargo build --target "$target"
+          timeout 30 qemu-system-${{ matrix.arch }} \
+            -machine virt \
+            -nographic \
+            -bios "$bios" \
+            -kernel "target/$target/debug/riscv" | tee qemu.log
+          grep -q 'Back from user: Exception(UserEnvCall)' qemu.log
+          grep -q 'TRAP: Breakpoint' qemu.log
+          grep -q 'Exit...' qemu.log
+
+  test-mipsel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2026-09-01
+          components: rust-src
+      - name: Install QEMU
+        uses: pkgxdev/setup@v5
+        with:
+          +: qemu.org
+      - name: Run trap round-trip test
+        working-directory: examples/mipsel
+        run: |
+          cargo build
+          set +e
+          timeout 5 qemu-system-mipsel \
+            -machine malta \
+            -nographic \
+            -kernel target/mipsel-unknown-none/debug/mipsel | tee qemu.log
+          qemu_status=${PIPESTATUS[0]}
+          set -e
+          test "$qemu_status" -eq 124
+          grep -q 'MIPS trap round-trip passed' qemu.log

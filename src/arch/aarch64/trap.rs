@@ -13,7 +13,9 @@ global_asm!(include_str!("trap.S"));
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     // Set the exception vector address
-    asm!("msr VBAR_EL1, {}", in(reg) __vectors as *const () as usize);
+    unsafe {
+        asm!("msr VBAR_EL1, {}", in(reg) __vectors as *const () as usize);
+    }
 }
 
 /// Trap frame of kernel interrupt
@@ -25,7 +27,7 @@ pub unsafe fn init() {
 /// ```no_run
 /// use trapframe::TrapFrame;
 ///
-/// #[no_mangle]
+/// #[unsafe(no_mangle)]
 /// pub extern "C" fn trap_handler(tf: &mut TrapFrame) {
 ///     println!("TRAP! tf: {:#x?}", tf);
 /// }
@@ -80,7 +82,7 @@ impl UserContext {
 }
 
 #[allow(improper_ctypes)]
-extern "C" {
+unsafe extern "C" {
     fn __vectors();
     fn run_user(regs: &mut UserContext);
 }

@@ -7,16 +7,24 @@ global_asm!(include_str!("trap.S"));
 /// # Safety
 ///
 /// This function will:
-/// - Set `sscratch` to 0.
-/// - Set `stvec` to internal exception vector.
+/// - Set CP0 `EBase` to the internal exception vector.
+/// - Clear CP0 Status `BEV` to enable that vector.
 ///
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
-    // Set cp0 ebase(15, 1) register to trap entry
-    asm!(
-        "mtc0 {trap_entry}, $15, 1",
-        trap_entry = in(reg) trap_entry,
-    );
+    let status: usize;
+    unsafe {
+        // Set CP0 EBase (15, 1) to the trap entry and select that vector by
+        // clearing the bootstrap exception vector bit in CP0 Status.
+        asm!(
+            "mtc0 $2, $15, 1",
+            "mfc0 $3, $12",
+            in("$2") trap_entry,
+            out("$3") status,
+        );
+        let status = status & !(1 << 22);
+        asm!("mtc0 $2, $12", "ehb", in("$2") status);
+    }
 }
 
 /// Trap frame of kernel interrupt
@@ -28,7 +36,7 @@ pub unsafe fn init() {
 /// ```no_run
 /// use trapframe::TrapFrame;
 ///
-/// #[no_mangle]
+/// #[unsafe(no_mangle)]
 /// pub extern "C" fn trap_handler(tf: &mut TrapFrame) {
 ///     println!("TRAP! tf: {:#x?}", tf);
 /// }
@@ -202,7 +210,7 @@ impl UserContext {
 }
 
 #[allow(improper_ctypes)]
-extern "C" {
+unsafe extern "C" {
     fn trap_entry();
     fn run_user(regs: &mut UserContext);
 }

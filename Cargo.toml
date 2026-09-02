@@ -7,7 +7,7 @@ authors = [
     "Hoblovski <daizy19@mails.tsinghua.edu.cn>",
     "Ben Pig Chu <benpichu@gmail.com>",
 ]
-edition = "2021"
+edition = "2024"
 description = "Handle Trap Frame across kernel and user space on multiple ISAs."
 homepage = "https://github.com/rcore-os/trapframe-rs"
 documentation = "https://docs.rs/trapframe"

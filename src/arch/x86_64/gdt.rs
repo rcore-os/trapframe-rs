@@ -7,8 +7,8 @@ use core::mem::size_of;
 
 use x86_64::instructions::tables::{lgdt, load_tss};
 use x86_64::registers::model_specific::{GsBase, Star};
-use x86_64::structures::gdt::{Descriptor, SegmentSelector};
 use x86_64::structures::DescriptorTablePointer;
+use x86_64::structures::gdt::{Descriptor, SegmentSelector};
 use x86_64::{PrivilegeLevel, VirtAddr};
 
 #[cfg(not(feature = "ioport_bitmap"))]
@@ -79,13 +79,15 @@ unsafe fn sgdt() -> DescriptorTablePointer {
         limit: 0,
         base: VirtAddr::zero(),
     };
-    asm!("sgdt [{}]", in(reg) &mut gdt);
+    unsafe {
+        asm!("sgdt [{}]", in(reg) &mut gdt);
+    }
     gdt
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut USER_SS: u16 = 0;
-#[no_mangle]
+#[unsafe(no_mangle)]
 static mut USER_CS: u16 = 0;
 
 const KCODE64: u64 = 0x00209800_00000000; // EXECUTABLE | USER_SEGMENT | PRESENT | LONG_MODE
