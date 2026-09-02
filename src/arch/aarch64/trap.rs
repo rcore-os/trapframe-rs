@@ -18,7 +18,7 @@ pub unsafe fn init() {
     }
 }
 
-/// Trap frame of kernel interrupt
+/// Register frame saved when an exception enters the kernel.
 ///
 /// # Trap handler
 ///
@@ -35,20 +35,19 @@ pub unsafe fn init() {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {
-    /// Trap num: Source and Kind
+    /// Encoded exception source and kind.
     pub trap_num: usize,
-    /// Reserved for internal use
+    /// Reserved for the assembly frame layout.
     pub __reserved: usize,
-    /// Exception Link Register, elr_el1
+    /// Exception Link Register (`ELR_EL1`).
     pub elr: usize,
-    /// Saved Process Status Register, spsr_el1
+    /// Saved Process Status Register (`SPSR_EL1`).
     pub spsr: usize,
-    /// Stack Pointer, sp_el1
+    /// Kernel stack pointer (`SP_EL1`).
     pub sp: usize,
-    /// Software Thread ID Register, tpidr_el1
+    /// Kernel thread pointer (`TPIDR_EL1`).
     pub tpidr: usize,
-    /// General registers
-    /// Must be last in this struct
+    /// General-purpose registers; kept last for the assembly layout.
     pub general: GeneralRegs,
 }
 
