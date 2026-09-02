@@ -109,11 +109,10 @@ jobs:
         with:
           toolchain: nightly-2026-09-01
           components: rust-src
-      - name: Install cached QEMU
-        uses: awalsh128/cache-apt-pkgs-action@v1.6.3
+      - name: Install QEMU
+        uses: pkgxdev/setup@v5
         with:
-          packages: qemu-system-mips
-          version: 1
+          +: qemu.org
       - name: Run trap round-trip test
         working-directory: examples/mipsel
         run: |
