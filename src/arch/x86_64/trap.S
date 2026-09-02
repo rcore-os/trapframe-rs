@@ -60,6 +60,9 @@ __from_kernel:
     push rbx
     push rax
 
+    # The interrupted context may have DF set. The SysV ABI requires it to be
+    # clear before entering the Rust trap handler.
+    cld
     mov rdi, rsp
     call trap_handler
 
