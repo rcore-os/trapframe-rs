@@ -10,7 +10,7 @@
 use super::UserContext;
 use core::arch::global_asm;
 
-extern "sysv64" {
+unsafe extern "sysv64" {
     /// The syscall entry of function call.
     ///
     /// # Usage

@@ -37,11 +37,13 @@ global_asm!(
 ///
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
-    // Set sscratch register to 0, indicating to exception vector that we are
-    // presently executing in the kernel
-    asm!("csrw sscratch, zero");
-    // Set the exception vector address
-    asm!("csrw stvec, {}", in(reg) trap_entry as *const () as usize);
+    unsafe {
+        // Set sscratch register to 0, indicating to exception vector that we are
+        // presently executing in the kernel
+        asm!("csrw sscratch, zero");
+        // Set the exception vector address
+        asm!("csrw stvec, {}", in(reg) trap_entry as *const () as usize);
+    }
 }
 
 /// Trap frame of kernel interrupt
@@ -53,7 +55,7 @@ pub unsafe fn init() {
 /// ```no_run
 /// use trapframe::TrapFrame;
 ///
-/// #[no_mangle]
+/// #[unsafe(no_mangle)]
 /// pub extern "C" fn trap_handler(tf: &mut TrapFrame) {
 ///     println!("TRAP! tf: {:#x?}", tf);
 /// }
@@ -198,7 +200,7 @@ impl UserContext {
 }
 
 #[allow(improper_ctypes)]
-extern "C" {
+unsafe extern "C" {
     fn trap_entry();
     fn run_user(regs: &mut UserContext);
 }

@@ -48,7 +48,7 @@ fn kernel_thread() {
 ```rust
 use trapframe::TrapFrame;
 
-#[no_mangle]	// export a function 'trap_handler'
+#[unsafe(no_mangle)] // export a function 'trap_handler'
 extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
     match tf.trap_num {
         0x3 => {
@@ -64,6 +64,7 @@ extern "sysv64" fn trap_handler(tf: &mut TrapFrame) {
 
 * [x86_64](./examples/uefi)
 * [RISC-V](./examples/riscv)
+* [MIPS little-endian](./examples/mipsel)
 
 ## Internal
 

@@ -66,7 +66,7 @@ fn panic(info: &PanicInfo) -> ! {
     shutdown()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn main() {
     unsafe {
         trapframe::init();
@@ -130,7 +130,7 @@ extern "C" fn main() {
     shutdown();
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn trap_handler(tf: &mut TrapFrame) {
     let scause = scause::read();
     let stval = stval::read();

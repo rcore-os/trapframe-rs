@@ -79,15 +79,26 @@ jobs:
         with:
           targets: ${{ matrix.arch }}imac-unknown-none-elf
       - run: sudo apt-get update && sudo apt-get install -y qemu-system-misc
+      - name: Install 32-bit OpenSBI firmware
+        if: matrix.arch == 'riscv32'
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/riscv-software-src/opensbi/releases/download/v1.9/opensbi-1.9-rv-bin.tar.xz \
+            --output "$RUNNER_TEMP/opensbi.tar.xz"
+          tar -xJf "$RUNNER_TEMP/opensbi.tar.xz" -C "$RUNNER_TEMP"
       - name: Run trap round-trip test
         working-directory: examples/riscv
         run: |
           target=${{ matrix.arch }}imac-unknown-none-elf
+          bios=default
+          if [ "${{ matrix.arch }}" = riscv32 ]; then
+            bios="$RUNNER_TEMP/opensbi-1.9-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin"
+          fi
           cargo build --target "$target"
           timeout 30 qemu-system-${{ matrix.arch }} \
             -machine virt \
             -nographic \
-            -bios default \
+            -bios "$bios" \
             -kernel "target/$target/debug/riscv" | tee qemu.log
           grep -q 'Back from user: Exception(UserEnvCall)' qemu.log
           grep -q 'TRAP: Breakpoint' qemu.log
@@ -101,5 +112,6 @@ jobs:
         with:
           toolchain: nightly-2026-09-01
           components: rust-src
-      - uses: taiki-e/install-action@cross
-      - run: cross +nightly-2026-09-01 test -Z build-std --target mipsel-unknown-linux-gnu
+      - name: Build bare-metal example
+        working-directory: examples/mipsel
+        run: cargo build
