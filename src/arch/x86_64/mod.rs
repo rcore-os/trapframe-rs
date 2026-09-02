@@ -43,58 +43,81 @@ pub unsafe fn init() {
     syscall::init();
 }
 
-/// User space context
+/// Saved x86-64 user context used to enter and resume user code.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct UserContext {
+    /// General-purpose registers and execution state.
     pub general: GeneralRegs,
+    /// Interrupt vector or synthetic trap number that returned control.
     pub trap_num: usize,
+    /// Error code associated with the trap.
     pub error_code: usize,
 }
 
-/// General registers
+/// x86-64 general-purpose registers and execution state.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct GeneralRegs {
+    /// Accumulator register.
     pub rax: usize,
+    /// Base register.
     pub rbx: usize,
+    /// Counter register.
     pub rcx: usize,
+    /// Data register.
     pub rdx: usize,
+    /// Source index register.
     pub rsi: usize,
+    /// Destination index register.
     pub rdi: usize,
+    /// Frame pointer register.
     pub rbp: usize,
+    /// Stack pointer register.
     pub rsp: usize,
+    /// General-purpose register R8.
     pub r8: usize,
+    /// General-purpose register R9.
     pub r9: usize,
+    /// General-purpose register R10.
     pub r10: usize,
+    /// General-purpose register R11.
     pub r11: usize,
+    /// General-purpose register R12.
     pub r12: usize,
+    /// General-purpose register R13.
     pub r13: usize,
+    /// General-purpose register R14.
     pub r14: usize,
+    /// General-purpose register R15.
     pub r15: usize,
+    /// Instruction pointer.
     pub rip: usize,
+    /// Saved processor flags.
     pub rflags: usize,
+    /// FS segment base, conventionally used as the user TLS pointer.
     pub fsbase: usize,
+    /// GS segment base.
     pub gsbase: usize,
 }
 
 impl UserContext {
-    /// Get number of syscall
+    /// Returns the system call number from `rax`.
     pub fn get_syscall_num(&self) -> usize {
         self.general.rax
     }
 
-    /// Get return value of syscall
+    /// Returns the system call result from `rax`.
     pub fn get_syscall_ret(&self) -> usize {
         self.general.rax
     }
 
-    /// Set return value of syscall
+    /// Sets the system call result in `rax`.
     pub fn set_syscall_ret(&mut self, ret: usize) {
         self.general.rax = ret;
     }
 
-    /// Get syscall args
+    /// Returns the six system call arguments in ABI order.
     pub fn get_syscall_args(&self) -> [usize; 6] {
         [
             self.general.rdi,
@@ -106,22 +129,22 @@ impl UserContext {
         ]
     }
 
-    /// Set instruction pointer
+    /// Sets the instruction pointer.
     pub fn set_ip(&mut self, ip: usize) {
         self.general.rip = ip;
     }
 
-    /// Set stack pointer
+    /// Sets the stack pointer.
     pub fn set_sp(&mut self, sp: usize) {
         self.general.rsp = sp;
     }
 
-    /// Get stack pointer
+    /// Returns the stack pointer.
     pub fn get_sp(&self) -> usize {
         self.general.rsp
     }
 
-    /// Set tls pointer
+    /// Sets the user TLS pointer in `fsbase`.
     pub fn set_tls(&mut self, tls: usize) {
         self.general.fsbase = tls;
     }

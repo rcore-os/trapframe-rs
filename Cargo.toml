@@ -8,7 +8,7 @@ authors = [
     "Ben Pig Chu <benpichu@gmail.com>",
 ]
 edition = "2024"
-description = "Handle Trap Frame across kernel and user space on multiple ISAs."
+description = "Cross user/kernel boundaries with function-like context switching on multiple ISAs."
 homepage = "https://github.com/rcore-os/trapframe-rs"
 documentation = "https://docs.rs/trapframe"
 readme = "README.md"
@@ -17,6 +17,18 @@ categories = ["no-std", "embedded"]
 license = "MIT"
 repository = "https://github.com/rcore-os/trapframe-rs"
 exclude = ["docs", ".idea"]
+
+[package.metadata.docs.rs]
+all-features = true
+default-target = "x86_64-unknown-linux-gnu"
+targets = [
+    "x86_64-apple-darwin",
+    "x86_64-unknown-none",
+    "aarch64-unknown-linux-gnu",
+    "aarch64-unknown-none-softfloat",
+    "riscv32imac-unknown-none-elf",
+    "riscv64imac-unknown-none-elf",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

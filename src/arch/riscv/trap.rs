@@ -46,7 +46,7 @@ pub unsafe fn init() {
     }
 }
 
-/// Trap frame of kernel interrupt
+/// Register frame saved when a trap enters the kernel.
 ///
 /// # Trap handler
 ///
@@ -63,23 +63,23 @@ pub unsafe fn init() {
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct TrapFrame {
-    /// General registers
+    /// General-purpose registers.
     pub general: GeneralRegs,
-    /// Supervisor Status
+    /// Supervisor status register (`sstatus`).
     pub sstatus: usize,
-    /// Supervisor Exception Program Counter
+    /// Supervisor exception program counter (`sepc`).
     pub sepc: usize,
 }
 
-/// Saved registers on a trap.
+/// Saved RISC-V user context used to enter and resume user code.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct UserContext {
-    /// General registers
+    /// General-purpose registers.
     pub general: GeneralRegs,
-    /// Supervisor Status
+    /// Supervisor status register (`sstatus`).
     pub sstatus: usize,
-    /// Supervisor Exception Program Counter
+    /// Supervisor exception program counter (`sepc`).
     pub sepc: usize,
 }
 
@@ -112,61 +112,93 @@ impl UserContext {
     }
 }
 
-/// General registers
+/// RISC-V integer registers in architectural order.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct GeneralRegs {
+    /// Hard-wired zero register X0.
     pub zero: usize,
+    /// Return address register X1.
     pub ra: usize,
+    /// Stack pointer register X2.
     pub sp: usize,
+    /// Global pointer register X3.
     pub gp: usize,
+    /// Thread pointer register X4.
     pub tp: usize,
+    /// Temporary register X5.
     pub t0: usize,
+    /// Temporary register X6.
     pub t1: usize,
+    /// Temporary register X7.
     pub t2: usize,
+    /// Saved/frame pointer register X8.
     pub s0: usize,
+    /// Saved register X9.
     pub s1: usize,
+    /// Argument and return-value register X10.
     pub a0: usize,
+    /// Argument and return-value register X11.
     pub a1: usize,
+    /// Argument register X12.
     pub a2: usize,
+    /// Argument register X13.
     pub a3: usize,
+    /// Argument register X14.
     pub a4: usize,
+    /// Argument register X15.
     pub a5: usize,
+    /// Argument register X16.
     pub a6: usize,
+    /// Argument and system call number register X17.
     pub a7: usize,
+    /// Saved register X18.
     pub s2: usize,
+    /// Saved register X19.
     pub s3: usize,
+    /// Saved register X20.
     pub s4: usize,
+    /// Saved register X21.
     pub s5: usize,
+    /// Saved register X22.
     pub s6: usize,
+    /// Saved register X23.
     pub s7: usize,
+    /// Saved register X24.
     pub s8: usize,
+    /// Saved register X25.
     pub s9: usize,
+    /// Saved register X26.
     pub s10: usize,
+    /// Saved register X27.
     pub s11: usize,
+    /// Temporary register X28.
     pub t3: usize,
+    /// Temporary register X29.
     pub t4: usize,
+    /// Temporary register X30.
     pub t5: usize,
+    /// Temporary register X31.
     pub t6: usize,
 }
 
 impl UserContext {
-    /// Get number of syscall
+    /// Returns the system call number from `a7`.
     pub fn get_syscall_num(&self) -> usize {
         self.general.a7
     }
 
-    /// Get return value of syscall
+    /// Returns the system call result from `a0`.
     pub fn get_syscall_ret(&self) -> usize {
         self.general.a0
     }
 
-    /// Set return value of syscall
+    /// Sets the system call result in `a0`.
     pub fn set_syscall_ret(&mut self, ret: usize) {
         self.general.a0 = ret;
     }
 
-    /// Get syscall args
+    /// Returns the six system call arguments in ABI order.
     pub fn get_syscall_args(&self) -> [usize; 6] {
         [
             self.general.a0,
@@ -178,22 +210,22 @@ impl UserContext {
         ]
     }
 
-    /// Set instruction pointer
+    /// Sets the exception return address.
     pub fn set_ip(&mut self, ip: usize) {
         self.sepc = ip;
     }
 
-    /// Set stack pointer
+    /// Sets the user stack pointer.
     pub fn set_sp(&mut self, sp: usize) {
         self.general.sp = sp;
     }
 
-    /// Get stack pointer
+    /// Returns the user stack pointer.
     pub fn get_sp(&self) -> usize {
         self.general.sp
     }
 
-    /// Set tls pointer
+    /// Sets the user thread pointer.
     pub fn set_tls(&mut self, tls: usize) {
         self.general.tp = tls;
     }
