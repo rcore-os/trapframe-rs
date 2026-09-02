@@ -1,6 +1,7 @@
 #![no_std]
 #![deny(warnings)]
 
+#[cfg(target_arch = "x86_64")]
 extern crate alloc;
 
 #[cfg(target_arch = "x86_64")]

@@ -7,7 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "0.4"
 riscv = "0.7"
-opensbi-rt = { git = "https://github.com/rcore-os/opensbi-rt.git", rev = "6d44fced33f6116bfea68d52b0e027bea6414e85" }
 trapframe = { path = "../.." }

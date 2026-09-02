@@ -75,7 +75,7 @@ jobs:
         arch: [riscv32, riscv64]
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.arch }}imac-unknown-none-elf
       - run: sudo apt-get update && sudo apt-get install -y qemu-system-misc
@@ -83,7 +83,7 @@ jobs:
         working-directory: examples/riscv
         run: |
           target=${{ matrix.arch }}imac-unknown-none-elf
-          cargo +nightly build --target "$target"
+          cargo build --target "$target"
           timeout 30 qemu-system-${{ matrix.arch }} \
             -machine virt \
             -nographic \
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly-2022-01-20
-          targets: mipsel-unknown-linux-gnu
+          toolchain: nightly-2026-09-01
+          components: rust-src
       - uses: taiki-e/install-action@cross
-      - run: cross +nightly-2022-01-20 test --target mipsel-unknown-linux-gnu
+      - run: cross +nightly-2026-09-01 test -Z build-std --target mipsel-unknown-linux-gnu
