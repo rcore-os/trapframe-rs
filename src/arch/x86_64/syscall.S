@@ -103,6 +103,9 @@ syscall_entry:
 
 .global trap_syscall_entry
 trap_syscall_entry:
+    # Interrupts preserve DF, but the SysV ABI requires it to be clear when
+    # returning to Rust. The original value is already saved in rflags.
+    cld
     push r15
     push r14
     push r13
