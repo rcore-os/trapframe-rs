@@ -15,5 +15,5 @@ panic = "abort"
 [dependencies]
 log = "0.4"
 x86_64 = { version = "0.15", default-features = false, features = ["instructions"] }
-uefi = { version = "0.38", features = ["global_allocator", "logger", "panic_handler"] }
+uefi = { version = "0.40", features = ["global_allocator", "logger", "panic_handler"] }
 trapframe = { path = "../.." }

@@ -80,6 +80,7 @@ jobs:
           timeout 5 qemu-system-x86_64 \
             -bios "$PWD/OVMF.fd" \
             -drive format=raw,file=fat:rw:target/x86_64-unknown-uefi/debug/esp \
+            -cpu max \
             -net none \
             -nographic | tee qemu.log
           qemu_status=${PIPESTATUS[0]}
