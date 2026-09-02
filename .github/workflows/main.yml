@@ -76,7 +76,7 @@ jobs:
             target/x86_64-unknown-uefi/debug/esp/EFI/Boot/BootX64.efi
           set +e
           timeout 5 qemu-system-x86_64 \
-            -bios OVMF.fd \
+            -bios "$PWD/OVMF.fd" \
             -drive format=raw,file=fat:rw:target/x86_64-unknown-uefi/debug/esp \
             -net none \
             -nographic | tee qemu.log
