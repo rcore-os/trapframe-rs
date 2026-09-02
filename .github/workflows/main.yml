@@ -41,11 +41,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rust-src
-      - run: cargo +nightly build --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
-      - run: cargo +nightly doc --all-features --target x86_64-unknown-linux-gnu -Z build-std=core,alloc
+          targets: x86_64-unknown-none
+      - run: cargo build --all-features --target x86_64-unknown-none
+      - run: cargo doc --all-features --target x86_64-unknown-none
 
   test-x86_64:
     runs-on: ${{ matrix.os }}
@@ -115,6 +115,17 @@ jobs:
         with:
           toolchain: nightly-2026-09-01
           components: rust-src
-      - name: Build bare-metal example
+      - run: sudo apt-get update && sudo apt-get install -y qemu-system-mips
+      - name: Run trap round-trip test
         working-directory: examples/mipsel
-        run: cargo build
+        run: |
+          cargo build
+          set +e
+          timeout 30 qemu-system-mipsel \
+            -machine malta \
+            -nographic \
+            -kernel target/mipsel-unknown-none/debug/mipsel | tee qemu.log
+          qemu_status=${PIPESTATUS[0]}
+          set -e
+          test "$qemu_status" -eq 124
+          grep -q 'MIPS trap round-trip passed' qemu.log

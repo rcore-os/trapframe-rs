@@ -7,17 +7,23 @@ global_asm!(include_str!("trap.S"));
 /// # Safety
 ///
 /// This function will:
-/// - Set `sscratch` to 0.
-/// - Set `stvec` to internal exception vector.
+/// - Set CP0 `EBase` to the internal exception vector.
+/// - Clear CP0 Status `BEV` to enable that vector.
 ///
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
-    // Set cp0 ebase(15, 1) register to trap entry
+    let status: usize;
     unsafe {
+        // Set CP0 EBase (15, 1) to the trap entry and select that vector by
+        // clearing the bootstrap exception vector bit in CP0 Status.
         asm!(
             "mtc0 $2, $15, 1",
+            "mfc0 $3, $12",
             in("$2") trap_entry,
+            out("$3") status,
         );
+        let status = status & !(1 << 22);
+        asm!("mtc0 $2, $12", "ehb", in("$2") status);
     }
 }
 

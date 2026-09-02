@@ -6,13 +6,18 @@ use x86_64::structures::tss::TaskStateSegment;
 
 /// TSS with port bitmap, allocated consecutively.
 #[derive(Clone, Copy)]
-#[repr(C, packed)]
+#[repr(C)]
 pub(super) struct TSSWithPortBitmap {
     tss: TaskStateSegment,
     /// Bit in port_bitmap: 0 indicates accessible, 1 indicated inaccessible.
     /// Follow linux, add one extra element.
     port_bitmap: [u8; 1 + Self::BITMAP_VALID_SIZE],
 }
+
+const _: () = assert!(
+    core::mem::offset_of!(TSSWithPortBitmap, port_bitmap)
+        == core::mem::size_of::<TaskStateSegment>()
+);
 
 impl Deref for TSSWithPortBitmap {
     type Target = TaskStateSegment;
