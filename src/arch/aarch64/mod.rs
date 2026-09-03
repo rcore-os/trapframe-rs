@@ -1,11 +1,11 @@
 //! AArch64 register layouts and context-switch entry points.
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "macos"))]
 mod fncall;
 #[cfg(any(target_os = "none", target_os = "uefi"))]
 mod trap;
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "macos"))]
 pub use fncall::*;
 #[cfg(any(target_os = "none", target_os = "uefi"))]
 pub use trap::*;

@@ -12,6 +12,13 @@ use core::arch::global_asm;
 
 global_asm!(include_str!("fncall.S"));
 
+#[cfg(target_os = "macos")]
+global_asm!(
+    ".set _syscall_fn_entry, syscall_fn_entry\n\
+     .set _syscall_fn_return, syscall_fn_return\n\
+     .set _syscall_fn_return_extended, syscall_fn_return_extended"
+);
+
 unsafe extern "C" {
     /// The syscall entry of function call.
     ///
@@ -49,6 +56,14 @@ impl UserContextWithExtensions {
 mod tests {
     use crate::*;
     use core::arch::{asm, global_asm};
+
+    #[cfg(target_os = "macos")]
+    global_asm!(
+        ".set _dump_registers, dump_registers\n\
+         .set _elr_location, elr_location\n\
+         .set RESTORED_Q0, _RESTORED_Q0\n\
+         .set UPDATED_Q0, _UPDATED_Q0"
+    );
 
     #[unsafe(no_mangle)]
     static mut RESTORED_Q0: u128 = 0;
