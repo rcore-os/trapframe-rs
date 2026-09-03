@@ -8,4 +8,4 @@ edition = "2024"
 
 [dependencies]
 riscv = "0.7"
-trapframe = { path = "../..", features = ["riscv-vector"] }
+trapframe = { path = "../.." }

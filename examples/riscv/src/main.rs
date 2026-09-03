@@ -6,7 +6,9 @@ use core::fmt::{self, Write};
 use core::panic::PanicInfo;
 use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
-use trapframe::{FloatRegs, GeneralRegs, TrapFrame, UserContext, VectorRegs};
+#[cfg(target_pointer_width = "64")]
+use trapframe::{FloatRegs, VectorRegs};
+use trapframe::{GeneralRegs, TrapFrame, UserContext};
 
 global_asm!(
     r#"
@@ -252,6 +254,7 @@ extern "C" fn main() {
         // Enable floating-point and vector state for user mode (FS/VS=Dirty).
         sstatus: (3 << 13) | (3 << 9) | (1 << 5),
         sepc: user_entry as *const () as usize,
+        #[cfg(target_pointer_width = "64")]
         vector: VectorRegs {
             registers: initial_vector,
             vstart: 0,
@@ -259,6 +262,7 @@ extern "C" fn main() {
             vtype: 0,
             vcsr: 5,
         },
+        #[cfg(target_pointer_width = "64")]
         float: FloatRegs {
             registers: initial_float,
             fcsr: 0,

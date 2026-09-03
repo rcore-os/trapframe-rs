@@ -65,9 +65,15 @@ end_trap_from_kernel:
     tail trap_handler
 
 end_trap_from_user:
-    .ifdef RISCV_VECTOR_CONTEXT
+    .ifdef RISCV_EXTENDED_CONTEXT
+    LOAD_SP t1, 32
+    # VS=Off means this hart either has no vector extension or the user did not
+    # enable it.  Do not execute vector instructions in either case.
+    li t3, 3 << 9
+    and t3, t1, t3
+    beqz t3, 1f
     .option push
-    .option arch, +v
+    .option arch, +v, +d
     # UserContext starts with 34 XLEN words.  Save four groups of eight
     # whole vector registers; this feature currently targets VLEN=128.
     addi t0, sp, 34 * XLENB
@@ -86,6 +92,15 @@ end_trap_from_user:
     STORE_SP t2, 100
     csrr t0, vcsr
     STORE_SP t0, 101
+    .option pop
+1:
+    # Floating-point state is independent of vector state.
+    LOAD_SP t1, 32
+    li t3, 3 << 13
+    and t3, t1, t3
+    beqz t3, 2f
+    .option push
+    .option arch, +d
     fsd f0, 102 * XLENB(sp)
     fsd f1, 103 * XLENB(sp)
     fsd f2, 104 * XLENB(sp)
@@ -121,6 +136,7 @@ end_trap_from_user:
     csrr t0, fcsr
     STORE_SP t0, 134
     .option pop
+2:
     .endif
     # load callee-saved registers
     LOAD_SP sp, 0
@@ -171,13 +187,16 @@ run_user:
 trap_return:
     LOAD_SP t0, 32          # t0 = sstatus
     LOAD_SP t1, 33          # t1 = sepc
-    .ifdef RISCV_VECTOR_CONTEXT
-    # Kernel traps use the smaller TrapFrame, so only restore vector state
+    .ifdef RISCV_EXTENDED_CONTEXT
+    # Kernel traps use the smaller TrapFrame, so only restore extension state
     # when returning to userspace (sstatus.SPP == 0).
     andi t2, t0, 1 << 8
-    bnez t2, 1f
+    bnez t2, 3f
+    li t3, 3 << 9
+    and t3, t0, t3
+    beqz t3, 1f
     .option push
-    .option arch, +v
+    .option arch, +v, +d
     addi t2, sp, 34 * XLENB
     vl8re8.v v0, (t2)
     addi t2, t2, 128
@@ -193,6 +212,13 @@ trap_return:
     csrw vcsr, t2
     LOAD_SP t2, 98
     csrw vstart, t2
+    .option pop
+1:
+    li t3, 3 << 13
+    and t3, t0, t3
+    beqz t3, 3f
+    .option push
+    .option arch, +d
     fld f0, 102 * XLENB(sp)
     fld f1, 103 * XLENB(sp)
     fld f2, 104 * XLENB(sp)
@@ -228,7 +254,7 @@ trap_return:
     LOAD_SP t2, 134
     csrw fcsr, t2
     .option pop
-1:
+3:
     .endif
     csrw sstatus, t0        # load sstatus
     csrw sepc, t1           # load sepc

@@ -14,24 +14,10 @@ global_asm!(
     include_str!("trap.S")
 );
 #[cfg(target_arch = "riscv64")]
-#[cfg(not(feature = "riscv-vector"))]
 global_asm!(
     r"
     .equ XLENB, 8
-    .macro LOAD_SP a1, a2
-        ld \a1, \a2*XLENB(sp)
-    .endm
-    .macro STORE_SP a1, a2
-        sd \a1, \a2*XLENB(sp)
-    .endm
-",
-    include_str!("trap.S")
-);
-#[cfg(all(target_arch = "riscv64", feature = "riscv-vector"))]
-global_asm!(
-    r"
-    .equ XLENB, 8
-    .equ RISCV_VECTOR_CONTEXT, 1
+    .equ RISCV_EXTENDED_CONTEXT, 1
     .macro LOAD_SP a1, a2
         ld \a1, \a2*XLENB(sp)
     .endm
@@ -97,15 +83,15 @@ pub struct UserContext {
     /// Supervisor exception program counter (`sepc`).
     pub sepc: usize,
     /// RISC-V vector registers and control state.
-    #[cfg(feature = "riscv-vector")]
+    #[cfg(target_arch = "riscv64")]
     pub vector: VectorRegs,
     /// RISC-V floating-point registers and control state.
-    #[cfg(feature = "riscv-vector")]
+    #[cfg(target_arch = "riscv64")]
     pub float: FloatRegs,
 }
 
 /// Saved state for a RISC-V V implementation with VLEN=128.
-#[cfg(feature = "riscv-vector")]
+#[cfg(target_arch = "riscv64")]
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C, align(16))]
 pub struct VectorRegs {
@@ -122,7 +108,7 @@ pub struct VectorRegs {
 }
 
 /// Saved double-precision RISC-V floating-point state.
-#[cfg(feature = "riscv-vector")]
+#[cfg(target_arch = "riscv64")]
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct FloatRegs {
