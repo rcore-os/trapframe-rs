@@ -42,26 +42,27 @@ syscall_fn_entry:
     stp     x1, x2, [sp, #-16]!
 
     # save floating-point and Advanced SIMD state
-    stp     q0, q1, [sp, #304]
-    stp     q2, q3, [sp, #336]
-    stp     q4, q5, [sp, #368]
-    stp     q6, q7, [sp, #400]
-    stp     q8, q9, [sp, #432]
-    stp     q10, q11, [sp, #464]
-    stp     q12, q13, [sp, #496]
-    stp     q14, q15, [sp, #528]
-    stp     q16, q17, [sp, #560]
-    stp     q18, q19, [sp, #592]
-    stp     q20, q21, [sp, #624]
-    stp     q22, q23, [sp, #656]
-    stp     q24, q25, [sp, #688]
-    stp     q26, q27, [sp, #720]
-    stp     q28, q29, [sp, #752]
-    stp     q30, q31, [sp, #784]
+    sub     x4, sp, #48
+    stp     q0, q1, [x4, #304]
+    stp     q2, q3, [x4, #336]
+    stp     q4, q5, [x4, #368]
+    stp     q6, q7, [x4, #400]
+    stp     q8, q9, [x4, #432]
+    stp     q10, q11, [x4, #464]
+    stp     q12, q13, [x4, #496]
+    stp     q14, q15, [x4, #528]
+    stp     q16, q17, [x4, #560]
+    stp     q18, q19, [x4, #592]
+    stp     q20, q21, [x4, #624]
+    stp     q22, q23, [x4, #656]
+    stp     q24, q25, [x4, #688]
+    stp     q26, q27, [x4, #720]
+    stp     q28, q29, [x4, #752]
+    stp     q30, q31, [x4, #784]
     mrs     x2, fpcr
     mrs     x3, fpsr
-    add     x4, sp, #816
-    stp     w2, w3, [x4]
+    add     x5, x4, #816
+    stp     w2, w3, [x5]
 
     # skip sp and save tpidr
     mrs     x1, tpidr_el0
