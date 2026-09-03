@@ -51,10 +51,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-15-intel]
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Verify x86_64 runner
+        run: test "$(uname -m)" = x86_64
       - run: cargo test --all-features
 
   test-x86_64-bare-metal:
