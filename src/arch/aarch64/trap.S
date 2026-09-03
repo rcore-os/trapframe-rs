@@ -53,6 +53,8 @@ trap_from_kernel:
     b       trap_return_without_fp
 
 trap_from_user:
+    ldr     x3, [sp, #8]
+    tbz     x3, #0, trap_from_user_without_fp
     # save floating-point and Advanced SIMD state after the integer frame
     stp     q0, q1, [sp, #304]
     stp     q2, q3, [sp, #336]
@@ -75,12 +77,15 @@ trap_from_user:
     add     x5, sp, #816
     stp     w3, w4, [x5]
 
+trap_from_user_without_fp:
     # read tpidr and sp
     mrs     x2, tpidr_el0
     mrs     x1, sp_el0
     stp     x1, x2, [sp, #32]
     # read sp
     ldr     x2, [sp, #8]
+    bic     x2, x2, #1
+    str     x2, [sp, #8]
     mov     sp, x2
 
     # load callee-saved registers
@@ -123,7 +128,13 @@ __vectors:
     HANDLER 3 3
 
 .global run_user
+.global run_user_extended
 run_user:
+    mov     x3, #0
+    b       run_user_common
+run_user_extended:
+    mov     x3, #1
+run_user_common:
     # x0 points to TrapFrame
     # save callee-saved registers x19-x29
     stp     x29, x30, [sp, #-16]!
@@ -135,6 +146,7 @@ run_user:
 
     # save kernel sp to TrapFrame
     mov     x1, sp
+    orr     x1, x1, x3
     mov     sp, x0
     str     x1, [sp, #8]
 
@@ -145,6 +157,8 @@ run_user:
 
 trap_return:
     # sp points to TrapFrame
+    ldr     x3, [sp, #8]
+    tbz     x3, #0, trap_return_without_fp
     ldp     q0, q1, [sp, #304]
     ldp     q2, q3, [sp, #336]
     ldp     q4, q5, [sp, #368]

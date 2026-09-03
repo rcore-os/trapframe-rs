@@ -265,11 +265,19 @@ extern "C" fn main() {
     #[cfg(target_pointer_width = "32")]
     let mut regs = context;
     #[cfg(target_pointer_width = "64")]
-    let mut legacy = context;
-    #[cfg(target_pointer_width = "64")]
     {
-        legacy.run();
+        #[repr(C)]
+        struct GuardedContext {
+            context: UserContext,
+            guard: [u8; 1024],
+        }
+        let mut legacy = GuardedContext {
+            context,
+            guard: [0xa5; 1024],
+        };
+        legacy.context.run();
         assert_eq!(scause::read().cause(), Trap::Exception(E::UserEnvCall));
+        assert_eq!(legacy.guard, [0xa5; 1024]);
         println!("RISC-V base context round-trip passed");
     }
     #[cfg(target_pointer_width = "64")]

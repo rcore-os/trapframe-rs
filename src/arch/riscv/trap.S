@@ -66,6 +66,9 @@ end_trap_from_kernel:
 
 end_trap_from_user:
     .ifdef RISCV_EXTENDED_CONTEXT
+    LOAD_SP t3, 0
+    andi t3, t3, 1
+    beqz t3, 4f
     LOAD_SP t1, 32
     # VS=Off means this hart either has no vector extension or the user did not
     # enable it.  Do not execute vector instructions in either case.
@@ -137,9 +140,13 @@ end_trap_from_user:
     STORE_SP t0, 134
     .option pop
 2:
+4:
     .endif
     # load callee-saved registers
-    LOAD_SP sp, 0
+    LOAD_SP t0, 0
+    andi t0, t0, -2
+    STORE_SP t0, 0
+    mv sp, t0
     LOAD_SP s0, 0
     LOAD_SP s1, 1
     LOAD_SP s2, 2
@@ -160,7 +167,17 @@ end_trap_from_user:
     ret
 
 .global run_user
+.ifdef RISCV_EXTENDED_CONTEXT
+.global run_user_extended
+.endif
 run_user:
+    li t1, 0
+    j run_user_common
+.ifdef RISCV_EXTENDED_CONTEXT
+run_user_extended:
+    li t1, 1
+.endif
+run_user_common:
     # save callee-saved registers
     addi sp, sp, -14 * XLENB
     STORE_SP s0, 0
@@ -180,6 +197,7 @@ run_user:
     STORE_SP tp, 13
 
     mv t0, sp
+    or t0, t0, t1
     mv sp, a0
     STORE_SP t0, 0          # save kernel-sp
     csrw sscratch, sp       # sscratch = bottom of trap frame
@@ -192,6 +210,9 @@ trap_return:
     # when returning to userspace (sstatus.SPP == 0).
     andi t2, t0, 1 << 8
     bnez t2, 3f
+    LOAD_SP t2, 0
+    andi t2, t2, 1
+    beqz t2, 3f
     li t3, 3 << 9
     and t3, t0, t3
     beqz t3, 1f

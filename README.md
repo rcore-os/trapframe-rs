@@ -25,6 +25,8 @@ and call `run()` again to resume execution.
 `UserContextWithExtensions` adds architecture-specific floating-point/vector state
 without changing the layout of the original `UserContext`: x87/SSE on x86-64,
 FP/SIMD on AArch64, and F/D plus 128-bit V registers on RISC-V 64.
+The original `UserContext` path does not access floating-point, SIMD, or vector
+registers; use the extended type when those registers must be preserved.
 
 The crate is `no_std` and supports x86-64, AArch64, RISC-V 32/64, and
 little-endian MIPS.

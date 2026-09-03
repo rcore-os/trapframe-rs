@@ -88,6 +88,22 @@ jobs:
           test "$qemu_status" -eq 124
           grep -q 'back from user' qemu.log
           grep -q 'TRAP: BreakPoint' qemu.log
+      - name: Run context switch benchmark with KVM
+        working-directory: examples/uefi
+        run: |
+          sudo chmod 666 /dev/kvm
+          set +e
+          timeout 5 qemu-system-x86_64 \
+            -bios "$PWD/OVMF.fd" \
+            -drive format=raw,file=fat:rw:target/x86_64-unknown-uefi/debug/esp \
+            -enable-kvm \
+            -cpu host \
+            -net none \
+            -nographic | tee qemu-kvm.log
+          qemu_status=${PIPESTATUS[0]}
+          set -e
+          test "$qemu_status" -eq 124
+          grep -q 'context switch benchmark:' qemu-kvm.log
 
   test-aarch64:
     runs-on: ubuntu-latest

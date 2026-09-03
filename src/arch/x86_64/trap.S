@@ -24,7 +24,8 @@ __from_user:
     mov rax, [rsp + 6*8]    # rax = user rsp
     mov gs:12, rax          # store user rsp -> scratch at TSS.sp1
 
-    mov rsp, [rsp + 8*8]    # load rsp = bottom of trap frame
+    mov rsp, [rsp + 8*8]    # load rsp = tagged bottom of trap frame
+    and rsp, -2
     add rsp, 22*8           # rsp = top of trap frame
     mov rax, gs:4           # rax = kernel stack
 

@@ -172,23 +172,7 @@ impl UserContext {
     /// println!("back from user: {:#x?}", context);
     /// ```
     pub fn run(&mut self) {
-        #[cfg(target_arch = "riscv64")]
-        {
-            let mut context = UserContextWithExtensions {
-                general: self.general,
-                sstatus: self.sstatus,
-                sepc: self.sepc,
-                ..Default::default()
-            };
-            context.run();
-            self.general = context.general;
-            self.sstatus = context.sstatus;
-            self.sepc = context.sepc;
-        }
-        #[cfg(target_arch = "riscv32")]
-        unsafe {
-            run_user(self)
-        }
+        unsafe { run_user(self) }
     }
 }
 
@@ -196,7 +180,7 @@ impl UserContext {
 impl UserContextWithExtensions {
     /// Runs user code while preserving floating-point and vector state.
     pub fn run(&mut self) {
-        unsafe { run_user(self) }
+        unsafe { run_user_extended(self) }
     }
 }
 
@@ -322,8 +306,7 @@ impl UserContext {
 #[allow(improper_ctypes)]
 unsafe extern "C" {
     fn trap_entry();
-    #[cfg(target_arch = "riscv32")]
     fn run_user(regs: &mut UserContext);
     #[cfg(target_arch = "riscv64")]
-    fn run_user(regs: &mut UserContextWithExtensions);
+    fn run_user_extended(regs: &mut UserContextWithExtensions);
 }

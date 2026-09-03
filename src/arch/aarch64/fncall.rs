@@ -25,7 +25,8 @@ unsafe extern "C" {
     /// ```
     pub fn syscall_fn_entry();
 
-    fn syscall_fn_return(regs: &mut UserContextWithExtensions);
+    fn syscall_fn_return(regs: &mut UserContext);
+    fn syscall_fn_return_extended(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -33,38 +34,21 @@ impl UserContext {
     ///
     /// User program should call `syscall_fn_entry()` to return back.
     pub fn run_fncall(&mut self) {
-        let mut context = UserContextWithExtensions {
-            trap_num: self.trap_num,
-            __reserved: self.__reserved,
-            elr: self.elr,
-            spsr: self.spsr,
-            sp: self.sp,
-            tpidr: self.tpidr,
-            general: self.general,
-            ..Default::default()
-        };
-        context.run_fncall();
-        self.trap_num = context.trap_num;
-        self.__reserved = context.__reserved;
-        self.elr = context.elr;
-        self.spsr = context.spsr;
-        self.sp = context.sp;
-        self.tpidr = context.tpidr;
-        self.general = context.general;
+        unsafe { syscall_fn_return(self) }
     }
 }
 
 impl UserContextWithExtensions {
     /// Goes to user context while preserving floating-point and SIMD state.
     pub fn run_fncall(&mut self) {
-        unsafe { syscall_fn_return(self) }
+        unsafe { syscall_fn_return_extended(self) }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::*;
-    use core::arch::global_asm;
+    use core::arch::{asm, global_asm};
 
     #[unsafe(no_mangle)]
     static mut RESTORED_Q0: u128 = 0;
@@ -186,9 +170,27 @@ elr_location:
             elr: dump_registers as *const () as usize,
             ..Default::default()
         };
-        let mut legacy = base;
-        legacy.run_fncall();
-        assert_eq!(legacy.general.x0, 100);
+        #[repr(C)]
+        struct GuardedContext {
+            context: UserContext,
+            guard: [u8; 520],
+        }
+        let mut legacy = GuardedContext {
+            context: base,
+            guard: [0xa5; 520],
+        };
+        let mut legacy_q0 = 0;
+        legacy.context.run_fncall();
+        unsafe {
+            asm!(
+                "str q0, [{buffer}]",
+                buffer = in(reg) &raw mut legacy_q0,
+                options(nostack)
+            );
+        }
+        assert_eq!(legacy.context.general.x0, 100);
+        assert_eq!(legacy.guard, [0xa5; 520]);
+        assert_eq!(legacy_q0, UPDATED_Q0);
 
         let mut cx = UserContextWithExtensions {
             trap_num: base.trap_num,

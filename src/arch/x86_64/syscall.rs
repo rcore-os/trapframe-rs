@@ -51,7 +51,8 @@ pub fn init() {
 
 unsafe extern "sysv64" {
     fn syscall_entry();
-    fn syscall_return(regs: &mut UserContextWithExtensions);
+    fn syscall_return(regs: &mut UserContext);
+    fn syscall_return_extended(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -84,22 +85,13 @@ impl UserContext {
     /// println!("back from user: {:#x?}", context);
     /// ```
     pub fn run(&mut self) {
-        let mut context = UserContextWithExtensions {
-            general: self.general,
-            trap_num: self.trap_num,
-            error_code: self.error_code,
-            ..Default::default()
-        };
-        context.run();
-        self.general = context.general;
-        self.trap_num = context.trap_num;
-        self.error_code = context.error_code;
+        unsafe { syscall_return(self) }
     }
 }
 
 impl UserContextWithExtensions {
     /// Goes to user space while preserving x87 and SSE state.
     pub fn run(&mut self) {
-        unsafe { syscall_return(self) }
+        unsafe { syscall_return_extended(self) }
     }
 }
