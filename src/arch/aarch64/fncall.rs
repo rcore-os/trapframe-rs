@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::UserContext;
+use super::{ExtendedUserContext, UserContext};
 use core::arch::global_asm;
 
 global_asm!(include_str!("fncall.S"));
