@@ -55,6 +55,56 @@ pub struct UserContext {
     pub error_code: usize,
 }
 
+/// An x86-64 user context that also preserves x87 and SSE state.
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[repr(C, align(16))]
+pub struct UserContextWithExtensions {
+    /// General-purpose registers and execution state.
+    pub general: GeneralRegs,
+    /// Interrupt vector or synthetic trap number that returned control.
+    pub trap_num: usize,
+    /// Error code associated with the trap.
+    pub error_code: usize,
+    /// x87 and SSE state.
+    pub fp_simd: FpSimdState,
+}
+
+impl core::ops::Deref for UserContextWithExtensions {
+    type Target = UserContext;
+
+    fn deref(&self) -> &Self::Target {
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &*(self as *const Self).cast() }
+    }
+}
+
+impl core::ops::DerefMut for UserContextWithExtensions {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &mut *(self as *mut Self).cast() }
+    }
+}
+
+/// The 512-byte, 16-byte-aligned x87/SSE save area used by FXSAVE.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[repr(C, align(16))]
+pub struct FpSimdState {
+    /// Raw architectural FXSAVE image.
+    pub bytes: [u8; 512],
+}
+
+impl Default for FpSimdState {
+    fn default() -> Self {
+        let mut bytes = [0; 512];
+        // Architectural reset values for the x87 control word and MXCSR.
+        bytes[0] = 0x7f;
+        bytes[1] = 0x03;
+        bytes[24] = 0x80;
+        bytes[25] = 0x1f;
+        Self { bytes }
+    }
+}
+
 /// x86-64 general-purpose registers and execution state.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]

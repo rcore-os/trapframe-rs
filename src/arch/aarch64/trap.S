@@ -50,15 +50,42 @@ trap_from_kernel:
     ldr     x1, [sp, #40]
     msr     tpidr_el1, x1
     # go to trap_return
-    b       trap_return
+    b       trap_return_without_fp
 
 trap_from_user:
+    ldr     x3, [sp, #8]
+    tbz     x3, #0, trap_from_user_without_fp
+    # save floating-point and Advanced SIMD state after the integer frame
+    stp     q0, q1, [sp, #304]
+    stp     q2, q3, [sp, #336]
+    stp     q4, q5, [sp, #368]
+    stp     q6, q7, [sp, #400]
+    stp     q8, q9, [sp, #432]
+    stp     q10, q11, [sp, #464]
+    stp     q12, q13, [sp, #496]
+    stp     q14, q15, [sp, #528]
+    stp     q16, q17, [sp, #560]
+    stp     q18, q19, [sp, #592]
+    stp     q20, q21, [sp, #624]
+    stp     q22, q23, [sp, #656]
+    stp     q24, q25, [sp, #688]
+    stp     q26, q27, [sp, #720]
+    stp     q28, q29, [sp, #752]
+    stp     q30, q31, [sp, #784]
+    mrs     x3, fpcr
+    mrs     x4, fpsr
+    add     x5, sp, #816
+    stp     w3, w4, [x5]
+
+trap_from_user_without_fp:
     # read tpidr and sp
     mrs     x2, tpidr_el0
     mrs     x1, sp_el0
     stp     x1, x2, [sp, #32]
     # read sp
     ldr     x2, [sp, #8]
+    bic     x2, x2, #1
+    str     x2, [sp, #8]
     mov     sp, x2
 
     # load callee-saved registers
@@ -101,7 +128,13 @@ __vectors:
     HANDLER 3 3
 
 .global run_user
+.global run_user_extended
 run_user:
+    mov     x3, #0
+    b       run_user_common
+run_user_extended:
+    mov     x3, #1
+run_user_common:
     # x0 points to TrapFrame
     # save callee-saved registers x19-x29
     stp     x29, x30, [sp, #-16]!
@@ -113,6 +146,7 @@ run_user:
 
     # save kernel sp to TrapFrame
     mov     x1, sp
+    orr     x1, x1, x3
     mov     sp, x0
     str     x1, [sp, #8]
 
@@ -123,6 +157,30 @@ run_user:
 
 trap_return:
     # sp points to TrapFrame
+    ldr     x3, [sp, #8]
+    tbz     x3, #0, trap_return_without_fp
+    ldp     q0, q1, [sp, #304]
+    ldp     q2, q3, [sp, #336]
+    ldp     q4, q5, [sp, #368]
+    ldp     q6, q7, [sp, #400]
+    ldp     q8, q9, [sp, #432]
+    ldp     q10, q11, [sp, #464]
+    ldp     q12, q13, [sp, #496]
+    ldp     q14, q15, [sp, #528]
+    ldp     q16, q17, [sp, #560]
+    ldp     q18, q19, [sp, #592]
+    ldp     q20, q21, [sp, #624]
+    ldp     q22, q23, [sp, #656]
+    ldp     q24, q25, [sp, #688]
+    ldp     q26, q27, [sp, #720]
+    ldp     q28, q29, [sp, #752]
+    ldp     q30, q31, [sp, #784]
+    add     x3, sp, #816
+    ldp     w1, w2, [x3]
+    msr     fpcr, x1
+    msr     fpsr, x2
+
+trap_return_without_fp:
     # skip trap num, don't restore
     add     sp, sp, #16
 

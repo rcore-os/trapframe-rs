@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::UserContext;
+use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
 
 global_asm!(include_str!("fncall.S"));
@@ -26,6 +26,7 @@ unsafe extern "C" {
     pub fn syscall_fn_entry();
 
     fn syscall_fn_return(regs: &mut UserContext);
+    fn syscall_fn_return_extended(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -33,21 +34,39 @@ impl UserContext {
     ///
     /// User program should call `syscall_fn_entry()` to return back.
     pub fn run_fncall(&mut self) {
-        unsafe {
-            syscall_fn_return(self);
-        }
+        unsafe { syscall_fn_return(self) }
+    }
+}
+
+impl UserContextWithExtensions {
+    /// Goes to user context while preserving floating-point and SIMD state.
+    pub fn run_fncall(&mut self) {
+        unsafe { syscall_fn_return_extended(self) }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::*;
-    use core::arch::global_asm;
+    use core::arch::{asm, global_asm};
+
+    #[unsafe(no_mangle)]
+    static mut RESTORED_Q0: u128 = 0;
+    #[unsafe(no_mangle)]
+    static UPDATED_Q0: u128 = 0xa5a5_a5a5_a5a5_a5a5_5a5a_5a5a_5a5a_5a5a;
 
     // Mock user program to dump registers at stack.
     global_asm!(
         r#"
 dump_registers:
+    str     x9, [sp, #-16]!
+    adrp    x9, RESTORED_Q0
+    add     x9, x9, :lo12:RESTORED_Q0
+    str     q0, [x9]
+    adrp    x9, UPDATED_Q0
+    add     x9, x9, :lo12:UPDATED_Q0
+    ldr     q0, [x9]
+    ldr     x9, [sp], #16
     stp     x30, x0, [sp, #-16]!
     str     x29, [sp, #-16]!
     stp     x27, x28, [sp, #-16]!
@@ -145,13 +164,50 @@ elr_location:
             x30: 30,
             ..Default::default()
         };
-        let mut cx = UserContext {
+        let base = UserContext {
             general,
             sp: stack.as_mut_ptr() as usize + 0x1000,
             elr: dump_registers as *const () as usize,
             ..Default::default()
         };
+        #[repr(C)]
+        struct GuardedContext {
+            context: UserContext,
+            guard: [u8; 520],
+        }
+        let mut legacy = GuardedContext {
+            context: base,
+            guard: [0xa5; 520],
+        };
+        let mut legacy_q0 = 0;
+        legacy.context.run_fncall();
+        unsafe {
+            asm!(
+                "str q0, [{buffer}]",
+                buffer = in(reg) &raw mut legacy_q0,
+                options(nostack)
+            );
+        }
+        assert_eq!(legacy.context.general.x0, 100);
+        assert_eq!(legacy.guard, [0xa5; 520]);
+        assert_eq!(legacy_q0, UPDATED_Q0);
+
+        let mut cx = UserContextWithExtensions {
+            trap_num: base.trap_num,
+            __reserved: base.__reserved,
+            elr: base.elr,
+            spsr: base.spsr,
+            sp: base.sp,
+            tpidr: base.tpidr,
+            general: base.general,
+            ..Default::default()
+        };
+        let initial_q0 = 0x1122_3344_5566_7788_99aa_bbcc_ddee_ff00;
+        cx.fp_simd.registers[0] = initial_q0;
         cx.run_fncall();
+        let restored_q0 = unsafe { core::ptr::addr_of!(RESTORED_Q0).read_volatile() };
+        assert_eq!(restored_q0, initial_q0);
+        assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
         // check restored registers
         let general_dump = unsafe { *(cx.sp as *const GeneralRegs) };
         assert_eq!(

@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::UserContext;
+use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
 
 unsafe extern "sysv64" {
@@ -24,6 +24,7 @@ unsafe extern "sysv64" {
     pub fn syscall_fn_entry();
 
     fn syscall_fn_return(regs: &mut UserContext);
+    fn syscall_fn_return_extended(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -32,9 +33,16 @@ impl UserContext {
     /// User program should call `syscall_fn_entry()` to return back.
     /// Trap reason and error code will always be set to 0x100 and 0.
     pub fn run_fncall(&mut self) {
-        unsafe {
-            syscall_fn_return(self);
-        }
+        unsafe { syscall_fn_return(self) }
+        self.trap_num = 0x100;
+        self.error_code = 0;
+    }
+}
+
+impl UserContextWithExtensions {
+    /// Goes to user context while preserving x87 and SSE state.
+    pub fn run_fncall(&mut self) {
+        unsafe { syscall_fn_return_extended(self) }
         self.trap_num = 0x100;
         self.error_code = 0;
     }
@@ -83,6 +91,7 @@ global_asm!(
 
 .global syscall_fn_entry
 .global syscall_fn_return
+.global syscall_fn_return_extended
 "#
 );
 
@@ -136,25 +145,36 @@ global_asm!(
 .global _syscall_fn_entry
 .global syscall_fn_entry
 .global _syscall_fn_return
+.global _syscall_fn_return_extended
 .set _syscall_fn_entry, syscall_fn_entry
 .set _syscall_fn_return, syscall_fn_return
+.set _syscall_fn_return_extended, syscall_fn_return_extended
 "#
 );
 
 global_asm!(
     r#"
 syscall_fn_entry:
+    pushfq                  # preserve flags before inspecting the tagged context
     # save rsp
-    lea r11, [rsp + 8]      # save rsp to r11 (clobber)
+    lea r11, [rsp + 16]     # save rsp to r11 (clobber)
 
     SWITCH_TO_KERNEL_STACK
     pop rsp
+    test rsp, 1
+    jnz 1f
+    and rsp, -2
+    mov qword ptr [rsp + 21*8], 0
+    jmp 2f
+1:  and rsp, -2
+    mov qword ptr [rsp + 21*8], 1
+2:
     lea rsp, [rsp + 20*8]   # rsp = top of trap frame
 
     # push trap frame (struct GeneralRegs)
     push 0                  # ignore gs_base
     PUSH_USER_FSBASE
-    pushfq                  # push rflags
+    push [r11 - 16]         # push saved rflags
     push [r11 - 8]          # push rip
     push r15
     push r14
@@ -173,6 +193,11 @@ syscall_fn_entry:
     push rbx
     push rax
 
+    cmp qword ptr [rsp + 21*8], 0
+    je 1f
+    fxsave64 [rsp + 22*8]
+1:
+
     # restore callee-saved registers
     SWITCH_TO_KERNEL_STACK
     pop rbx
@@ -190,6 +215,11 @@ syscall_fn_entry:
 
     # extern "sysv64" fn syscall_fn_return(&mut UserContext)
 syscall_fn_return:
+    xor esi, esi
+    jmp syscall_fn_return_common
+syscall_fn_return_extended:
+    mov esi, 1
+syscall_fn_return_common:
     # save callee-saved registers
     push r15
     push r14
@@ -198,9 +228,16 @@ syscall_fn_return:
     push rbp
     push rbx
 
+    or rdi, rsi
     push rdi
     SAVE_KERNEL_STACK
+    and rdi, -2
     mov rsp, rdi
+
+    test esi, esi
+    jz 1f
+    fxrstor64 [rsp + 22*8]
+1:
 
     POP_USER_FSBASE
 
@@ -231,15 +268,26 @@ syscall_fn_return:
 #[cfg(test)]
 mod tests {
     use crate::*;
-    use core::arch::global_asm;
+    use core::arch::{asm, global_asm};
 
     #[cfg(target_os = "macos")]
-    global_asm!(".set _dump_registers, dump_registers");
+    global_asm!(
+        ".set _dump_registers, dump_registers\n\
+         .set RESTORED_XMM0, _RESTORED_XMM0\n\
+         .set UPDATED_XMM0, _UPDATED_XMM0"
+    );
+
+    #[unsafe(no_mangle)]
+    static mut RESTORED_XMM0: [u8; 16] = [0; 16];
+    #[unsafe(no_mangle)]
+    static UPDATED_XMM0: [u8; 16] = [0xa5; 16];
 
     // Mock user program to dump registers at stack.
     global_asm!(
         r#"
 dump_registers:
+    movdqu [rip + RESTORED_XMM0], xmm0
+    movdqu xmm0, [rip + UPDATED_XMM0]
     push r15
     push r14
     push r13
@@ -283,33 +331,64 @@ dump_registers:
             fn dump_registers();
         }
         let mut stack = [0u8; 0x1000];
-        let mut cx = UserContext {
-            general: GeneralRegs {
-                rax: 0,
-                rbx: 1,
-                rcx: 2,
-                rdx: 3,
-                rsi: 4,
-                rdi: 5,
-                rbp: 6,
-                rsp: stack.as_mut_ptr() as usize + 0x1000,
-                r8: 8,
-                r9: 9,
-                r10: 10,
-                r11: 11,
-                r12: 12,
-                r13: 13,
-                r14: 14,
-                r15: 15,
-                rip: dump_registers as *const () as usize,
-                rflags: 0,
-                fsbase: 0, // don't set to non-zero garbage value
-                gsbase: 0,
+        let general = GeneralRegs {
+            rax: 0,
+            rbx: 1,
+            rcx: 2,
+            rdx: 3,
+            rsi: 4,
+            rdi: 5,
+            rbp: 6,
+            rsp: stack.as_mut_ptr() as usize + 0x1000,
+            r8: 8,
+            r9: 9,
+            r10: 10,
+            r11: 11,
+            r12: 12,
+            r13: 13,
+            r14: 14,
+            r15: 15,
+            rip: dump_registers as *const () as usize,
+            rflags: 0,
+            fsbase: 0, // don't set to non-zero garbage value
+            gsbase: 0,
+        };
+        #[repr(C)]
+        struct GuardedContext {
+            context: UserContext,
+            guard: [u8; 512],
+        }
+        let mut legacy = GuardedContext {
+            context: UserContext {
+                general,
+                ..Default::default()
             },
+            guard: [0xa5; 512],
+        };
+        let mut legacy_xmm0 = [0; 16];
+        legacy.context.run_fncall();
+        unsafe {
+            asm!(
+                "movdqu [{buffer}], xmm0",
+                buffer = in(reg) legacy_xmm0.as_mut_ptr(),
+                options(nostack)
+            );
+        }
+        assert_eq!(legacy.context.trap_num, 0x100);
+        assert_eq!(legacy.guard, [0xa5; 512]);
+        assert_eq!(legacy_xmm0, UPDATED_XMM0);
+
+        let mut cx = UserContextWithExtensions {
+            general,
             trap_num: 0,
             error_code: 0,
+            fp_simd: Default::default(),
         };
+        cx.fp_simd.bytes[160..176].fill(0x5a);
         cx.run_fncall();
+        let restored_xmm0 = unsafe { core::ptr::addr_of!(RESTORED_XMM0).read_volatile() };
+        assert_eq!(restored_xmm0, [0x5a; 16]);
+        assert_eq!(&cx.fp_simd.bytes[160..176], &UPDATED_XMM0);
         // check restored registers
         let general = unsafe { *(cx.general.rsp as *const GeneralRegs) };
         assert_eq!(

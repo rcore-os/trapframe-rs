@@ -6,7 +6,7 @@ extern crate alloc;
 
 use core::arch::asm;
 use log::*;
-use trapframe::{GeneralRegs, TrapFrame, UserContext};
+use trapframe::{GeneralRegs, TrapFrame, UserContext, UserContextWithExtensions};
 use uefi::prelude::*;
 use x86_64::registers::control::*;
 use x86_64::structures::paging::{PageTable, PageTableFlags};
@@ -32,6 +32,11 @@ fn efi_main() -> Status {
     unsafe {
         trapframe::init();
     }
+    let cr0 = Cr0::read();
+    let cr4 = Cr4::read();
+    assert!(cr0.contains(Cr0Flags::MONITOR_COPROCESSOR | Cr0Flags::NUMERIC_ERROR));
+    assert!(!cr0.intersects(Cr0Flags::EMULATE_COPROCESSOR | Cr0Flags::TASK_SWITCHED));
+    assert!(cr4.contains(Cr4Flags::OSFXSR | Cr4Flags::OSXMMEXCPT_ENABLE));
 
     let mut context = UserContext {
         general: GeneralRegs {
@@ -64,6 +69,8 @@ fn efi_main() -> Status {
     info!("back from user: {:#x?}", context);
     assert_eq!(context.trap_num, 0x100); // syscall
 
+    benchmark_context_switches(context.general);
+
     info!("go to user");
     context.run();
     info!("back from user: {:#x?}", context);
@@ -74,6 +81,66 @@ fn efi_main() -> Status {
         asm!("int3", options(nomem, nostack));
     }
     unimplemented!()
+}
+
+fn benchmark_context_switches(mut general: GeneralRegs) {
+    const WARMUP: usize = 10;
+    const ITERATIONS: usize = 1000;
+    let user_entry = user_entry as *const () as usize;
+
+    let mut base = UserContext {
+        general,
+        trap_num: 0x100,
+        ..Default::default()
+    };
+    for _ in 0..WARMUP {
+        base.general.rip = user_entry;
+        base.run();
+    }
+    let start = read_tsc();
+    for _ in 0..ITERATIONS {
+        base.general.rip = user_entry;
+        base.run();
+    }
+    let base_cycles = read_tsc() - start;
+
+    general.rip = user_entry;
+    let mut extended = UserContextWithExtensions {
+        general,
+        trap_num: 0x100,
+        ..Default::default()
+    };
+    for _ in 0..WARMUP {
+        extended.general.rip = user_entry;
+        extended.run();
+    }
+    let start = read_tsc();
+    for _ in 0..ITERATIONS {
+        extended.general.rip = user_entry;
+        extended.run();
+    }
+    let extended_cycles = read_tsc() - start;
+
+    info!(
+        "context switch benchmark: base={} cycles, extended={} cycles",
+        base_cycles / ITERATIONS as u64,
+        extended_cycles / ITERATIONS as u64
+    );
+}
+
+fn read_tsc() -> u64 {
+    let low: u32;
+    let high: u32;
+    unsafe {
+        asm!(
+            "lfence",
+            "rdtsc",
+            out("eax") low,
+            out("edx") high,
+            options(nomem, nostack)
+        );
+    }
+    (u64::from(high) << 32) | u64::from(low)
 }
 
 #[unsafe(no_mangle)]

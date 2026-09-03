@@ -17,6 +17,7 @@ global_asm!(
 global_asm!(
     r"
     .equ XLENB, 8
+    .equ RISCV_EXTENDED_CONTEXT, 1
     .macro LOAD_SP a1, a2
         ld \a1, \a2*XLENB(sp)
     .endm
@@ -83,6 +84,69 @@ pub struct UserContext {
     pub sepc: usize,
 }
 
+/// A RISC-V 64 user context that also preserves floating-point and vector state.
+#[cfg(target_arch = "riscv64")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C, align(16))]
+pub struct UserContextWithExtensions {
+    /// Integer registers.
+    pub general: GeneralRegs,
+    /// Supervisor status register (`sstatus`).
+    pub sstatus: usize,
+    /// Supervisor exception program counter (`sepc`).
+    pub sepc: usize,
+    /// RISC-V vector registers and control state.
+    pub vector: VectorRegs,
+    /// RISC-V floating-point registers and control state.
+    pub float: FloatRegs,
+}
+
+#[cfg(target_arch = "riscv64")]
+impl core::ops::Deref for UserContextWithExtensions {
+    type Target = UserContext;
+
+    fn deref(&self) -> &Self::Target {
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &*(self as *const Self).cast() }
+    }
+}
+
+#[cfg(target_arch = "riscv64")]
+impl core::ops::DerefMut for UserContextWithExtensions {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &mut *(self as *mut Self).cast() }
+    }
+}
+
+/// Saved state for a RISC-V V implementation with VLEN=128.
+#[cfg(target_arch = "riscv64")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C, align(16))]
+pub struct VectorRegs {
+    /// The 32 vector registers, each 128 bits wide.
+    pub registers: [u128; 32],
+    /// Vector start index.
+    pub vstart: usize,
+    /// Vector length.
+    pub vl: usize,
+    /// Vector type.
+    pub vtype: usize,
+    /// Fixed-point rounding mode and saturation flag.
+    pub vcsr: usize,
+}
+
+/// Saved double-precision RISC-V floating-point state.
+#[cfg(target_arch = "riscv64")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C)]
+pub struct FloatRegs {
+    /// Floating-point registers F0 through F31.
+    pub registers: [u64; 32],
+    /// Floating-point control and status register.
+    pub fcsr: usize,
+}
+
 impl UserContext {
     /// Go to user space with the context, and come back when a trap occurs.
     ///
@@ -109,6 +173,14 @@ impl UserContext {
     /// ```
     pub fn run(&mut self) {
         unsafe { run_user(self) }
+    }
+}
+
+#[cfg(target_arch = "riscv64")]
+impl UserContextWithExtensions {
+    /// Runs user code while preserving floating-point and vector state.
+    pub fn run(&mut self) {
+        unsafe { run_user_extended(self) }
     }
 }
 
@@ -235,4 +307,6 @@ impl UserContext {
 unsafe extern "C" {
     fn trap_entry();
     fn run_user(regs: &mut UserContext);
+    #[cfg(target_arch = "riscv64")]
+    fn run_user_extended(regs: &mut UserContextWithExtensions);
 }

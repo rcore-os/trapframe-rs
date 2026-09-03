@@ -6,6 +6,8 @@ use core::fmt::{self, Write};
 use core::panic::PanicInfo;
 use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
+#[cfg(target_pointer_width = "64")]
+use trapframe::{FloatRegs, UserContextWithExtensions, VectorRegs};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 
 global_asm!(
@@ -23,6 +25,147 @@ bootstack:
 bootstacktop:
 "#
 );
+
+#[cfg(target_pointer_width = "64")]
+global_asm!(
+    r#"
+    .section .text
+    .globl user_entry
+user_entry:
+    .option push
+    .option arch, +v, +d
+    la t0, RESTORED_VECTOR
+    vs8r.v v0, (t0)
+    addi t0, t0, 128
+    vs8r.v v8, (t0)
+    addi t0, t0, 128
+    vs8r.v v16, (t0)
+    addi t0, t0, 128
+    vs8r.v v24, (t0)
+
+    la t0, RESTORED_FLOAT
+    fsd f0, 0(t0)
+    fsd f1, 8(t0)
+    fsd f2, 16(t0)
+    fsd f3, 24(t0)
+    fsd f4, 32(t0)
+    fsd f5, 40(t0)
+    fsd f6, 48(t0)
+    fsd f7, 56(t0)
+    fsd f8, 64(t0)
+    fsd f9, 72(t0)
+    fsd f10, 80(t0)
+    fsd f11, 88(t0)
+    fsd f12, 96(t0)
+    fsd f13, 104(t0)
+    fsd f14, 112(t0)
+    fsd f15, 120(t0)
+    fsd f16, 128(t0)
+    fsd f17, 136(t0)
+    fsd f18, 144(t0)
+    fsd f19, 152(t0)
+    fsd f20, 160(t0)
+    fsd f21, 168(t0)
+    fsd f22, 176(t0)
+    fsd f23, 184(t0)
+    fsd f24, 192(t0)
+    fsd f25, 200(t0)
+    fsd f26, 208(t0)
+    fsd f27, 216(t0)
+    fsd f28, 224(t0)
+    fsd f29, 232(t0)
+    fsd f30, 240(t0)
+    fsd f31, 248(t0)
+
+    la t0, UPDATED_VECTOR
+    vl8re8.v v0, (t0)
+    addi t0, t0, 128
+    vl8re8.v v8, (t0)
+    addi t0, t0, 128
+    vl8re8.v v16, (t0)
+    addi t0, t0, 128
+    vl8re8.v v24, (t0)
+
+    la t0, UPDATED_FLOAT
+    fld f0, 0(t0)
+    fld f1, 8(t0)
+    fld f2, 16(t0)
+    fld f3, 24(t0)
+    fld f4, 32(t0)
+    fld f5, 40(t0)
+    fld f6, 48(t0)
+    fld f7, 56(t0)
+    fld f8, 64(t0)
+    fld f9, 72(t0)
+    fld f10, 80(t0)
+    fld f11, 88(t0)
+    fld f12, 96(t0)
+    fld f13, 104(t0)
+    fld f14, 112(t0)
+    fld f15, 120(t0)
+    fld f16, 128(t0)
+    fld f17, 136(t0)
+    fld f18, 144(t0)
+    fld f19, 152(t0)
+    fld f20, 160(t0)
+    fld f21, 168(t0)
+    fld f22, 176(t0)
+    fld f23, 184(t0)
+    fld f24, 192(t0)
+    fld f25, 200(t0)
+    fld f26, 208(t0)
+    fld f27, 216(t0)
+    fld f28, 224(t0)
+    fld f29, 232(t0)
+    fld f30, 240(t0)
+    fld f31, 248(t0)
+    csrwi fcsr, 0x1f
+    vsetivli zero, 8, e16, m2, ta, ma
+    csrwi vcsr, 3
+    ecall
+    .option pop
+"#
+);
+
+#[cfg(target_pointer_width = "64")]
+#[unsafe(no_mangle)]
+static mut RESTORED_VECTOR: [u128; 32] = [0; 32];
+#[cfg(target_pointer_width = "64")]
+#[unsafe(no_mangle)]
+static mut RESTORED_FLOAT: [u64; 32] = [0; 32];
+#[cfg(target_pointer_width = "64")]
+#[unsafe(no_mangle)]
+static UPDATED_VECTOR: [u128; 32] = sequence_u128(0x2000);
+#[cfg(target_pointer_width = "64")]
+#[unsafe(no_mangle)]
+static UPDATED_FLOAT: [u64; 32] = sequence_u64(0x4000);
+
+#[cfg(target_pointer_width = "64")]
+unsafe extern "C" {
+    fn user_entry();
+}
+
+#[cfg(target_pointer_width = "64")]
+const fn sequence_u128(base: u128) -> [u128; 32] {
+    let mut values = [0; 32];
+    let mut i = 0;
+    while i < values.len() {
+        values[i] = base + i as u128;
+        i += 1;
+    }
+    values
+}
+
+#[cfg(target_pointer_width = "64")]
+const fn sequence_u64(base: u64) -> [u64; 32] {
+    let mut values = [0; 32];
+    let mut i = 0;
+    while i < values.len() {
+        values[i] = base + i as u64;
+        i += 1;
+    }
+    values
+}
 
 struct Stdout;
 
@@ -73,7 +216,11 @@ extern "C" fn main() {
     }
     println!("Hello, OpenSBI!");
 
-    let mut regs = UserContext {
+    #[cfg(target_pointer_width = "64")]
+    let initial_vector = sequence_u128(0x1000);
+    #[cfg(target_pointer_width = "64")]
+    let initial_float = sequence_u64(0x3000);
+    let context = UserContext {
         general: GeneralRegs {
             zero: 0,
             ra: 1,
@@ -108,8 +255,47 @@ extern "C" fn main() {
             t5: 30,
             t6: 31,
         },
-        sstatus: 0xdead_beaf,
+        #[cfg(target_pointer_width = "64")]
+        // Enable floating-point and vector state for user mode (FS/VS=Dirty).
+        sstatus: (3 << 13) | (3 << 9) | (1 << 5),
+        #[cfg(target_pointer_width = "32")]
+        sstatus: 1 << 5,
         sepc: user_entry as *const () as usize,
+    };
+    #[cfg(target_pointer_width = "32")]
+    let mut regs = context;
+    #[cfg(target_pointer_width = "64")]
+    {
+        #[repr(C)]
+        struct GuardedContext {
+            context: UserContext,
+            guard: [u8; 1024],
+        }
+        let mut legacy = GuardedContext {
+            context,
+            guard: [0xa5; 1024],
+        };
+        legacy.context.run();
+        assert_eq!(scause::read().cause(), Trap::Exception(E::UserEnvCall));
+        assert_eq!(legacy.guard, [0xa5; 1024]);
+        println!("RISC-V base context round-trip passed");
+    }
+    #[cfg(target_pointer_width = "64")]
+    let mut regs = UserContextWithExtensions {
+        general: context.general,
+        sstatus: context.sstatus,
+        sepc: context.sepc,
+        vector: VectorRegs {
+            registers: initial_vector,
+            vstart: 0,
+            vl: 16,
+            vtype: 0,
+            vcsr: 5,
+        },
+        float: FloatRegs {
+            registers: initial_float,
+            fcsr: 0,
+        },
     };
     println!("Go to user: {:#x?}", regs);
     regs.run();
@@ -121,6 +307,20 @@ extern "C" fn main() {
         stval,
         regs
     );
+
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        let restored_vector = core::ptr::addr_of!(RESTORED_VECTOR).read_volatile();
+        let restored_float = core::ptr::addr_of!(RESTORED_FLOAT).read_volatile();
+        assert_eq!(restored_vector, initial_vector);
+        assert_eq!(restored_float, initial_float);
+        assert_eq!(regs.vector.registers, UPDATED_VECTOR);
+        assert_eq!(regs.float.registers, UPDATED_FLOAT);
+        assert_eq!(regs.vector.vl, 8);
+        assert_eq!(regs.vector.vcsr, 3);
+        assert_eq!(regs.float.fcsr, 0x1f);
+        println!("RISC-V vector/FPU context round-trip passed");
+    }
 
     unsafe {
         asm!("ebreak");
@@ -148,6 +348,7 @@ extern "C" fn trap_handler(tf: &mut TrapFrame) {
     }
 }
 
+#[cfg(target_pointer_width = "32")]
 unsafe extern "C" fn user_entry() {
     console_putchar(1);
 }

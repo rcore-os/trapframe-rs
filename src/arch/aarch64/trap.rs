@@ -80,8 +80,16 @@ impl UserContext {
     }
 }
 
+impl UserContextWithExtensions {
+    /// Goes to user space while preserving floating-point and SIMD state.
+    pub fn run(&mut self) {
+        unsafe { run_user_extended(self) }
+    }
+}
+
 #[allow(improper_ctypes)]
 unsafe extern "C" {
     fn __vectors();
     fn run_user(regs: &mut UserContext);
+    fn run_user_extended(regs: &mut UserContextWithExtensions);
 }

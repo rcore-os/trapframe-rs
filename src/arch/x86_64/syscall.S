@@ -1,7 +1,13 @@
 .text
     # extern "sysv64" fn syscall_return(&mut GeneralRegs)
 .global syscall_return
+.global syscall_return_extended
 syscall_return:
+    xor esi, esi
+    jmp syscall_return_common
+syscall_return_extended:
+    mov esi, 1
+syscall_return_common:
     # disable interrupt
     cli
 
@@ -17,10 +23,17 @@ syscall_return:
     rdfsbase rbx
     push rbx
 
+    or rdi, rsi             # tag the context pointer for the trap entry
     push rdi
     push rdi                # keep rsp 16 bytes align
     mov gs:4, rsp           # store kernel rsp -> TSS.sp0
+    and rdi, -2
     mov rsp, rdi            # set rsp = bottom of trap frame
+
+    test esi, esi
+    jz 1f
+    fxrstor64 [rsp + 22*8]
+1:
 
     # pop fsbase gsbase
     swapgs                  # store kernel gsbase
@@ -90,7 +103,8 @@ syscall_entry:
     swapgs                  # swap in kernel gs
     mov gs:12, rsp          # store user rsp -> scratch at TSS.sp1
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
-    pop rsp                 # load rsp = bottom of trap frame
+    pop rsp                 # load rsp = tagged bottom of trap frame
+    and rsp, -2
     add rsp, 22*8           # rsp = top of trap frame
 
     # push trap_num, error_code
@@ -130,6 +144,12 @@ trap_syscall_entry:
     rdgsbase rbx
     mov [rsp + 19*8], rbx
     swapgs
+
+    mov rbx, gs:4
+    test byte ptr [rbx], 1
+    jz 1f
+    fxsave64 [rsp + 22*8]
+1:
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
