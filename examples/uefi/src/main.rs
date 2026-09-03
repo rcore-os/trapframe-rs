@@ -32,6 +32,11 @@ fn efi_main() -> Status {
     unsafe {
         trapframe::init();
     }
+    let cr0 = Cr0::read();
+    let cr4 = Cr4::read();
+    assert!(cr0.contains(Cr0Flags::MONITOR_COPROCESSOR | Cr0Flags::NUMERIC_ERROR));
+    assert!(!cr0.intersects(Cr0Flags::EMULATE_COPROCESSOR | Cr0Flags::TASK_SWITCHED));
+    assert!(cr4.contains(Cr4Flags::OSFXSR | Cr4Flags::OSXMMEXCPT_ENABLE));
 
     let mut context = UserContext {
         general: GeneralRegs {

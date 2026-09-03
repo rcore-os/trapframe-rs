@@ -256,8 +256,8 @@ mod tests {
     #[cfg(target_os = "macos")]
     global_asm!(
         ".set _dump_registers, dump_registers\n\
-         .set _RESTORED_XMM0, RESTORED_XMM0\n\
-         .set _UPDATED_XMM0, UPDATED_XMM0"
+         .set RESTORED_XMM0, _RESTORED_XMM0\n\
+         .set UPDATED_XMM0, _UPDATED_XMM0"
     );
 
     #[unsafe(no_mangle)]
