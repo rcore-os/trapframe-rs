@@ -14,9 +14,24 @@ global_asm!(
     include_str!("trap.S")
 );
 #[cfg(target_arch = "riscv64")]
+#[cfg(not(feature = "riscv-vector"))]
 global_asm!(
     r"
     .equ XLENB, 8
+    .macro LOAD_SP a1, a2
+        ld \a1, \a2*XLENB(sp)
+    .endm
+    .macro STORE_SP a1, a2
+        sd \a1, \a2*XLENB(sp)
+    .endm
+",
+    include_str!("trap.S")
+);
+#[cfg(all(target_arch = "riscv64", feature = "riscv-vector"))]
+global_asm!(
+    r"
+    .equ XLENB, 8
+    .equ RISCV_VECTOR_CONTEXT, 1
     .macro LOAD_SP a1, a2
         ld \a1, \a2*XLENB(sp)
     .endm
@@ -81,6 +96,40 @@ pub struct UserContext {
     pub sstatus: usize,
     /// Supervisor exception program counter (`sepc`).
     pub sepc: usize,
+    /// RISC-V vector registers and control state.
+    #[cfg(feature = "riscv-vector")]
+    pub vector: VectorRegs,
+    /// RISC-V floating-point registers and control state.
+    #[cfg(feature = "riscv-vector")]
+    pub float: FloatRegs,
+}
+
+/// Saved state for a RISC-V V implementation with VLEN=128.
+#[cfg(feature = "riscv-vector")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C, align(16))]
+pub struct VectorRegs {
+    /// The 32 vector registers, each 128 bits wide.
+    pub registers: [u128; 32],
+    /// Vector start index.
+    pub vstart: usize,
+    /// Vector length.
+    pub vl: usize,
+    /// Vector type.
+    pub vtype: usize,
+    /// Fixed-point rounding mode and saturation flag.
+    pub vcsr: usize,
+}
+
+/// Saved double-precision RISC-V floating-point state.
+#[cfg(feature = "riscv-vector")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C)]
+pub struct FloatRegs {
+    /// Floating-point registers F0 through F31.
+    pub registers: [u64; 32],
+    /// Floating-point control and status register.
+    pub fcsr: usize,
 }
 
 impl UserContext {

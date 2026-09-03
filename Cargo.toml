@@ -42,3 +42,5 @@ raw-cpuid = "11.0"
 default = []
 # This requires allocating a 64K consecutive memory block.
 ioport_bitmap = []
+# Save and restore 128-bit RISC-V vector registers in `UserContext`.
+riscv-vector = []
