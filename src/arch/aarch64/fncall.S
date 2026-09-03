@@ -60,7 +60,8 @@ syscall_fn_entry:
     stp     q30, q31, [sp, #784]
     mrs     x2, fpcr
     mrs     x3, fpsr
-    stp     w2, w3, [sp, #816]
+    add     x4, sp, #816
+    stp     w2, w3, [x4]
 
     # skip sp and save tpidr
     mrs     x1, tpidr_el0
@@ -108,7 +109,8 @@ syscall_fn_return:
     ldp     q26, q27, [x0, #720]
     ldp     q28, q29, [x0, #752]
     ldp     q30, q31, [x0, #784]
-    ldp     w1, w2, [x0, #816]
+    add     x3, x0, #816
+    ldp     w1, w2, [x3]
     msr     fpcr, x1
     msr     fpsr, x2
 

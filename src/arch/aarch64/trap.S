@@ -72,7 +72,8 @@ trap_from_user:
     stp     q30, q31, [sp, #784]
     mrs     x3, fpcr
     mrs     x4, fpsr
-    stp     w3, w4, [sp, #816]
+    add     x5, sp, #816
+    stp     w3, w4, [x5]
 
     # read tpidr and sp
     mrs     x2, tpidr_el0
@@ -160,7 +161,8 @@ trap_return:
     ldp     q26, q27, [sp, #720]
     ldp     q28, q29, [sp, #752]
     ldp     q30, q31, [sp, #784]
-    ldp     w1, w2, [sp, #816]
+    add     x3, sp, #816
+    ldp     w1, w2, [x3]
     msr     fpcr, x1
     msr     fpsr, x2
 
