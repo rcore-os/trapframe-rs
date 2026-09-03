@@ -114,6 +114,8 @@ while keeping the kernel-facing control flow.
 
 - `ioport_bitmap`: adds an x86-64 TSS I/O-permission bitmap. It requires a
   contiguous allocation of approximately 64 KiB.
+- `riscv-vector`: preserves 128-bit RISC-V vector registers and the associated
+  floating-point state across user/kernel transitions.
 
 ## Examples
 

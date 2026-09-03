@@ -126,12 +126,16 @@ jobs:
           cargo build --target "$target"
           timeout 30 qemu-system-${{ matrix.arch }} \
             -machine virt \
+            ${{ matrix.arch == 'riscv64' && '-cpu max,vlen=128' || '' }} \
             -nographic \
             -bios "$bios" \
             -kernel "target/$target/debug/riscv" | tee qemu.log
           grep -q 'Back from user: Exception(UserEnvCall)' qemu.log
           grep -q 'TRAP: Breakpoint' qemu.log
           grep -q 'Exit...' qemu.log
+          if [ "${{ matrix.arch }}" = riscv64 ]; then
+            grep -q 'RISC-V vector/FPU context round-trip passed' qemu.log
+          fi
 
   test-mipsel:
     runs-on: ubuntu-latest
