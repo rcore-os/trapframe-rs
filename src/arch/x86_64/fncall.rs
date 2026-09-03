@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::UserContext;
+use super::{ExtendedUserContext, UserContext};
 use core::arch::global_asm;
 
 unsafe extern "sysv64" {
@@ -23,7 +23,7 @@ unsafe extern "sysv64" {
     /// ```
     pub fn syscall_fn_entry();
 
-    fn syscall_fn_return(regs: &mut UserContext);
+    fn syscall_fn_return(regs: &mut ExtendedUserContext);
 }
 
 impl UserContext {
@@ -32,9 +32,21 @@ impl UserContext {
     /// User program should call `syscall_fn_entry()` to return back.
     /// Trap reason and error code will always be set to 0x100 and 0.
     pub fn run_fncall(&mut self) {
-        unsafe {
-            syscall_fn_return(self);
-        }
+        let mut context = ExtendedUserContext {
+            context: *self,
+            ..Default::default()
+        };
+        context.run_fncall();
+        *self = context.context;
+        self.trap_num = 0x100;
+        self.error_code = 0;
+    }
+}
+
+impl ExtendedUserContext {
+    /// Goes to user context while preserving x87 and SSE state.
+    pub fn run_fncall(&mut self) {
+        unsafe { syscall_fn_return(self) }
         self.trap_num = 0x100;
         self.error_code = 0;
     }
@@ -173,6 +185,8 @@ syscall_fn_entry:
     push rbx
     push rax
 
+    fxsave64 [rsp + 22*8]
+
     # restore callee-saved registers
     SWITCH_TO_KERNEL_STACK
     pop rbx
@@ -201,6 +215,8 @@ syscall_fn_return:
     push rdi
     SAVE_KERNEL_STACK
     mov rsp, rdi
+
+    fxrstor64 [rsp + 22*8]
 
     POP_USER_FSBASE
 
@@ -234,12 +250,23 @@ mod tests {
     use core::arch::global_asm;
 
     #[cfg(target_os = "macos")]
-    global_asm!(".set _dump_registers, dump_registers");
+    global_asm!(
+        ".set _dump_registers, dump_registers\n\
+         .set _RESTORED_XMM0, RESTORED_XMM0\n\
+         .set _UPDATED_XMM0, UPDATED_XMM0"
+    );
+
+    #[unsafe(no_mangle)]
+    static mut RESTORED_XMM0: [u8; 16] = [0; 16];
+    #[unsafe(no_mangle)]
+    static UPDATED_XMM0: [u8; 16] = [0xa5; 16];
 
     // Mock user program to dump registers at stack.
     global_asm!(
         r#"
 dump_registers:
+    movdqu [rip + RESTORED_XMM0], xmm0
+    movdqu xmm0, [rip + UPDATED_XMM0]
     push r15
     push r14
     push r13
@@ -283,33 +310,40 @@ dump_registers:
             fn dump_registers();
         }
         let mut stack = [0u8; 0x1000];
-        let mut cx = UserContext {
-            general: GeneralRegs {
-                rax: 0,
-                rbx: 1,
-                rcx: 2,
-                rdx: 3,
-                rsi: 4,
-                rdi: 5,
-                rbp: 6,
-                rsp: stack.as_mut_ptr() as usize + 0x1000,
-                r8: 8,
-                r9: 9,
-                r10: 10,
-                r11: 11,
-                r12: 12,
-                r13: 13,
-                r14: 14,
-                r15: 15,
-                rip: dump_registers as *const () as usize,
-                rflags: 0,
-                fsbase: 0, // don't set to non-zero garbage value
-                gsbase: 0,
+        let mut cx = ExtendedUserContext {
+            context: UserContext {
+                general: GeneralRegs {
+                    rax: 0,
+                    rbx: 1,
+                    rcx: 2,
+                    rdx: 3,
+                    rsi: 4,
+                    rdi: 5,
+                    rbp: 6,
+                    rsp: stack.as_mut_ptr() as usize + 0x1000,
+                    r8: 8,
+                    r9: 9,
+                    r10: 10,
+                    r11: 11,
+                    r12: 12,
+                    r13: 13,
+                    r14: 14,
+                    r15: 15,
+                    rip: dump_registers as *const () as usize,
+                    rflags: 0,
+                    fsbase: 0, // don't set to non-zero garbage value
+                    gsbase: 0,
+                },
+                trap_num: 0,
+                error_code: 0,
             },
-            trap_num: 0,
-            error_code: 0,
+            fp_simd: Default::default(),
         };
+        cx.fp_simd.bytes[160..176].fill(0x5a);
         cx.run_fncall();
+        let restored_xmm0 = unsafe { core::ptr::addr_of!(RESTORED_XMM0).read_volatile() };
+        assert_eq!(restored_xmm0, [0x5a; 16]);
+        assert_eq!(&cx.fp_simd.bytes[160..176], &UPDATED_XMM0);
         // check restored registers
         let general = unsafe { *(cx.general.rsp as *const GeneralRegs) };
         assert_eq!(

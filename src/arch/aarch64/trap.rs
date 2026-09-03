@@ -76,6 +76,18 @@ impl UserContext {
     /// println!("back from user: {:#x?}", context);
     /// ```
     pub fn run(&mut self) {
+        let mut context = ExtendedUserContext {
+            context: *self,
+            ..Default::default()
+        };
+        context.run();
+        *self = context.context;
+    }
+}
+
+impl ExtendedUserContext {
+    /// Goes to user space while preserving floating-point and SIMD state.
+    pub fn run(&mut self) {
         unsafe { run_user(self) }
     }
 }
@@ -83,5 +95,5 @@ impl UserContext {
 #[allow(improper_ctypes)]
 unsafe extern "C" {
     fn __vectors();
-    fn run_user(regs: &mut UserContext);
+    fn run_user(regs: &mut ExtendedUserContext);
 }

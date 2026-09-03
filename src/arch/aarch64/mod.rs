@@ -30,6 +30,42 @@ pub struct UserContext {
     pub general: GeneralRegs,
 }
 
+/// An AArch64 user context that also preserves floating-point and SIMD state.
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[repr(C, align(16))]
+pub struct ExtendedUserContext {
+    /// General-purpose and control state.
+    pub context: UserContext,
+    /// Floating-point and Advanced SIMD state.
+    pub fp_simd: FpSimdState,
+}
+
+impl core::ops::Deref for ExtendedUserContext {
+    type Target = UserContext;
+
+    fn deref(&self) -> &Self::Target {
+        &self.context
+    }
+}
+
+impl core::ops::DerefMut for ExtendedUserContext {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.context
+    }
+}
+
+/// Saved AArch64 floating-point and Advanced SIMD state.
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[repr(C, align(16))]
+pub struct FpSimdState {
+    /// SIMD and floating-point registers Q0 through Q31.
+    pub registers: [u128; 32],
+    /// Floating-point control register.
+    pub fpcr: u32,
+    /// Floating-point status register.
+    pub fpsr: u32,
+}
+
 /// AArch64 general-purpose registers.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]

@@ -82,12 +82,35 @@ pub struct UserContext {
     pub sstatus: usize,
     /// Supervisor exception program counter (`sepc`).
     pub sepc: usize,
+}
+
+/// A RISC-V 64 user context that also preserves floating-point and vector state.
+#[cfg(target_arch = "riscv64")]
+#[derive(Debug, Default, Clone, Copy)]
+#[repr(C, align(16))]
+pub struct ExtendedUserContext {
+    /// Integer and control registers.
+    pub context: UserContext,
     /// RISC-V vector registers and control state.
-    #[cfg(target_arch = "riscv64")]
     pub vector: VectorRegs,
     /// RISC-V floating-point registers and control state.
-    #[cfg(target_arch = "riscv64")]
     pub float: FloatRegs,
+}
+
+#[cfg(target_arch = "riscv64")]
+impl core::ops::Deref for ExtendedUserContext {
+    type Target = UserContext;
+
+    fn deref(&self) -> &Self::Target {
+        &self.context
+    }
+}
+
+#[cfg(target_arch = "riscv64")]
+impl core::ops::DerefMut for ExtendedUserContext {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.context
+    }
 }
 
 /// Saved state for a RISC-V V implementation with VLEN=128.
@@ -142,6 +165,26 @@ impl UserContext {
     /// // back from user
     /// println!("back from user: {:#x?}", context);
     /// ```
+    pub fn run(&mut self) {
+        #[cfg(target_arch = "riscv64")]
+        {
+            let mut context = ExtendedUserContext {
+                context: *self,
+                ..Default::default()
+            };
+            context.run();
+            *self = context.context;
+        }
+        #[cfg(target_arch = "riscv32")]
+        unsafe {
+            run_user(self)
+        }
+    }
+}
+
+#[cfg(target_arch = "riscv64")]
+impl ExtendedUserContext {
+    /// Runs user code while preserving floating-point and vector state.
     pub fn run(&mut self) {
         unsafe { run_user(self) }
     }
@@ -269,5 +312,8 @@ impl UserContext {
 #[allow(improper_ctypes)]
 unsafe extern "C" {
     fn trap_entry();
+    #[cfg(target_arch = "riscv32")]
     fn run_user(regs: &mut UserContext);
+    #[cfg(target_arch = "riscv64")]
+    fn run_user(regs: &mut ExtendedUserContext);
 }

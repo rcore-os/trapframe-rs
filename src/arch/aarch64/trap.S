@@ -50,9 +50,30 @@ trap_from_kernel:
     ldr     x1, [sp, #40]
     msr     tpidr_el1, x1
     # go to trap_return
-    b       trap_return
+    b       trap_return_without_fp
 
 trap_from_user:
+    # save floating-point and Advanced SIMD state after the integer frame
+    stp     q0, q1, [sp, #304]
+    stp     q2, q3, [sp, #336]
+    stp     q4, q5, [sp, #368]
+    stp     q6, q7, [sp, #400]
+    stp     q8, q9, [sp, #432]
+    stp     q10, q11, [sp, #464]
+    stp     q12, q13, [sp, #496]
+    stp     q14, q15, [sp, #528]
+    stp     q16, q17, [sp, #560]
+    stp     q18, q19, [sp, #592]
+    stp     q20, q21, [sp, #624]
+    stp     q22, q23, [sp, #656]
+    stp     q24, q25, [sp, #688]
+    stp     q26, q27, [sp, #720]
+    stp     q28, q29, [sp, #752]
+    stp     q30, q31, [sp, #784]
+    mrs     x3, fpcr
+    mrs     x4, fpsr
+    stp     w3, w4, [sp, #816]
+
     # read tpidr and sp
     mrs     x2, tpidr_el0
     mrs     x1, sp_el0
@@ -123,6 +144,27 @@ run_user:
 
 trap_return:
     # sp points to TrapFrame
+    ldp     q0, q1, [sp, #304]
+    ldp     q2, q3, [sp, #336]
+    ldp     q4, q5, [sp, #368]
+    ldp     q6, q7, [sp, #400]
+    ldp     q8, q9, [sp, #432]
+    ldp     q10, q11, [sp, #464]
+    ldp     q12, q13, [sp, #496]
+    ldp     q14, q15, [sp, #528]
+    ldp     q16, q17, [sp, #560]
+    ldp     q18, q19, [sp, #592]
+    ldp     q20, q21, [sp, #624]
+    ldp     q22, q23, [sp, #656]
+    ldp     q24, q25, [sp, #688]
+    ldp     q26, q27, [sp, #720]
+    ldp     q28, q29, [sp, #752]
+    ldp     q30, q31, [sp, #784]
+    ldp     w1, w2, [sp, #816]
+    msr     fpcr, x1
+    msr     fpsr, x2
+
+trap_return_without_fp:
     # skip trap num, don't restore
     add     sp, sp, #16
 

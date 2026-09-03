@@ -7,7 +7,7 @@ use core::panic::PanicInfo;
 use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
 #[cfg(target_pointer_width = "64")]
-use trapframe::{FloatRegs, VectorRegs};
+use trapframe::{ExtendedUserContext, FloatRegs, VectorRegs};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 
 global_asm!(
@@ -145,6 +145,7 @@ unsafe extern "C" {
     fn user_entry();
 }
 
+#[cfg(target_pointer_width = "64")]
 const fn sequence_u128(base: u128) -> [u128; 32] {
     let mut values = [0; 32];
     let mut i = 0;
@@ -155,6 +156,7 @@ const fn sequence_u128(base: u128) -> [u128; 32] {
     values
 }
 
+#[cfg(target_pointer_width = "64")]
 const fn sequence_u64(base: u64) -> [u64; 32] {
     let mut values = [0; 32];
     let mut i = 0;
@@ -214,9 +216,11 @@ extern "C" fn main() {
     }
     println!("Hello, OpenSBI!");
 
+    #[cfg(target_pointer_width = "64")]
     let initial_vector = sequence_u128(0x1000);
+    #[cfg(target_pointer_width = "64")]
     let initial_float = sequence_u64(0x3000);
-    let mut regs = UserContext {
+    let context = UserContext {
         general: GeneralRegs {
             zero: 0,
             ra: 1,
@@ -251,10 +255,18 @@ extern "C" fn main() {
             t5: 30,
             t6: 31,
         },
+        #[cfg(target_pointer_width = "64")]
         // Enable floating-point and vector state for user mode (FS/VS=Dirty).
         sstatus: (3 << 13) | (3 << 9) | (1 << 5),
+        #[cfg(target_pointer_width = "32")]
+        sstatus: 1 << 5,
         sepc: user_entry as *const () as usize,
-        #[cfg(target_pointer_width = "64")]
+    };
+    #[cfg(target_pointer_width = "32")]
+    let mut regs = context;
+    #[cfg(target_pointer_width = "64")]
+    let mut regs = ExtendedUserContext {
+        context,
         vector: VectorRegs {
             registers: initial_vector,
             vstart: 0,
@@ -262,7 +274,6 @@ extern "C" fn main() {
             vtype: 0,
             vcsr: 5,
         },
-        #[cfg(target_pointer_width = "64")]
         float: FloatRegs {
             registers: initial_float,
             fcsr: 0,

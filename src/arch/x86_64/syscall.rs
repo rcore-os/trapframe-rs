@@ -1,4 +1,4 @@
-use super::UserContext;
+use super::{ExtendedUserContext, UserContext};
 use core::arch::global_asm;
 use x86_64::VirtAddr;
 use x86_64::registers::control::{Cr4, Cr4Flags};
@@ -39,7 +39,7 @@ pub fn init() {
 
 unsafe extern "sysv64" {
     fn syscall_entry();
-    fn syscall_return(regs: &mut UserContext);
+    fn syscall_return(regs: &mut ExtendedUserContext);
 }
 
 impl UserContext {
@@ -72,8 +72,18 @@ impl UserContext {
     /// println!("back from user: {:#x?}", context);
     /// ```
     pub fn run(&mut self) {
-        unsafe {
-            syscall_return(self);
-        }
+        let mut context = ExtendedUserContext {
+            context: *self,
+            ..Default::default()
+        };
+        context.run();
+        *self = context.context;
+    }
+}
+
+impl ExtendedUserContext {
+    /// Goes to user space while preserving x87 and SSE state.
+    pub fn run(&mut self) {
+        unsafe { syscall_return(self) }
     }
 }

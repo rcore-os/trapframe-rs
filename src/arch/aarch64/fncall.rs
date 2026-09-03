@@ -25,7 +25,7 @@ unsafe extern "C" {
     /// ```
     pub fn syscall_fn_entry();
 
-    fn syscall_fn_return(regs: &mut UserContext);
+    fn syscall_fn_return(regs: &mut ExtendedUserContext);
 }
 
 impl UserContext {
@@ -33,9 +33,19 @@ impl UserContext {
     ///
     /// User program should call `syscall_fn_entry()` to return back.
     pub fn run_fncall(&mut self) {
-        unsafe {
-            syscall_fn_return(self);
-        }
+        let mut context = ExtendedUserContext {
+            context: *self,
+            ..Default::default()
+        };
+        context.run_fncall();
+        *self = context.context;
+    }
+}
+
+impl ExtendedUserContext {
+    /// Goes to user context while preserving floating-point and SIMD state.
+    pub fn run_fncall(&mut self) {
+        unsafe { syscall_fn_return(self) }
     }
 }
 
@@ -44,10 +54,23 @@ mod tests {
     use crate::*;
     use core::arch::global_asm;
 
+    #[unsafe(no_mangle)]
+    static mut RESTORED_Q0: u128 = 0;
+    #[unsafe(no_mangle)]
+    static UPDATED_Q0: u128 = 0xa5a5_a5a5_a5a5_a5a5_5a5a_5a5a_5a5a_5a5a;
+
     // Mock user program to dump registers at stack.
     global_asm!(
         r#"
 dump_registers:
+    str     x9, [sp, #-16]!
+    adrp    x9, RESTORED_Q0
+    add     x9, x9, :lo12:RESTORED_Q0
+    str     q0, [x9]
+    adrp    x9, UPDATED_Q0
+    add     x9, x9, :lo12:UPDATED_Q0
+    ldr     q0, [x9]
+    ldr     x9, [sp], #16
     stp     x30, x0, [sp, #-16]!
     str     x29, [sp, #-16]!
     stp     x27, x28, [sp, #-16]!
@@ -145,13 +168,21 @@ elr_location:
             x30: 30,
             ..Default::default()
         };
-        let mut cx = UserContext {
-            general,
-            sp: stack.as_mut_ptr() as usize + 0x1000,
-            elr: dump_registers as *const () as usize,
+        let mut cx = ExtendedUserContext {
+            context: UserContext {
+                general,
+                sp: stack.as_mut_ptr() as usize + 0x1000,
+                elr: dump_registers as *const () as usize,
+                ..Default::default()
+            },
             ..Default::default()
         };
+        let initial_q0 = 0x1122_3344_5566_7788_99aa_bbcc_ddee_ff00;
+        cx.fp_simd.registers[0] = initial_q0;
         cx.run_fncall();
+        let restored_q0 = unsafe { core::ptr::addr_of!(RESTORED_Q0).read_volatile() };
+        assert_eq!(restored_q0, initial_q0);
+        assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
         // check restored registers
         let general_dump = unsafe { *(cx.sp as *const GeneralRegs) };
         assert_eq!(

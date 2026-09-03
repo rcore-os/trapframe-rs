@@ -22,6 +22,8 @@ syscall_return:
     mov gs:4, rsp           # store kernel rsp -> TSS.sp0
     mov rsp, rdi            # set rsp = bottom of trap frame
 
+    fxrstor64 [rsp + 22*8]
+
     # pop fsbase gsbase
     swapgs                  # store kernel gsbase
     mov rax, [rsp + 18*8]
@@ -130,6 +132,8 @@ trap_syscall_entry:
     rdgsbase rbx
     mov [rsp + 19*8], rbx
     swapgs
+
+    fxsave64 [rsp + 22*8]
 
     # restore callee-saved registers
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
