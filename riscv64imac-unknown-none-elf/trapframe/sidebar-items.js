@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["init"],"struct":["GeneralRegs","TrapFrame","UserContext"]};
+window.SIDEBAR_ITEMS = {"fn":["init"],"struct":["FloatRegs","GeneralRegs","TrapFrame","UserContext","UserContextWithExtensions","VectorRegs"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["syscall_fn_entry"],"struct":["GeneralRegs","UserContext"]};
+window.SIDEBAR_ITEMS = {"fn":["syscall_fn_entry"],"struct":["FpSimdState","GeneralRegs","UserContext","UserContextWithExtensions"]};
