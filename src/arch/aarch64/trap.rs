@@ -76,16 +76,28 @@ impl UserContext {
     /// println!("back from user: {:#x?}", context);
     /// ```
     pub fn run(&mut self) {
-        let mut context = ExtendedUserContext {
-            context: *self,
+        let mut context = UserContextWithExtensions {
+            trap_num: self.trap_num,
+            __reserved: self.__reserved,
+            elr: self.elr,
+            spsr: self.spsr,
+            sp: self.sp,
+            tpidr: self.tpidr,
+            general: self.general,
             ..Default::default()
         };
         context.run();
-        *self = context.context;
+        self.trap_num = context.trap_num;
+        self.__reserved = context.__reserved;
+        self.elr = context.elr;
+        self.spsr = context.spsr;
+        self.sp = context.sp;
+        self.tpidr = context.tpidr;
+        self.general = context.general;
     }
 }
 
-impl ExtendedUserContext {
+impl UserContextWithExtensions {
     /// Goes to user space while preserving floating-point and SIMD state.
     pub fn run(&mut self) {
         unsafe { run_user(self) }
@@ -95,5 +107,5 @@ impl ExtendedUserContext {
 #[allow(improper_ctypes)]
 unsafe extern "C" {
     fn __vectors();
-    fn run_user(regs: &mut ExtendedUserContext);
+    fn run_user(regs: &mut UserContextWithExtensions);
 }

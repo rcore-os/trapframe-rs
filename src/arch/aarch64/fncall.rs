@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::{ExtendedUserContext, UserContext};
+use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
 
 global_asm!(include_str!("fncall.S"));
@@ -25,7 +25,7 @@ unsafe extern "C" {
     /// ```
     pub fn syscall_fn_entry();
 
-    fn syscall_fn_return(regs: &mut ExtendedUserContext);
+    fn syscall_fn_return(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -33,16 +33,28 @@ impl UserContext {
     ///
     /// User program should call `syscall_fn_entry()` to return back.
     pub fn run_fncall(&mut self) {
-        let mut context = ExtendedUserContext {
-            context: *self,
+        let mut context = UserContextWithExtensions {
+            trap_num: self.trap_num,
+            __reserved: self.__reserved,
+            elr: self.elr,
+            spsr: self.spsr,
+            sp: self.sp,
+            tpidr: self.tpidr,
+            general: self.general,
             ..Default::default()
         };
         context.run_fncall();
-        *self = context.context;
+        self.trap_num = context.trap_num;
+        self.__reserved = context.__reserved;
+        self.elr = context.elr;
+        self.spsr = context.spsr;
+        self.sp = context.sp;
+        self.tpidr = context.tpidr;
+        self.general = context.general;
     }
 }
 
-impl ExtendedUserContext {
+impl UserContextWithExtensions {
     /// Goes to user context while preserving floating-point and SIMD state.
     pub fn run_fncall(&mut self) {
         unsafe { syscall_fn_return(self) }
@@ -168,13 +180,24 @@ elr_location:
             x30: 30,
             ..Default::default()
         };
-        let mut cx = ExtendedUserContext {
-            context: UserContext {
-                general,
-                sp: stack.as_mut_ptr() as usize + 0x1000,
-                elr: dump_registers as *const () as usize,
-                ..Default::default()
-            },
+        let base = UserContext {
+            general,
+            sp: stack.as_mut_ptr() as usize + 0x1000,
+            elr: dump_registers as *const () as usize,
+            ..Default::default()
+        };
+        let mut legacy = base;
+        legacy.run_fncall();
+        assert_eq!(legacy.general.x0, 100);
+
+        let mut cx = UserContextWithExtensions {
+            trap_num: base.trap_num,
+            __reserved: base.__reserved,
+            elr: base.elr,
+            spsr: base.spsr,
+            sp: base.sp,
+            tpidr: base.tpidr,
+            general: base.general,
             ..Default::default()
         };
         let initial_q0 = 0x1122_3344_5566_7788_99aa_bbcc_ddee_ff00;

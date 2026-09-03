@@ -22,7 +22,7 @@ When `run()` returns, the same `UserContext` contains the user's latest
 registers and trap state. The kernel can inspect the event, update registers,
 and call `run()` again to resume execution.
 
-`ExtendedUserContext` adds architecture-specific floating-point/vector state
+`UserContextWithExtensions` adds architecture-specific floating-point/vector state
 without changing the layout of the original `UserContext`: x87/SSE on x86-64,
 FP/SIMD on AArch64, and F/D plus 128-bit V registers on RISC-V 64.
 

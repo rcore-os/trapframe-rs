@@ -58,24 +58,30 @@ pub struct UserContext {
 /// An x86-64 user context that also preserves x87 and SSE state.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C, align(16))]
-pub struct ExtendedUserContext {
-    /// General-purpose and control state.
-    pub context: UserContext,
+pub struct UserContextWithExtensions {
+    /// General-purpose registers and execution state.
+    pub general: GeneralRegs,
+    /// Interrupt vector or synthetic trap number that returned control.
+    pub trap_num: usize,
+    /// Error code associated with the trap.
+    pub error_code: usize,
     /// x87 and SSE state.
     pub fp_simd: FpSimdState,
 }
 
-impl core::ops::Deref for ExtendedUserContext {
+impl core::ops::Deref for UserContextWithExtensions {
     type Target = UserContext;
 
     fn deref(&self) -> &Self::Target {
-        &self.context
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &*(self as *const Self).cast() }
     }
 }
 
-impl core::ops::DerefMut for ExtendedUserContext {
+impl core::ops::DerefMut for UserContextWithExtensions {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.context
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &mut *(self as *mut Self).cast() }
     }
 }
 

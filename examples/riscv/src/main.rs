@@ -7,7 +7,7 @@ use core::panic::PanicInfo;
 use riscv::register::scause::{Exception as E, Trap};
 use riscv::register::{scause, stval};
 #[cfg(target_pointer_width = "64")]
-use trapframe::{ExtendedUserContext, FloatRegs, VectorRegs};
+use trapframe::{FloatRegs, UserContextWithExtensions, VectorRegs};
 use trapframe::{GeneralRegs, TrapFrame, UserContext};
 
 global_asm!(
@@ -265,8 +265,18 @@ extern "C" fn main() {
     #[cfg(target_pointer_width = "32")]
     let mut regs = context;
     #[cfg(target_pointer_width = "64")]
-    let mut regs = ExtendedUserContext {
-        context,
+    let mut legacy = context;
+    #[cfg(target_pointer_width = "64")]
+    {
+        legacy.run();
+        assert_eq!(scause::read().cause(), Trap::Exception(E::UserEnvCall));
+        println!("RISC-V base context round-trip passed");
+    }
+    #[cfg(target_pointer_width = "64")]
+    let mut regs = UserContextWithExtensions {
+        general: context.general,
+        sstatus: context.sstatus,
+        sepc: context.sepc,
         vector: VectorRegs {
             registers: initial_vector,
             vstart: 0,

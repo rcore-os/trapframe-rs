@@ -88,9 +88,13 @@ pub struct UserContext {
 #[cfg(target_arch = "riscv64")]
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C, align(16))]
-pub struct ExtendedUserContext {
-    /// Integer and control registers.
-    pub context: UserContext,
+pub struct UserContextWithExtensions {
+    /// Integer registers.
+    pub general: GeneralRegs,
+    /// Supervisor status register (`sstatus`).
+    pub sstatus: usize,
+    /// Supervisor exception program counter (`sepc`).
+    pub sepc: usize,
     /// RISC-V vector registers and control state.
     pub vector: VectorRegs,
     /// RISC-V floating-point registers and control state.
@@ -98,18 +102,20 @@ pub struct ExtendedUserContext {
 }
 
 #[cfg(target_arch = "riscv64")]
-impl core::ops::Deref for ExtendedUserContext {
+impl core::ops::Deref for UserContextWithExtensions {
     type Target = UserContext;
 
     fn deref(&self) -> &Self::Target {
-        &self.context
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &*(self as *const Self).cast() }
     }
 }
 
 #[cfg(target_arch = "riscv64")]
-impl core::ops::DerefMut for ExtendedUserContext {
+impl core::ops::DerefMut for UserContextWithExtensions {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.context
+        // The base fields are an identical `repr(C)` prefix.
+        unsafe { &mut *(self as *mut Self).cast() }
     }
 }
 
@@ -168,12 +174,16 @@ impl UserContext {
     pub fn run(&mut self) {
         #[cfg(target_arch = "riscv64")]
         {
-            let mut context = ExtendedUserContext {
-                context: *self,
+            let mut context = UserContextWithExtensions {
+                general: self.general,
+                sstatus: self.sstatus,
+                sepc: self.sepc,
                 ..Default::default()
             };
             context.run();
-            *self = context.context;
+            self.general = context.general;
+            self.sstatus = context.sstatus;
+            self.sepc = context.sepc;
         }
         #[cfg(target_arch = "riscv32")]
         unsafe {
@@ -183,7 +193,7 @@ impl UserContext {
 }
 
 #[cfg(target_arch = "riscv64")]
-impl ExtendedUserContext {
+impl UserContextWithExtensions {
     /// Runs user code while preserving floating-point and vector state.
     pub fn run(&mut self) {
         unsafe { run_user(self) }
@@ -315,5 +325,5 @@ unsafe extern "C" {
     #[cfg(target_arch = "riscv32")]
     fn run_user(regs: &mut UserContext);
     #[cfg(target_arch = "riscv64")]
-    fn run_user(regs: &mut ExtendedUserContext);
+    fn run_user(regs: &mut UserContextWithExtensions);
 }

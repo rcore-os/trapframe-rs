@@ -7,7 +7,7 @@
 //!
 //! Because we will store values in their pthread structure.
 
-use super::{ExtendedUserContext, UserContext};
+use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
 
 unsafe extern "sysv64" {
@@ -23,7 +23,7 @@ unsafe extern "sysv64" {
     /// ```
     pub fn syscall_fn_entry();
 
-    fn syscall_fn_return(regs: &mut ExtendedUserContext);
+    fn syscall_fn_return(regs: &mut UserContextWithExtensions);
 }
 
 impl UserContext {
@@ -32,18 +32,22 @@ impl UserContext {
     /// User program should call `syscall_fn_entry()` to return back.
     /// Trap reason and error code will always be set to 0x100 and 0.
     pub fn run_fncall(&mut self) {
-        let mut context = ExtendedUserContext {
-            context: *self,
+        let mut context = UserContextWithExtensions {
+            general: self.general,
+            trap_num: self.trap_num,
+            error_code: self.error_code,
             ..Default::default()
         };
         context.run_fncall();
-        *self = context.context;
+        self.general = context.general;
+        self.trap_num = context.trap_num;
+        self.error_code = context.error_code;
         self.trap_num = 0x100;
         self.error_code = 0;
     }
 }
 
-impl ExtendedUserContext {
+impl UserContextWithExtensions {
     /// Goes to user context while preserving x87 and SSE state.
     pub fn run_fncall(&mut self) {
         unsafe { syscall_fn_return(self) }
@@ -310,33 +314,39 @@ dump_registers:
             fn dump_registers();
         }
         let mut stack = [0u8; 0x1000];
-        let mut cx = ExtendedUserContext {
-            context: UserContext {
-                general: GeneralRegs {
-                    rax: 0,
-                    rbx: 1,
-                    rcx: 2,
-                    rdx: 3,
-                    rsi: 4,
-                    rdi: 5,
-                    rbp: 6,
-                    rsp: stack.as_mut_ptr() as usize + 0x1000,
-                    r8: 8,
-                    r9: 9,
-                    r10: 10,
-                    r11: 11,
-                    r12: 12,
-                    r13: 13,
-                    r14: 14,
-                    r15: 15,
-                    rip: dump_registers as *const () as usize,
-                    rflags: 0,
-                    fsbase: 0, // don't set to non-zero garbage value
-                    gsbase: 0,
-                },
-                trap_num: 0,
-                error_code: 0,
-            },
+        let general = GeneralRegs {
+            rax: 0,
+            rbx: 1,
+            rcx: 2,
+            rdx: 3,
+            rsi: 4,
+            rdi: 5,
+            rbp: 6,
+            rsp: stack.as_mut_ptr() as usize + 0x1000,
+            r8: 8,
+            r9: 9,
+            r10: 10,
+            r11: 11,
+            r12: 12,
+            r13: 13,
+            r14: 14,
+            r15: 15,
+            rip: dump_registers as *const () as usize,
+            rflags: 0,
+            fsbase: 0, // don't set to non-zero garbage value
+            gsbase: 0,
+        };
+        let mut legacy = UserContext {
+            general,
+            ..Default::default()
+        };
+        legacy.run_fncall();
+        assert_eq!(legacy.trap_num, 0x100);
+
+        let mut cx = UserContextWithExtensions {
+            general,
+            trap_num: 0,
+            error_code: 0,
             fp_simd: Default::default(),
         };
         cx.fp_simd.bytes[160..176].fill(0x5a);
