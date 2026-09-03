@@ -103,7 +103,8 @@ syscall_entry:
     swapgs                  # swap in kernel gs
     mov gs:12, rsp          # store user rsp -> scratch at TSS.sp1
     mov rsp, gs:4           # load kernel rsp <- TSS.sp0
-    pop rsp                 # load rsp = bottom of trap frame
+    pop rsp                 # load rsp = tagged bottom of trap frame
+    and rsp, -2
     add rsp, 22*8           # rsp = top of trap frame
 
     # push trap_num, error_code

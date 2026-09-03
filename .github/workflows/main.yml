@@ -23,6 +23,7 @@ jobs:
           x86_64-unknown-linux-gnu,
           x86_64-apple-darwin,
           aarch64-unknown-linux-gnu,
+          aarch64-apple-darwin,
           aarch64-unknown-none-softfloat,
           riscv32imac-unknown-none-elf,
           riscv64imac-unknown-none-elf,
@@ -112,6 +113,16 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
       - run: cross test --target aarch64-unknown-linux-gnu
+
+  test-aarch64-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify Apple Silicon runner
+        run: test "$(uname -m)" = arm64
+      - name: Test AArch64 libos context switching
+        run: cargo test --all-features --target aarch64-apple-darwin
 
   test-riscv:
     runs-on: ubuntu-latest
