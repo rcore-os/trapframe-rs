@@ -1,24 +1,40 @@
-# User: (musl)
-# - tp:0  (pthread.self)       = user tp
-# - tp:48 (pthread.canary2)    = user context
-#
-# Kernel: (glibc)
-# - tp:0  (pthread.self)       = kernel tp
-# - tp:72 (pthread.???)        = init user tp
+# User contexts are published in FNCALL_CONTEXTS under the thread pointer that
+# will be loaded before entering user code.  This keeps trapframe metadata out
+# of the guest libc's TLS block.
 
 syscall_fn_entry:
-    # save 2 registers for scratch
-    stp     x0, x30, [sp, #-16] // save x0, x30 at user stack
+    # Save the registers used to find the context in FNCALL_CONTEXTS.
+    sub     sp, sp, #48
+    stp     x0, x1, [sp]
+    stp     x2, x3, [sp, #16]
+    str     x30, [sp, #32]
 
-    # switch to kernel sp
-    mrs     x0, tpidr_el0       // x0 = user tp
-    ldr     x0, [x0, #48]       // x0 = user context
-    mov     x30, sp             // x30 = user stack
+    # Take the context registered for this user thread pointer.  The acquire
+    # load pairs with register_fncall_context's release publication.
+    mrs     x0, tpidr_el0
+    LOAD_CONTEXT_TABLE x1
+    mov     x2, #256
+1:  ldar    x3, [x1]
+    cmp     x3, x0
+    b.eq    2f
+    add     x1, x1, #16
+    subs    x2, x2, #1
+    b.ne    1b
+    brk     #0
+2:  ldr     x0, [x1, #8]
+    stlr    xzr, [x1]
+    cbz     x0, 3f
+
+    # Switch to the context stack and restore the lookup scratch registers.
+    add     x30, sp, #48         // x30 = user stack
     str     x30, [x0, #4 * 8]   // save user stack
     add     sp, x0, #38 * 8     // sp = top of user context
-
-    # recover x0, x30
-    ldp     x0, x30, [x30, #-16]
+    ldp     x2, x3, [x30, #-32]
+    ldp     x0, x1, [x30, #-48]
+    ldr     x30, [x30, #-16]
+    b       4f
+3:  brk     #0
+4:
 
     # save general registers
     stp     x30, x0, [sp, #-16]!
@@ -176,7 +192,6 @@ syscall_fn_return_extended:
     cbnz    x9, 1f          // if not 0, goto set
     INIT_USER_TP x9, x8     // x9 = init user tp
 1:  msr     tpidr_el0, x9   // tp = x9
-    str     x0, [x9, #48]   // user_tp:48 = user context
 
     # pop elr, sp
     ldr     x30, [x0, #2*8]
