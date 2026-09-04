@@ -75,8 +75,8 @@ global_asm!(
 .endm
 
 .macro LOAD_CONTEXT_TABLE dst
-    adrp    \dst, FNCALL_CONTEXTS
-    add     \dst, \dst, :lo12:FNCALL_CONTEXTS
+    adrp    \dst, :got:FNCALL_CONTEXTS
+    ldr     \dst, [\dst, :got_lo12:FNCALL_CONTEXTS]
 .endm
 
 .global syscall_fn_entry
@@ -97,8 +97,8 @@ global_asm!(
 
 
 .macro LOAD_CONTEXT_TABLE dst
-    adrp    \dst, _FNCALL_CONTEXTS@PAGE
-    add     \dst, \dst, _FNCALL_CONTEXTS@PAGEOFF
+    adrp    \dst, _FNCALL_CONTEXTS@GOTPAGE
+    ldr     \dst, [\dst, _FNCALL_CONTEXTS@GOTPAGEOFF]
 .endm
 
 .global _syscall_fn_entry
