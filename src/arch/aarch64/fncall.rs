@@ -10,6 +10,38 @@
 use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
 
+#[cfg(target_os = "linux")]
+global_asm!(
+    r#"
+.macro INIT_USER_TP dst, kernel_tp
+    add     \dst, \kernel_tp, #72
+.endm
+
+.global syscall_fn_entry
+.global syscall_fn_return
+.global syscall_fn_return_extended
+"#
+);
+
+#[cfg(target_os = "macos")]
+global_asm!(
+    r#"
+.macro INIT_USER_TP dst, kernel_tp
+    // Darwin's TSD base is in TPIDRRO_EL0. Use TSD slot 30 as the
+    // backing storage for the initial synthetic user thread pointer.
+    mrs     \dst, tpidrro_el0
+    add     \dst, \dst, #240
+.endm
+
+.global _syscall_fn_entry
+.global _syscall_fn_return
+.global _syscall_fn_return_extended
+.set _syscall_fn_entry, syscall_fn_entry
+.set _syscall_fn_return, syscall_fn_return
+.set _syscall_fn_return_extended, syscall_fn_return_extended
+"#
+);
+
 global_asm!(include_str!("fncall.S"));
 
 unsafe extern "C" {
@@ -50,6 +82,31 @@ mod tests {
     use crate::*;
     use core::arch::{asm, global_asm};
 
+    #[cfg(target_os = "linux")]
+    global_asm!(
+        r#"
+.macro LOAD_ADDRESS reg, symbol
+    adrp    \reg, \symbol
+    add     \reg, \reg, :lo12:\symbol
+.endm
+"#
+    );
+
+    #[cfg(target_os = "macos")]
+    global_asm!(
+        r#"
+.macro LOAD_ADDRESS reg, symbol
+    adrp    \reg, \symbol@GOTPAGE
+    ldr     \reg, [\reg, \symbol@GOTPAGEOFF]
+.endm
+
+.set _dump_registers, dump_registers
+.set _elr_location, elr_location
+.set RESTORED_Q0, _RESTORED_Q0
+.set UPDATED_Q0, _UPDATED_Q0
+"#
+    );
+
     #[unsafe(no_mangle)]
     static mut RESTORED_Q0: u128 = 0;
     #[unsafe(no_mangle)]
@@ -60,11 +117,9 @@ mod tests {
         r#"
 dump_registers:
     str     x9, [sp, #-16]!
-    adrp    x9, RESTORED_Q0
-    add     x9, x9, :lo12:RESTORED_Q0
+    LOAD_ADDRESS x9, RESTORED_Q0
     str     q0, [x9]
-    adrp    x9, UPDATED_Q0
-    add     x9, x9, :lo12:UPDATED_Q0
+    LOAD_ADDRESS x9, UPDATED_Q0
     ldr     q0, [x9]
     ldr     x9, [sp], #16
     stp     x30, x0, [sp, #-16]!

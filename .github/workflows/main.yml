@@ -130,6 +130,24 @@ jobs:
       - name: Test AArch64 libos context switching
         run: cargo test --all-features
 
+  test-aarch64-macos-native:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Verify Apple Silicon runner
+        run: test "$(uname -m)" = arm64
+      - name: Verify AArch64 fncall test is present
+        run: |
+          cargo test --all-features --target aarch64-apple-darwin -- --list \
+            | grep -q 'arch::fncall::tests::run_fncall: test'
+      - name: Test AArch64 function-call context switching
+        run: >-
+          cargo test --all-features --target aarch64-apple-darwin
+          arch::fncall::tests::run_fncall -- --exact
+
   test-riscv:
     runs-on: ubuntu-latest
     strategy:
