@@ -1,20 +1,82 @@
 //! Switch context by function call within the same privilege level.
 //!
-//! # Assumption
-//!
-//! This module supposes the kernel is hosted by a Unix-like system and the
-//! user program has a writable thread-pointer area.
-//!
-//! Because we will store values in their pthread structure.
-
 use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
+use core::sync::atomic::{AtomicUsize, Ordering};
+
+const FNCALL_CONTEXT_SLOTS: usize = 256;
+const RESERVED_THREAD_POINTER: usize = usize::MAX;
+
+#[repr(C)]
+struct FncallContextSlot {
+    thread_pointer: AtomicUsize,
+    context: AtomicUsize,
+}
+
+#[unsafe(no_mangle)]
+static FNCALL_CONTEXTS: [FncallContextSlot; FNCALL_CONTEXT_SLOTS] = [const {
+    FncallContextSlot {
+        thread_pointer: AtomicUsize::new(0),
+        context: AtomicUsize::new(0),
+    }
+}; FNCALL_CONTEXT_SLOTS];
+
+fn register_fncall_context(thread_pointer: usize, context: *mut UserContext) {
+    assert_ne!(thread_pointer, 0);
+    for slot in &FNCALL_CONTEXTS {
+        if slot
+            .thread_pointer
+            .compare_exchange(
+                0,
+                RESERVED_THREAD_POINTER,
+                Ordering::Acquire,
+                Ordering::Relaxed,
+            )
+            .is_ok()
+        {
+            slot.context.store(context as usize, Ordering::Relaxed);
+            slot.thread_pointer.store(thread_pointer, Ordering::Release);
+            return;
+        }
+    }
+    panic!("too many concurrent AArch64 fncall contexts");
+}
+
+fn prepare_fncall_context(context: &mut UserContext) {
+    if context.tpidr == 0 {
+        let kernel_thread_pointer: usize;
+        #[cfg(target_os = "linux")]
+        unsafe {
+            core::arch::asm!(
+                "mrs {thread_pointer}, tpidr_el0",
+                thread_pointer = out(reg) kernel_thread_pointer,
+                options(nomem, nostack, preserves_flags)
+            );
+            context.tpidr = kernel_thread_pointer + 72;
+        }
+        #[cfg(target_os = "macos")]
+        unsafe {
+            core::arch::asm!(
+                "mrs {thread_pointer}, tpidrro_el0",
+                thread_pointer = out(reg) kernel_thread_pointer,
+                options(nomem, nostack, preserves_flags)
+            );
+            context.tpidr = kernel_thread_pointer + 240;
+        }
+    }
+    register_fncall_context(context.tpidr, context);
+}
 
 #[cfg(target_os = "linux")]
 global_asm!(
     r#"
 .macro INIT_USER_TP dst, kernel_tp
     add     \dst, \kernel_tp, #72
+.endm
+
+.macro LOAD_CONTEXT_TABLE dst
+    adrp    \dst, FNCALL_CONTEXTS
+    add     \dst, \dst, :lo12:FNCALL_CONTEXTS
 .endm
 
 .global syscall_fn_entry
@@ -31,6 +93,12 @@ global_asm!(
     // backing storage for the initial synthetic user thread pointer.
     mrs     \dst, tpidrro_el0
     add     \dst, \dst, #240
+.endm
+
+
+.macro LOAD_CONTEXT_TABLE dst
+    adrp    \dst, _FNCALL_CONTEXTS@PAGE
+    add     \dst, \dst, _FNCALL_CONTEXTS@PAGEOFF
 .endm
 
 .global _syscall_fn_entry
@@ -66,6 +134,7 @@ impl UserContext {
     ///
     /// User program should call `syscall_fn_entry()` to return back.
     pub fn run_fncall(&mut self) {
+        prepare_fncall_context(self);
         unsafe { syscall_fn_return(self) }
     }
 }
@@ -73,6 +142,7 @@ impl UserContext {
 impl UserContextWithExtensions {
     /// Goes to user context while preserving floating-point and SIMD state.
     pub fn run_fncall(&mut self) {
+        prepare_fncall_context(self);
         unsafe { syscall_fn_return_extended(self) }
     }
 }
@@ -124,6 +194,8 @@ dump_registers:
     str     q0, [x9]
     LOAD_ADDRESS x9, UPDATED_Q0
     ldr     q0, [x9]
+    mrs     x9, tpidr_el0
+    str     xzr, [x9, #48]
     ldr     x9, [sp], #16
     stp     x30, x0, [sp, #-16]!
     str     x29, [sp, #-16]!
@@ -216,6 +288,7 @@ test_preserve_host_state:
             );
         }
         let mut stack = [0u8; 0x1000];
+        let mut guest_tls = [0usize; 16];
         let general = GeneralRegs {
             x0: 0,
             x1: 1,
@@ -254,6 +327,7 @@ test_preserve_host_state:
             general,
             sp: stack.as_mut_ptr() as usize + 0x1000,
             elr: dump_registers as *const () as usize,
+            tpidr: guest_tls.as_mut_ptr() as usize,
             ..Default::default()
         };
         #[repr(C)]
@@ -266,6 +340,7 @@ test_preserve_host_state:
             guard: [0xa5; 520],
         };
         let mut legacy_q0 = 0;
+        guest_tls[6] = usize::MAX;
         legacy.context.run_fncall();
         unsafe {
             asm!(
@@ -275,6 +350,7 @@ test_preserve_host_state:
             );
         }
         assert_eq!(legacy.context.general.x0, 100);
+        assert_eq!(guest_tls[6], 0);
         assert_eq!(legacy.guard, [0xa5; 520]);
         assert_eq!(legacy_q0, UPDATED_Q0);
 
@@ -293,6 +369,7 @@ test_preserve_host_state:
         let initial_host_d8 = 0x1357_9bdf_2468_ace0_u64;
         let initial_host_x18 = 0x1020_3040_5060_7080_u64;
         let mut restored_host_state = [0; 2];
+        guest_tls[6] = usize::MAX;
         unsafe {
             test_preserve_host_state(
                 &mut cx,
@@ -303,6 +380,7 @@ test_preserve_host_state:
         };
         let restored_q0 = unsafe { core::ptr::addr_of!(RESTORED_Q0).read_volatile() };
         assert_eq!(restored_q0, initial_q0);
+        assert_eq!(guest_tls[6], 0);
         assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
         assert_eq!(restored_host_state, [initial_host_d8, initial_host_x18]);
         // check restored registers
