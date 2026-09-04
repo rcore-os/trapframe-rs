@@ -5,41 +5,63 @@ use core::arch::global_asm;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 const FNCALL_CONTEXT_SLOTS: usize = 256;
-const RESERVED_THREAD_POINTER: usize = usize::MAX;
+const RESERVED_THREAD_KEY: usize = usize::MAX;
 
 #[repr(C)]
 struct FncallContextSlot {
-    thread_pointer: AtomicUsize,
+    thread_key: AtomicUsize,
     context: AtomicUsize,
 }
 
 #[unsafe(no_mangle)]
 static FNCALL_CONTEXTS: [FncallContextSlot; FNCALL_CONTEXT_SLOTS] = [const {
     FncallContextSlot {
-        thread_pointer: AtomicUsize::new(0),
+        thread_key: AtomicUsize::new(0),
         context: AtomicUsize::new(0),
     }
 }; FNCALL_CONTEXT_SLOTS];
 
-fn register_fncall_context(thread_pointer: usize, context: *mut UserContext) {
-    assert_ne!(thread_pointer, 0);
+fn register_fncall_context(thread_key: usize, context: *mut UserContext) {
+    assert_ne!(thread_key, 0);
     for slot in &FNCALL_CONTEXTS {
         if slot
-            .thread_pointer
-            .compare_exchange(
-                0,
-                RESERVED_THREAD_POINTER,
-                Ordering::Acquire,
-                Ordering::Relaxed,
-            )
+            .thread_key
+            .compare_exchange(0, RESERVED_THREAD_KEY, Ordering::Acquire, Ordering::Relaxed)
             .is_ok()
         {
             slot.context.store(context as usize, Ordering::Relaxed);
-            slot.thread_pointer.store(thread_pointer, Ordering::Release);
+            slot.thread_key.store(thread_key, Ordering::Release);
             return;
         }
     }
     panic!("too many concurrent AArch64 fncall contexts");
+}
+
+#[cfg(target_os = "linux")]
+fn host_thread_key() -> usize {
+    let thread_id: usize;
+    unsafe {
+        core::arch::asm!(
+            "svc #0",
+            in("x8") 178usize,
+            lateout("x0") thread_id,
+            options(nostack)
+        );
+    }
+    thread_id
+}
+
+#[cfg(target_os = "macos")]
+fn host_thread_key() -> usize {
+    let thread_pointer: usize;
+    unsafe {
+        core::arch::asm!(
+            "mrs {thread_pointer}, tpidrro_el0",
+            thread_pointer = out(reg) thread_pointer,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+    thread_pointer
 }
 
 fn prepare_fncall_context(context: &mut UserContext) {
@@ -64,7 +86,7 @@ fn prepare_fncall_context(context: &mut UserContext) {
             context.tpidr = kernel_thread_pointer + 240;
         }
     }
-    register_fncall_context(context.tpidr, context);
+    register_fncall_context(host_thread_key(), context);
 }
 
 #[cfg(target_os = "linux")]
@@ -77,6 +99,12 @@ global_asm!(
 .macro LOAD_CONTEXT_TABLE dst
     adrp    \dst, :got:FNCALL_CONTEXTS
     ldr     \dst, [\dst, :got_lo12:FNCALL_CONTEXTS]
+.endm
+
+
+.macro LOAD_HOST_THREAD_KEY dst, scratch
+    mov     \scratch, #178
+    svc     #0
 .endm
 
 .global syscall_fn_entry
@@ -99,6 +127,11 @@ global_asm!(
 .macro LOAD_CONTEXT_TABLE dst
     adrp    \dst, _FNCALL_CONTEXTS@GOTPAGE
     ldr     \dst, [\dst, _FNCALL_CONTEXTS@GOTPAGEOFF]
+.endm
+
+
+.macro LOAD_HOST_THREAD_KEY dst, scratch
+    mrs     \dst, tpidrro_el0
 .endm
 
 .global _syscall_fn_entry
@@ -195,6 +228,8 @@ dump_registers:
     LOAD_ADDRESS x9, UPDATED_Q0
     ldr     q0, [x9]
     mrs     x9, tpidr_el0
+    add     x9, x9, #8
+    msr     tpidr_el0, x9
     str     xzr, [x9, #48]
     ldr     x9, [sp], #16
     stp     x30, x0, [sp, #-16]!
@@ -288,7 +323,8 @@ test_preserve_host_state:
             );
         }
         let mut stack = [0u8; 0x1000];
-        let mut guest_tls = [0usize; 16];
+        let mut guest_tls = [0usize; 32];
+        let initial_guest_tp = unsafe { guest_tls.as_mut_ptr().add(8) } as usize;
         let general = GeneralRegs {
             x0: 0,
             x1: 1,
@@ -327,7 +363,7 @@ test_preserve_host_state:
             general,
             sp: stack.as_mut_ptr() as usize + 0x1000,
             elr: dump_registers as *const () as usize,
-            tpidr: guest_tls.as_mut_ptr() as usize,
+            tpidr: initial_guest_tp,
             ..Default::default()
         };
         #[repr(C)]
@@ -340,7 +376,7 @@ test_preserve_host_state:
             guard: [0xa5; 520],
         };
         let mut legacy_q0 = 0;
-        guest_tls[6] = usize::MAX;
+        guest_tls[15] = usize::MAX;
         legacy.context.run_fncall();
         unsafe {
             asm!(
@@ -350,7 +386,8 @@ test_preserve_host_state:
             );
         }
         assert_eq!(legacy.context.general.x0, 100);
-        assert_eq!(guest_tls[6], 0);
+        assert_eq!(legacy.context.tpidr, initial_guest_tp + 8);
+        assert_eq!(guest_tls[15], 0);
         assert_eq!(legacy.guard, [0xa5; 520]);
         assert_eq!(legacy_q0, UPDATED_Q0);
 
@@ -369,7 +406,7 @@ test_preserve_host_state:
         let initial_host_d8 = 0x1357_9bdf_2468_ace0_u64;
         let initial_host_x18 = 0x1020_3040_5060_7080_u64;
         let mut restored_host_state = [0; 2];
-        guest_tls[6] = usize::MAX;
+        guest_tls[15] = usize::MAX;
         super::prepare_fncall_context(&mut cx);
         unsafe {
             test_preserve_host_state(
@@ -381,7 +418,8 @@ test_preserve_host_state:
         };
         let restored_q0 = unsafe { core::ptr::addr_of!(RESTORED_Q0).read_volatile() };
         assert_eq!(restored_q0, initial_q0);
-        assert_eq!(guest_tls[6], 0);
+        assert_eq!(cx.tpidr, initial_guest_tp + 8);
+        assert_eq!(guest_tls[15], 0);
         assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
         assert_eq!(restored_host_state, [initial_host_d8, initial_host_x18]);
         // check restored registers

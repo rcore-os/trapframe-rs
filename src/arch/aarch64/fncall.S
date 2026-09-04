@@ -1,17 +1,16 @@
-# User contexts are published in FNCALL_CONTEXTS under the thread pointer that
-# will be loaded before entering user code.  This keeps trapframe metadata out
-# of the guest libc's TLS block.
+# User contexts are published in FNCALL_CONTEXTS under a stable host-thread key.
+# The user program may replace TPIDR_EL0 at any time, so it cannot be the key.
 
 syscall_fn_entry:
     # Save the registers used to find the context in FNCALL_CONTEXTS.
-    sub     sp, sp, #48
+    sub     sp, sp, #64
     stp     x0, x1, [sp]
     stp     x2, x3, [sp, #16]
-    str     x30, [sp, #32]
+    stp     x8, x30, [sp, #32]
 
-    # Take the context registered for this user thread pointer.  The acquire
+    # Take the context registered for this host thread.  The acquire
     # load pairs with register_fncall_context's release publication.
-    mrs     x0, tpidr_el0
+    LOAD_HOST_THREAD_KEY x0, x8
     LOAD_CONTEXT_TABLE x1
     mov     x2, #256
 1:  ldar    x3, [x1]
@@ -26,12 +25,13 @@ syscall_fn_entry:
     cbz     x0, 3f
 
     # Switch to the context stack and restore the lookup scratch registers.
-    add     x30, sp, #48         // x30 = user stack
+    add     x30, sp, #64         // x30 = user stack
     str     x30, [x0, #4 * 8]   // save user stack
     add     sp, x0, #38 * 8     // sp = top of user context
-    ldp     x2, x3, [x30, #-32]
-    ldp     x0, x1, [x30, #-48]
-    ldr     x30, [x30, #-16]
+    ldp     x2, x3, [x30, #-48]
+    ldr     x8, [x30, #-32]
+    ldp     x0, x1, [x30, #-64]
+    ldr     x30, [x30, #-24]
     b       4f
 3:  brk     #0
 4:
