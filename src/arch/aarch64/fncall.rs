@@ -370,7 +370,7 @@ test_preserve_host_state:
         let initial_host_x18 = 0x1020_3040_5060_7080_u64;
         let mut restored_host_state = [0; 2];
         guest_tls[6] = usize::MAX;
-        prepare_fncall_context(&mut cx);
+        super::prepare_fncall_context(&mut cx);
         unsafe {
             test_preserve_host_state(
                 &mut cx,
