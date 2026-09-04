@@ -6,10 +6,6 @@
 # - tp:0  (pthread.self)       = kernel tp
 # - tp:72 (pthread.???)        = init user tp
 
-.global syscall_fn_entry
-.global syscall_fn_return
-.global syscall_fn_return_extended
-
 syscall_fn_entry:
     # save 2 registers for scratch
     stp     x0, x30, [sp, #-16] // save x0, x30 at user stack
@@ -45,7 +41,7 @@ syscall_fn_entry:
     # save floating-point and Advanced SIMD state
     sub     x4, sp, #48
     ldr     x5, [x4, #8]
-    tbz     x5, #0, syscall_fn_entry_without_fp
+    tbz     x5, #0, 9f
     stp     q0, q1, [x4, #304]
     stp     q2, q3, [x4, #336]
     stp     q4, q5, [x4, #368]
@@ -67,7 +63,7 @@ syscall_fn_entry:
     add     x5, x4, #816
     stp     w2, w3, [x5]
 
-syscall_fn_entry_without_fp:
+9:
     # skip sp and save tpidr
     mrs     x1, tpidr_el0
     str     x1, [sp, #-8]
@@ -100,11 +96,11 @@ syscall_fn_entry_without_fp:
     # extern "C" fn syscall_fn_return(&mut UserContext)
 syscall_fn_return:
     mov     x10, #0
-    b       syscall_fn_return_common
+    b       8f
 syscall_fn_return_extended:
     mov     x10, #1
-syscall_fn_return_common:
-    cbz     x10, syscall_fn_return_without_fp
+8:
+    cbz     x10, 7f
     # restore floating-point and Advanced SIMD state
     ldp     q0, q1, [x0, #304]
     ldp     q2, q3, [x0, #336]
@@ -127,7 +123,7 @@ syscall_fn_return_common:
     msr     fpcr, x1
     msr     fpsr, x2
 
-syscall_fn_return_without_fp:
+7:
     # save callee-saved registers
     stp     x29, x30, [sp, #-16]!
     stp     x27, x28, [sp, #-16]!
@@ -148,7 +144,7 @@ syscall_fn_return_without_fp:
     # pop tpidr
     ldr     x9, [x0, #5*8]  // x9 = user tp
     cbnz    x9, 1f          // if not 0, goto set
-    add     x9, x8, #72     // x9 = init user tp
+    INIT_USER_TP x9, x8     // x9 = init user tp
 1:  msr     tpidr_el0, x9   // tp = x9
     str     x0, [x9, #48]   // user_tp:48 = user context
 
