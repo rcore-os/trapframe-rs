@@ -103,6 +103,10 @@ syscall_fn_entry:
     ldp     x27, x28, [sp], #16
     ldp     x29, x30, [sp], #16
 
+    # x18 is the platform register and must survive calls on Darwin. Saving it
+    # unconditionally also keeps this entry path ABI-safe on other hosts.
+    ldr     x18, [sp], #16
+
     ret
 
     # extern "C" fn syscall_fn_return(&mut UserContext)
@@ -112,6 +116,10 @@ syscall_fn_return:
 syscall_fn_return_extended:
     mov     x10, #1
 8:
+    # Preserve the host platform register before loading the user register
+    # set. Apple reserves x18 for use by the operating system.
+    str     x18, [sp, #-16]!
+
     # save callee-saved registers
     stp     x29, x30, [sp, #-16]!
     stp     x27, x28, [sp, #-16]!

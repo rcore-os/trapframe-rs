@@ -90,7 +90,7 @@ mod tests {
     add     \reg, \reg, :lo12:\symbol
 .endm
 
-.global test_preserve_host_d8
+.global test_preserve_host_state
 "#
     );
 
@@ -104,7 +104,7 @@ mod tests {
 
 .set _dump_registers, dump_registers
 .set _elr_location, elr_location
-.set _test_preserve_host_d8, test_preserve_host_d8
+.set _test_preserve_host_state, test_preserve_host_state
 .set RESTORED_Q0, _RESTORED_Q0
 .set UPDATED_Q0, _UPDATED_Q0
 "#
@@ -179,22 +179,26 @@ dump_registers:
 .global elr_location
 elr_location:
 
-// Call the extended entry point while holding a sentinel in the AAPCS64
-// callee-saved d8 register. Return the observed value through x1 while
-// preserving the real caller's d8.
-test_preserve_host_d8:
-    stp     x19, x20, [sp, #-32]!
-    str     x30, [sp, #16]
-    str     d8, [sp, #24]
+// Call the extended entry point while holding sentinels in the AAPCS64
+// callee-saved d8 register and the platform register x18. Return the observed
+// values through x1 while preserving the real caller's registers.
+test_preserve_host_state:
+    stp     x19, x20, [sp, #-64]!
+    stp     x21, x30, [sp, #16]
+    str     d8, [sp, #32]
+    str     x18, [sp, #40]
     mov     x19, x1
     mov     x20, x2
     fmov    d8, x20
+    mov     x18, x3
     bl      syscall_fn_return_extended
     fmov    x9, d8
     str     x9, [x19]
-    ldr     d8, [sp, #24]
-    ldr     x30, [sp, #16]
-    ldp     x19, x20, [sp], #32
+    str     x18, [x19, #8]
+    ldr     d8, [sp, #32]
+    ldr     x18, [sp, #40]
+    ldp     x21, x30, [sp, #16]
+    ldp     x19, x20, [sp], #64
     ret
 "#
     );
@@ -204,10 +208,11 @@ test_preserve_host_d8:
         unsafe extern "C" {
             fn dump_registers();
             fn elr_location();
-            fn test_preserve_host_d8(
+            fn test_preserve_host_state(
                 context: &mut UserContextWithExtensions,
-                observed: &mut u64,
-                sentinel: u64,
+                observed: &mut [u64; 2],
+                d8_sentinel: u64,
+                x18_sentinel: u64,
             );
         }
         let mut stack = [0u8; 0x1000];
@@ -286,12 +291,20 @@ test_preserve_host_d8:
         let initial_q0 = 0x1122_3344_5566_7788_99aa_bbcc_ddee_ff00;
         cx.fp_simd.registers[0] = initial_q0;
         let initial_host_d8 = 0x1357_9bdf_2468_ace0_u64;
-        let mut restored_host_d8 = 0;
-        unsafe { test_preserve_host_d8(&mut cx, &mut restored_host_d8, initial_host_d8) };
+        let initial_host_x18 = 0x1020_3040_5060_7080_u64;
+        let mut restored_host_state = [0; 2];
+        unsafe {
+            test_preserve_host_state(
+                &mut cx,
+                &mut restored_host_state,
+                initial_host_d8,
+                initial_host_x18,
+            )
+        };
         let restored_q0 = unsafe { core::ptr::addr_of!(RESTORED_Q0).read_volatile() };
         assert_eq!(restored_q0, initial_q0);
         assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
-        assert_eq!(restored_host_d8, initial_host_d8);
+        assert_eq!(restored_host_state, [initial_host_d8, initial_host_x18]);
         // check restored registers
         let general_dump = unsafe { *(cx.sp as *const GeneralRegs) };
         assert_eq!(
