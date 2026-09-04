@@ -49,20 +49,24 @@ impl UserContextWithExtensions {
 }
 
 // User: (musl)
-// - fs:0  (pthread.self)       = user fsbase
-// - fs:48 (pthread.canary2)    = kernel fsbase
+// - fs:0                       = user fsbase
+// - gs:0                       = kernel fsbase
+// - gs:64 (pthread.???)        = kernel stack
 //
 // Kernel: (glibc)
-// - fs:0  (pthread.self)       = kernel fsbase
+// - fs:0                       = kernel fsbase
 // - fs:64 (pthread.???)        = kernel stack
 // - fs:72 (pthread.???)        = init user fsbase
+//
+// Older versions stored the kernel FS base at user fs:48.  That location is
+// now the Fuchsia stack guard, so libc overwrites it during startup.  Linux
+// leaves the userspace GS base available; keep the host TCB there instead.
 //
 #[cfg(target_os = "linux")]
 global_asm!(
     r#"
 .macro SWITCH_TO_KERNEL_STACK
-    mov rsp, fs:48          # rsp = kernel fsbase
-    mov rsp, [rsp + 64]     # rsp = kernel stack
+    mov rsp, gs:64          # rsp = kernel stack
 .endm
 .macro SAVE_KERNEL_STACK
     mov fs:64, rsp
@@ -73,7 +77,7 @@ global_asm!(
 .macro SWITCH_TO_KERNEL_FSBASE
     mov eax, 158            # SYS_arch_prctl
     mov edi, 0x1002         # SET_FS
-    mov rsi, fs:48          # rsi = kernel fsbase
+    mov rsi, gs:0           # rsi = kernel fsbase
     syscall
 .endm
 .macro POP_USER_FSBASE
@@ -84,9 +88,16 @@ global_asm!(
 0:  lea rsi, [rdx + 72]     # rsi = init user fsbase
     mov [rsi], rsi          # user_fs:0 = user fsbase
 1:  mov eax, 158            # SYS_arch_prctl
+    mov edi, 0x1001         # SET_GS
+    mov rsi, rdx            # rsi = kernel fsbase
+    syscall                 # keep kernel fsbase at gs:0 while in user code
+    mov rsi, [rsp + 18 * 8] # reload user fsbase (syscall clobbers r11)
+    test rsi, rsi
+    jnz 2f
+    lea rsi, [rdx + 72]
+2:  mov eax, 158            # SYS_arch_prctl
     mov edi, 0x1002         # SET_FS
     syscall                 # set fsbase
-    mov fs:48, rdx          # user_fs:48 = kernel fsbase
 .endm
 
 .global syscall_fn_entry
