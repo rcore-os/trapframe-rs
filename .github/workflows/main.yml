@@ -141,12 +141,19 @@ jobs:
         run: test "$(uname -m)" = arm64
       - name: Verify AArch64 fncall test is present
         run: |
-          cargo test --all-features --target aarch64-apple-darwin -- --list \
-            | grep -q 'arch::fncall::tests::run_fncall_extended_restores_guest_x18: test'
+          cargo test --all-features --target aarch64-apple-darwin -- --list > /tmp/tests.txt
+          grep -q 'arch::fncall::tests::run_fncall_extended_restores_guest_x18: test' /tmp/tests.txt
       - name: Test AArch64 function-call context switching
-        run: >-
-          cargo test --release --all-features --target aarch64-apple-darwin
-          arch::fncall::tests:: -- --test-threads=1
+        run: |
+          cargo test --release --all-features --target aarch64-apple-darwin --no-run
+          test_bin=$(find target/aarch64-apple-darwin/release/deps -type f -perm +111 -name 'trapframe-*' | head -1)
+          lldb --batch \
+            -o run \
+            -k 'thread backtrace all' \
+            -k 'register read x0 x1 x8 x18 x30 sp pc' \
+            -k 'disassemble --start-address "$pc-32" --count 20' \
+            -- "$test_bin" \
+            'arch::fncall::tests::run_fncall' --exact
 
   test-riscv:
     runs-on: ubuntu-latest
