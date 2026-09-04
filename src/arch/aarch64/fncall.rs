@@ -333,7 +333,10 @@ observe_guest_x18_return:
                 x18_sentinel: u64,
             );
         }
-        let mut stack = [0u8; 0x1000];
+        #[repr(align(16))]
+        struct AlignedStack([u8; 0x1000]);
+
+        let mut stack = AlignedStack([0; 0x1000]);
         let mut guest_tls = [0usize; 32];
         let initial_guest_tp = unsafe { guest_tls.as_mut_ptr().add(8) } as usize;
         let general = GeneralRegs {
@@ -372,7 +375,7 @@ observe_guest_x18_return:
         };
         let base = UserContext {
             general,
-            sp: stack.as_mut_ptr() as usize + 0x1000,
+            sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
             elr: dump_registers as *const () as usize,
             tpidr: initial_guest_tp,
             ..Default::default()
@@ -490,12 +493,15 @@ observe_guest_x18_return:
             fn observe_guest_x18_return();
         }
 
-        let mut stack = [0u8; 0x1000];
+        #[repr(align(16))]
+        struct AlignedStack([u8; 0x1000]);
+
+        let mut stack = AlignedStack([0; 0x1000]);
         let mut guest_tls = [0usize; 32];
         let guest_x18 = 0x1020_3040_5060_7080;
         let mut context = UserContextWithExtensions {
             elr: observe_guest_x18 as *const () as usize,
-            sp: stack.as_mut_ptr() as usize + stack.len(),
+            sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
             tpidr: unsafe { guest_tls.as_mut_ptr().add(8) } as usize,
             general: GeneralRegs {
                 x18: guest_x18,
