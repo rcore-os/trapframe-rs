@@ -128,7 +128,7 @@ jobs:
           cargo test --all-features -- --list \
             | grep -q 'arch::fncall::tests::run_fncall: test'
       - name: Test AArch64 libos context switching
-        run: cargo test --all-features
+        run: cargo test --all-features -- --test-threads=1
 
   test-aarch64-macos-native:
     runs-on: macos-15
@@ -142,11 +142,11 @@ jobs:
       - name: Verify AArch64 fncall test is present
         run: |
           cargo test --all-features --target aarch64-apple-darwin -- --list \
-            | grep -q 'arch::fncall::tests::run_fncall: test'
+            | grep -q 'arch::fncall::tests::run_fncall_extended_restores_guest_x18: test'
       - name: Test AArch64 function-call context switching
         run: >-
-          cargo test --all-features --target aarch64-apple-darwin
-          arch::fncall::tests::run_fncall -- --exact
+          cargo test --release --all-features --target aarch64-apple-darwin
+          arch::fncall::tests:: -- --test-threads=1
 
   test-riscv:
     runs-on: ubuntu-latest
