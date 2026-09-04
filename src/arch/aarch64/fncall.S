@@ -83,6 +83,18 @@ syscall_fn_entry:
     ldr     x1, [sp], #16
     msr     tpidr_el0, x1
 
+    # restore the host floating-point environment and the SIMD registers that
+    # are callee-saved by AAPCS64.  The user context may freely modify these,
+    # but syscall_fn_return is still an ordinary host function call as far as
+    # its Rust caller is concerned.
+    ldp     x2, x3, [sp], #16
+    msr     fpcr, x2
+    msr     fpsr, x3
+    ldp     d8, d9, [sp], #16
+    ldp     d10, d11, [sp], #16
+    ldp     d12, d13, [sp], #16
+    ldp     d14, d15, [sp], #16
+
     # load callee-saved registers
     ldp     x19, x20, [sp], #16
     ldp     x21, x22, [sp], #16
@@ -100,6 +112,33 @@ syscall_fn_return:
 syscall_fn_return_extended:
     mov     x10, #1
 8:
+    # save callee-saved registers
+    stp     x29, x30, [sp, #-16]!
+    stp     x27, x28, [sp, #-16]!
+    stp     x25, x26, [sp, #-16]!
+    stp     x23, x24, [sp, #-16]!
+    stp     x21, x22, [sp, #-16]!
+    stp     x19, x20, [sp, #-16]!
+
+    # Preserve the host floating-point environment and the low 64 bits of
+    # v8-v15, which AAPCS64 requires a function to keep intact.
+    stp     d14, d15, [sp, #-16]!
+    stp     d12, d13, [sp, #-16]!
+    stp     d10, d11, [sp, #-16]!
+    stp     d8, d9, [sp, #-16]!
+    mrs     x11, fpcr
+    mrs     x12, fpsr
+    stp     x11, x12, [sp, #-16]!
+
+    # save kernel tp
+    mrs     x8, tpidr_el0   // x8 = kernel tp
+    str     x8, [sp, #-16]!
+
+    # save kernel sp to UserContext
+    mov     x9, sp
+    orr     x9, x9, x10
+    str     x9, [x0, #8]
+
     cbz     x10, 7f
     # restore floating-point and Advanced SIMD state
     ldp     q0, q1, [x0, #304]
@@ -124,23 +163,6 @@ syscall_fn_return_extended:
     msr     fpsr, x2
 
 7:
-    # save callee-saved registers
-    stp     x29, x30, [sp, #-16]!
-    stp     x27, x28, [sp, #-16]!
-    stp     x25, x26, [sp, #-16]!
-    stp     x23, x24, [sp, #-16]!
-    stp     x21, x22, [sp, #-16]!
-    stp     x19, x20, [sp, #-16]!
-
-    # save kernel tp
-    mrs     x8, tpidr_el0   // x8 = kernel tp
-    str     x8, [sp, #-16]!
-
-    # save kernel sp to UserContext
-    mov     x9, sp
-    orr     x9, x9, x10
-    str     x9, [x0, #8]
-
     # pop tpidr
     ldr     x9, [x0, #5*8]  // x9 = user tp
     cbnz    x9, 1f          // if not 0, goto set
