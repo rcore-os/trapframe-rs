@@ -128,21 +128,7 @@ jobs:
           cargo test --all-features -- --list \
             | grep -q 'arch::fncall::tests::run_fncall: test'
       - name: Test AArch64 libos context switching
-        run: |
-          set +e
-          cargo test --all-features
-          status=$?
-          set -e
-          if [ "$status" -ne 0 ]; then
-            binary=$(find target/debug/deps -maxdepth 1 -type f -executable -name 'trapframe-*' -print -quit)
-            gdb --batch \
-              -ex 'set pagination off' \
-              -ex 'run arch::fncall::tests::run_fncall --exact' \
-              -ex 'x/8i $pc-16' \
-              -ex 'info registers x0 x1 x2 x3 x30 sp pc tpidr' \
-              "$binary"
-            exit "$status"
-          fi
+        run: cargo test --all-features
 
   test-aarch64-macos-native:
     runs-on: macos-15
