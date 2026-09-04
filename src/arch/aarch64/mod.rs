@@ -12,7 +12,7 @@ pub use trap::*;
 
 /// Saved AArch64 user context used to enter and resume user code.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
-#[repr(C)]
+#[repr(C, align(16))]
 pub struct UserContext {
     /// Encoded exception source and kind.
     pub trap_num: usize,
