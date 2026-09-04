@@ -194,6 +194,7 @@ mod tests {
 .endm
 
 .global test_preserve_host_state
+.global observe_guest_x18
 "#
     );
 
@@ -208,6 +209,8 @@ mod tests {
 .set _dump_registers, dump_registers
 .set _elr_location, elr_location
 .set _test_preserve_host_state, test_preserve_host_state
+.set _observe_guest_x18, observe_guest_x18
+.set _observe_guest_x18_return, observe_guest_x18_return
 .set RESTORED_Q0, _RESTORED_Q0
 .set UPDATED_Q0, _UPDATED_Q0
 "#
@@ -307,6 +310,14 @@ test_preserve_host_state:
     ldp     x21, x30, [sp, #16]
     ldp     x19, x20, [sp], #64
     ret
+
+// Observe the guest x18 value restored by the direct Rust entry path.
+observe_guest_x18:
+    mov     x0, x18
+    bl      syscall_fn_entry
+.global observe_guest_x18_return
+observe_guest_x18_return:
+    brk     #0
 "#
     );
 
@@ -322,7 +333,10 @@ test_preserve_host_state:
                 x18_sentinel: u64,
             );
         }
-        let mut stack = [0u8; 0x1000];
+        #[repr(align(16))]
+        struct AlignedStack([u8; 0x1000]);
+
+        let mut stack = AlignedStack([0; 0x1000]);
         let mut guest_tls = [0usize; 32];
         let initial_guest_tp = unsafe { guest_tls.as_mut_ptr().add(8) } as usize;
         let general = GeneralRegs {
@@ -361,7 +375,7 @@ test_preserve_host_state:
         };
         let base = UserContext {
             general,
-            sp: stack.as_mut_ptr() as usize + 0x1000,
+            sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
             elr: dump_registers as *const () as usize,
             tpidr: initial_guest_tp,
             ..Default::default()
@@ -470,5 +484,36 @@ test_preserve_host_state:
             }
         );
         assert_eq!(cx.elr, elr_location as *const () as usize);
+    }
+
+    #[test]
+    fn run_fncall_extended_restores_guest_x18() {
+        unsafe extern "C" {
+            fn observe_guest_x18();
+            fn observe_guest_x18_return();
+        }
+
+        #[repr(align(16))]
+        struct AlignedStack([u8; 0x1000]);
+
+        let mut stack = AlignedStack([0; 0x1000]);
+        let mut guest_tls = [0usize; 32];
+        let guest_x18 = 0x1020_3040_5060_7080;
+        let mut context = UserContextWithExtensions {
+            elr: observe_guest_x18 as *const () as usize,
+            sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
+            tpidr: unsafe { guest_tls.as_mut_ptr().add(8) } as usize,
+            general: GeneralRegs {
+                x18: guest_x18,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        context.run_fncall();
+
+        assert_eq!(context.general.x0, guest_x18);
+        assert_eq!(context.general.x18, guest_x18);
+        assert_eq!(context.elr, observe_guest_x18_return as *const () as usize);
     }
 }
