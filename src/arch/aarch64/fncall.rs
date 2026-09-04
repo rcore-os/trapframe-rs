@@ -2,8 +2,8 @@
 //!
 //! # Assumption
 //!
-//! This module suppose you are running kernel on Linux with glibc,
-//! and your user program is based on musl libc.
+//! This module supposes the kernel is hosted by a Unix-like system and the
+//! user program has a writable thread-pointer area.
 //!
 //! Because we will store values in their pthread structure.
 
