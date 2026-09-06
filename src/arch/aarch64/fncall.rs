@@ -677,6 +677,47 @@ increment_x0:
         assert_eq!(context.elr, observe_guest_x18_return as *const () as usize);
     }
 
+    #[cfg(target_os = "macos")]
+    global_asm!(
+        r#"
+.global _observe_x18_after_host_exception
+_observe_x18_after_host_exception:
+mov x16, #20 // Darwin getpid: force a real host exception.
+svc #0x80
+mov x0, x18
+bl _syscall_fn_entry
+brk #0
+"#
+    );
+    // Darwin clears x18 on exception return unless the host executable has
+    // com.apple.private.custom-x18-abi. A plain fncall round trip can miss it.
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn guest_x18_survives_host_exception() {
+        unsafe extern "C" {
+            fn observe_x18_after_host_exception();
+        }
+        #[repr(align(16))]
+        struct AlignedStack([u8; 0x1000]);
+        let mut stack = AlignedStack([0; 0x1000]);
+        let guest_x18 = 0x1020_3040_5060_7080;
+        let mut context = UserContextWithExtensions {
+            elr: observe_x18_after_host_exception as *const () as usize,
+            sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
+            general: GeneralRegs {
+                x18: guest_x18,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        context.run_fncall();
+        assert_eq!(
+            context.general.x0, guest_x18,
+            "sign this test executable with com.apple.private.custom-x18-abi"
+        );
+        assert_eq!(context.general.x18, guest_x18);
+    }
+
     #[test]
     fn run_fncall_concurrently() {
         unsafe extern "C" {

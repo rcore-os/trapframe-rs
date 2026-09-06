@@ -138,5 +138,9 @@ round-trip costs.
 
 For guests that use AArch64 x18 (including Fuchsia shadow-call stacks), enable
 `fncall-preserve-x18` on Linux. It locates contexts by the host TID so guest TLS
-and all guest registers remain independent of the host. Darwin always preserves
-x18 and uses a pthread-specific context slot.
+and all guest registers remain independent of the host. Darwin uses a pthread-specific context slot. On macOS 13+ SDK builds, sign the
+host executable with the `com.apple.private.custom-x18-abi` entitlement when
+guests use x18. Otherwise Darwin clears it on host exception return, even though
+a short fncall round trip may appear to preserve it. The macOS native test suite
+includes a real host syscall to verify this requirement; its Cargo runner must
+sign the test binary before execution.
