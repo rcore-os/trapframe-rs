@@ -104,6 +104,11 @@ with a call to `syscall_fn_entry`, which returns control to `run_fncall`.
 This is useful for testing a userspace runtime or embedding it in a host process
 while keeping the kernel-facing control flow.
 
+On AArch64 Linux, function-call mode reserves `x18` as its context pointer.
+Guest payloads must leave that platform register untouched. Run
+`cargo bench --bench fncall` on hosted AArch64 to measure the base and extended
+round-trip costs.
+
 ## Supported targets
 
 | Architecture | Targets | Execution mode |

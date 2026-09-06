@@ -119,6 +119,9 @@ pub struct GeneralRegs {
     /// Intra-procedure-call scratch register X17.
     pub x17: usize,
     /// Platform register X18.
+    ///
+    /// AArch64 Linux function-call mode reserves the live register for its
+    /// context pointer, so guest code must not use it in that mode.
     pub x18: usize,
     /// Callee-saved register X19.
     pub x19: usize,

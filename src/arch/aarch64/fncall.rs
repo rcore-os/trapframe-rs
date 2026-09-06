@@ -2,66 +2,61 @@
 //!
 use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
+#[cfg(target_os = "macos")]
 use core::sync::atomic::{AtomicUsize, Ordering};
 
-const FNCALL_CONTEXT_SLOTS: usize = 256;
-const RESERVED_THREAD_KEY: usize = usize::MAX;
+#[cfg(target_os = "macos")]
+const UNINITIALIZED_FNCALL_CONTEXT_KEY: usize = usize::MAX;
+#[cfg(target_os = "macos")]
+const INITIALIZING_FNCALL_CONTEXT_KEY: usize = usize::MAX - 1;
 
-#[repr(C)]
-struct FncallContextSlot {
-    thread_key: AtomicUsize,
-    context: AtomicUsize,
-}
-
+#[cfg(target_os = "macos")]
 #[unsafe(no_mangle)]
-static FNCALL_CONTEXTS: [FncallContextSlot; FNCALL_CONTEXT_SLOTS] = [const {
-    FncallContextSlot {
-        thread_key: AtomicUsize::new(0),
-        context: AtomicUsize::new(0),
-    }
-}; FNCALL_CONTEXT_SLOTS];
+static FNCALL_CONTEXT_KEY: AtomicUsize = AtomicUsize::new(UNINITIALIZED_FNCALL_CONTEXT_KEY);
 
-fn register_fncall_context(thread_key: usize, context: *mut UserContext) {
-    assert_ne!(thread_key, 0);
-    for slot in &FNCALL_CONTEXTS {
-        if slot
-            .thread_key
-            .compare_exchange(0, RESERVED_THREAD_KEY, Ordering::Acquire, Ordering::Relaxed)
-            .is_ok()
-        {
-            slot.context.store(context as usize, Ordering::Relaxed);
-            slot.thread_key.store(thread_key, Ordering::Release);
-            return;
-        }
-    }
-    panic!("too many concurrent AArch64 fncall contexts");
-}
-
-#[cfg(target_os = "linux")]
-fn host_thread_key() -> usize {
-    let thread_id: usize;
-    unsafe {
-        core::arch::asm!(
-            "svc #0",
-            in("x8") 178usize,
-            lateout("x0") thread_id,
-            options(nostack)
-        );
-    }
-    thread_id
+#[cfg(target_os = "macos")]
+unsafe extern "C" {
+    fn pthread_key_create(
+        key: *mut usize,
+        destructor: Option<unsafe extern "C" fn(*mut ())>,
+    ) -> i32;
+    fn pthread_setspecific(key: usize, value: *const ()) -> i32;
 }
 
 #[cfg(target_os = "macos")]
-fn host_thread_key() -> usize {
-    let thread_pointer: usize;
-    unsafe {
-        core::arch::asm!(
-            "mrs {thread_pointer}, tpidrro_el0",
-            thread_pointer = out(reg) thread_pointer,
-            options(nomem, nostack, preserves_flags)
-        );
+fn fncall_context_key() -> usize {
+    loop {
+        let key = FNCALL_CONTEXT_KEY.load(Ordering::Acquire);
+        if key < INITIALIZING_FNCALL_CONTEXT_KEY {
+            return key;
+        }
+        if key == UNINITIALIZED_FNCALL_CONTEXT_KEY
+            && FNCALL_CONTEXT_KEY
+                .compare_exchange(
+                    UNINITIALIZED_FNCALL_CONTEXT_KEY,
+                    INITIALIZING_FNCALL_CONTEXT_KEY,
+                    Ordering::Acquire,
+                    Ordering::Relaxed,
+                )
+                .is_ok()
+        {
+            let mut key = 0;
+            let result = unsafe { pthread_key_create(&mut key, None) };
+            assert_eq!(
+                result, 0,
+                "failed to allocate pthread key for AArch64 fncall"
+            );
+            FNCALL_CONTEXT_KEY.store(key, Ordering::Release);
+            return key;
+        }
+        core::hint::spin_loop();
     }
-    thread_pointer
+}
+
+#[cfg(target_os = "macos")]
+fn register_fncall_context(context: *mut UserContext) {
+    let result = unsafe { pthread_setspecific(fncall_context_key(), context.cast()) };
+    assert_eq!(result, 0, "failed to publish AArch64 fncall context");
 }
 
 fn prepare_fncall_context(context: &mut UserContext) {
@@ -86,7 +81,8 @@ fn prepare_fncall_context(context: &mut UserContext) {
             context.tpidr = kernel_thread_pointer + 240;
         }
     }
-    register_fncall_context(host_thread_key(), context);
+    #[cfg(target_os = "macos")]
+    register_fncall_context(context);
 }
 
 #[cfg(target_os = "linux")]
@@ -96,15 +92,23 @@ global_asm!(
     add     \dst, \kernel_tp, #72
 .endm
 
-.macro LOAD_CONTEXT_TABLE dst
-    adrp    \dst, :got:FNCALL_CONTEXTS
-    ldr     \dst, [\dst, :got_lo12:FNCALL_CONTEXTS]
+.macro LOAD_FNCALL_CONTEXT context, scratch1, scratch2, scratch3, scratch4
+    mov     \context, x18
 .endm
 
+.macro SET_FNCALL_CONTEXT context
+    mov     x18, \context
+.endm
 
-.macro LOAD_HOST_THREAD_KEY dst, scratch
-    mov     \scratch, #178
-    svc     #0
+.macro RESTORE_GUEST_X17_X18 base
+    ldr     x17, [\base], #16
+.endm
+
+.macro SAVE_GUEST_X17_X18
+    // x18 carries the context on Linux. The guest-visible value remains in
+    // the context because x18 is reserved by the fncall ABI.
+    ldr     x30, [x18, #23 * 8]
+    stp     x17, x30, [sp, #-16]!
 .endm
 
 .global syscall_fn_entry
@@ -124,14 +128,25 @@ global_asm!(
 .endm
 
 
-.macro LOAD_CONTEXT_TABLE dst
-    adrp    \dst, _FNCALL_CONTEXTS@GOTPAGE
-    ldr     \dst, [\dst, _FNCALL_CONTEXTS@GOTPAGEOFF]
+.macro LOAD_FNCALL_CONTEXT context, scratch1, scratch2, scratch3, scratch4
+    adrp    \scratch1, _FNCALL_CONTEXT_KEY@GOTPAGE
+    ldr     \scratch1, [\scratch1, _FNCALL_CONTEXT_KEY@GOTPAGEOFF]
+    ldr     \scratch1, [\scratch1]
+    mrs     \scratch2, tpidrro_el0
+    ldr     \context, [\scratch2, \scratch1, lsl #3]
+    str     xzr, [\scratch2, \scratch1, lsl #3]
 .endm
 
 
-.macro LOAD_HOST_THREAD_KEY dst, scratch
-    mrs     \dst, tpidrro_el0
+.macro SET_FNCALL_CONTEXT context
+.endm
+
+.macro RESTORE_GUEST_X17_X18 base
+    ldp     x17, x18, [\base], #16
+.endm
+
+.macro SAVE_GUEST_X17_X18
+    stp     x17, x18, [sp, #-16]!
 .endm
 
 .global _syscall_fn_entry
@@ -166,6 +181,7 @@ impl UserContext {
     /// Go to user context by function return, within the same privilege level.
     ///
     /// User program should call `syscall_fn_entry()` to return back.
+    /// On Linux, `x18` is reserved for the fncall context pointer.
     pub fn run_fncall(&mut self) {
         prepare_fncall_context(self);
         unsafe { syscall_fn_return(self) }
@@ -174,6 +190,7 @@ impl UserContext {
 
 impl UserContextWithExtensions {
     /// Goes to user context while preserving floating-point and SIMD state.
+    /// On Linux, `x18` is reserved for the fncall context pointer.
     pub fn run_fncall(&mut self) {
         prepare_fncall_context(self);
         unsafe { syscall_fn_return_extended(self) }
@@ -184,6 +201,7 @@ impl UserContextWithExtensions {
 mod tests {
     use crate::*;
     use core::arch::{asm, global_asm};
+    extern crate std;
 
     #[cfg(target_os = "linux")]
     global_asm!(
@@ -191,6 +209,17 @@ mod tests {
 .macro LOAD_ADDRESS reg, symbol
     adrp    \reg, \symbol
     add     \reg, \reg, :lo12:\symbol
+.endm
+
+.macro CALL_SYSCALL_FN_ENTRY
+    bl      syscall_fn_entry
+.endm
+
+.macro CALL_SYSCALL_FN_RETURN_EXTENDED
+    bl      syscall_fn_return_extended
+.endm
+
+.macro UPDATE_GUEST_X18
 .endm
 
 .global test_preserve_host_state
@@ -206,8 +235,22 @@ mod tests {
     ldr     \reg, [\reg, \symbol@GOTPAGEOFF]
 .endm
 
+.macro CALL_SYSCALL_FN_ENTRY
+    bl      _syscall_fn_entry
+.endm
+
+.macro CALL_SYSCALL_FN_RETURN_EXTENDED
+    bl      _syscall_fn_return_extended
+.endm
+
+.macro UPDATE_GUEST_X18
+    add     x18, x18, #100
+.endm
+
 .set _dump_registers, dump_registers
 .set _elr_location, elr_location
+.global _increment_x0
+.set _increment_x0, increment_x0
 .set _test_preserve_host_state, test_preserve_host_state
 .set _observe_guest_x18, observe_guest_x18
 .set _observe_guest_x18_return, observe_guest_x18_return
@@ -270,7 +313,7 @@ dump_registers:
     add     x15, x15, #100
     add     x16, x16, #100
     add     x17, x17, #100
-    add     x18, x18, #100
+    UPDATE_GUEST_X18
     add     x19, x19, #100
     add     x20, x20, #100
     add     x21, x21, #100
@@ -284,7 +327,7 @@ dump_registers:
     add     x29, x29, #100
     add     x30, x30, #100
 
-    bl syscall_fn_entry
+    CALL_SYSCALL_FN_ENTRY
 
 .global elr_location
 elr_location:
@@ -301,7 +344,7 @@ test_preserve_host_state:
     mov     x20, x2
     fmov    d8, x20
     mov     x18, x3
-    bl      syscall_fn_return_extended
+    CALL_SYSCALL_FN_RETURN_EXTENDED
     fmov    x9, d8
     str     x9, [x19]
     str     x18, [x19, #8]
@@ -314,10 +357,16 @@ test_preserve_host_state:
 // Observe the guest x18 value restored by the direct Rust entry path.
 observe_guest_x18:
     mov     x0, x18
-    bl      syscall_fn_entry
+    CALL_SYSCALL_FN_ENTRY
 .global observe_guest_x18_return
 observe_guest_x18_return:
     brk     #0
+
+.global increment_x0
+increment_x0:
+    add     x0, x0, #1
+    CALL_SYSCALL_FN_ENTRY
+    b       increment_x0
 "#
     );
 
@@ -438,10 +487,16 @@ observe_guest_x18_return:
         assert_eq!(restored_host_state, [initial_host_d8, initial_host_x18]);
         // check restored registers
         let general_dump = unsafe { *(cx.sp as *const GeneralRegs) };
+        let guest_x18 = if cfg!(target_os = "linux") {
+            &cx as *const UserContextWithExtensions as usize
+        } else {
+            general.x18
+        };
         assert_eq!(
             general_dump,
             GeneralRegs {
                 x30: dump_registers as *const () as usize,
+                x18: guest_x18,
                 ..general
             }
         );
@@ -449,7 +504,7 @@ observe_guest_x18_return:
         assert_eq!(
             cx.general,
             GeneralRegs {
-                x0: 100 + 0,
+                x0: 100,
                 x1: 100 + 1,
                 x2: 100 + 2,
                 x3: 100 + 3,
@@ -467,7 +522,7 @@ observe_guest_x18_return:
                 x15: 100 + 15,
                 x16: 100 + 16,
                 x17: 100 + 17,
-                x18: 100 + 18,
+                x18: if cfg!(target_os = "linux") { 18 } else { 118 },
                 x19: 100 + 19,
                 x20: 100 + 20,
                 x21: 100 + 21,
@@ -486,6 +541,7 @@ observe_guest_x18_return:
         assert_eq!(cx.elr, elr_location as *const () as usize);
     }
 
+    #[cfg(target_os = "macos")]
     #[test]
     fn run_fncall_extended_restores_guest_x18() {
         unsafe extern "C" {
@@ -515,5 +571,41 @@ observe_guest_x18_return:
         assert_eq!(context.general.x0, guest_x18);
         assert_eq!(context.general.x18, guest_x18);
         assert_eq!(context.elr, observe_guest_x18_return as *const () as usize);
+    }
+
+    #[test]
+    fn run_fncall_concurrently() {
+        unsafe extern "C" {
+            fn increment_x0();
+        }
+
+        const THREADS: usize = 8;
+        const ITERATIONS: usize = 1_000;
+
+        let threads: std::vec::Vec<_> = (0..THREADS)
+            .map(|_| {
+                std::thread::spawn(|| {
+                    #[repr(align(16))]
+                    struct AlignedStack([u8; 0x1000]);
+
+                    let mut stack = AlignedStack([0; 0x1000]);
+                    let mut guest_tls = [0usize; 16];
+                    let mut context = UserContext {
+                        elr: increment_x0 as *const () as usize,
+                        sp: stack.0.as_mut_ptr() as usize + stack.0.len(),
+                        tpidr: guest_tls.as_mut_ptr() as usize,
+                        ..Default::default()
+                    };
+                    for expected in 1..=ITERATIONS {
+                        context.run_fncall();
+                        assert_eq!(context.general.x0, expected);
+                    }
+                })
+            })
+            .collect();
+
+        for thread in threads {
+            thread.join().unwrap();
+        }
     }
 }

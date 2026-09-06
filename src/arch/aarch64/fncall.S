@@ -1,28 +1,17 @@
-# User contexts are published in FNCALL_CONTEXTS under a stable host-thread key.
-# The user program may replace TPIDR_EL0 at any time, so it cannot be the key.
+# Find the context through host-owned state. Darwin uses pthread-specific
+# storage because TPIDR_EL0 and every guest register remain usable there.
+# Linux reserves x18 as a direct context pointer.
 
 syscall_fn_entry:
-    # Save the registers used to find the context in FNCALL_CONTEXTS.
+    # Save the registers used to find the context.
     sub     sp, sp, #64
     stp     x0, x1, [sp]
     stp     x2, x3, [sp, #16]
     stp     x8, x30, [sp, #32]
 
-    # Take the context registered for this host thread.  The acquire
-    # load pairs with register_fncall_context's release publication.
-    LOAD_HOST_THREAD_KEY x0, x8
-    LOAD_CONTEXT_TABLE x1
-    mov     x2, #256
-1:  ldar    x3, [x1]
-    cmp     x3, x0
-    b.eq    2f
-    add     x1, x1, #16
-    subs    x2, x2, #1
-    b.ne    1b
-    brk     #0
-2:  ldr     x0, [x1, #8]
-    stlr    xzr, [x1]
-    cbz     x0, 3f
+    # Take the context from Linux x18 or Darwin pthread-specific storage.
+    LOAD_FNCALL_CONTEXT x0, x1, x2, x3, x8
+    cbz     x0, 1f
 
     # Switch to the context stack and restore the lookup scratch registers.
     add     x30, sp, #64         // x30 = user stack
@@ -32,9 +21,9 @@ syscall_fn_entry:
     ldr     x8, [x30, #-32]
     ldp     x0, x1, [x30, #-64]
     ldr     x30, [x30, #-24]
-    b       4f
-3:  brk     #0
-4:
+    b       2f
+1:  brk     #0
+2:
 
     # save general registers
     stp     x30, x0, [sp, #-16]!
@@ -44,7 +33,7 @@ syscall_fn_entry:
     stp     x23, x24, [sp, #-16]!
     stp     x21, x22, [sp, #-16]!
     stp     x19, x20, [sp, #-16]!
-    stp     x17, x18, [sp, #-16]!
+    SAVE_GUEST_X17_X18
     stp     x15, x16, [sp, #-16]!
     stp     x13, x14, [sp, #-16]!
     stp     x11, x12, [sp, #-16]!
@@ -196,6 +185,7 @@ syscall_fn_return_extended:
     # pop elr, sp
     ldr     x30, [x0, #2*8]
     ldr     x8, [x0, #4*8]
+    SET_FNCALL_CONTEXT x0
     mov     sp, x8
 
     # pop general registers
@@ -208,7 +198,7 @@ syscall_fn_return_extended:
     ldp     x11, x12, [x0], #16
     ldp     x13, x14, [x0], #16
     ldp     x15, x16, [x0], #16
-    ldp     x17, x18, [x0], #16
+    RESTORE_GUEST_X17_X18 x0
     ldp     x19, x20, [x0], #16
     ldp     x21, x22, [x0], #16
     ldp     x23, x24, [x0], #16
