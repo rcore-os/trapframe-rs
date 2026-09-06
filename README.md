@@ -141,6 +141,8 @@ For guests that use AArch64 x18 (including Fuchsia shadow-call stacks), enable
 and all guest registers remain independent of the host. Darwin uses a pthread-specific context slot. On macOS 13+ SDK builds, sign the
 host executable with the `com.apple.private.custom-x18-abi` entitlement when
 guests use x18. Otherwise Darwin clears it on host exception return, even though
-a short fncall round trip may appear to preserve it. The macOS native test suite
-includes a real host syscall to verify this requirement; its Cargo runner must
-sign the test binary before execution.
+a short fncall round trip may appear to preserve it. Tests that require x18 are ignored by default on macOS; one includes a real
+host syscall to verify this requirement. Run them with `--ignored` only from a
+host authorized for this private entitlement. Ad-hoc signing with the private
+entitlement is rejected by standard macOS runners. Layout and concurrent fncall
+tests with x18 unused still run on unprivileged macOS hosts.

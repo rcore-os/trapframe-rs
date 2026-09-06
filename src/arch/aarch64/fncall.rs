@@ -465,6 +465,10 @@ increment_x0:
     );
 
     #[test]
+    #[cfg_attr(
+        target_os = "macos",
+        ignore = "requires a host authorized for com.apple.private.custom-x18-abi"
+    )]
     fn run_fncall() {
         unsafe extern "C" {
             fn dump_registers();
@@ -647,6 +651,10 @@ increment_x0:
 
     #[cfg(any(target_os = "macos", feature = "fncall-preserve-x18"))]
     #[test]
+    #[cfg_attr(
+        target_os = "macos",
+        ignore = "requires a host authorized for com.apple.private.custom-x18-abi"
+    )]
     fn run_fncall_extended_restores_guest_x18() {
         unsafe extern "C" {
             fn observe_guest_x18();
@@ -693,6 +701,10 @@ brk #0
     // com.apple.private.custom-x18-abi. A plain fncall round trip can miss it.
     #[cfg(target_os = "macos")]
     #[test]
+    #[cfg_attr(
+        target_os = "macos",
+        ignore = "requires a host authorized for com.apple.private.custom-x18-abi"
+    )]
     fn guest_x18_survives_host_exception() {
         unsafe extern "C" {
             fn observe_x18_after_host_exception();
