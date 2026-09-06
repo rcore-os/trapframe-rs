@@ -2,7 +2,7 @@
 //!
 use super::{UserContext, UserContextWithExtensions};
 use core::arch::global_asm;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", feature = "fncall-preserve-x18"))]
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 #[cfg(target_os = "macos")]
@@ -59,6 +59,58 @@ fn register_fncall_context(context: *mut UserContext) {
     assert_eq!(result, 0, "failed to publish AArch64 fncall context");
 }
 
+#[cfg(all(target_os = "linux", feature = "fncall-preserve-x18"))]
+mod linux_context {
+    use super::*;
+    const FNCALL_CONTEXT_SLOTS: usize = 256;
+    const RESERVED_THREAD_KEY: usize = usize::MAX;
+
+    #[repr(C)]
+    struct FncallContextSlot {
+        thread_key: AtomicUsize,
+        context: AtomicUsize,
+    }
+
+    #[unsafe(no_mangle)]
+    static FNCALL_CONTEXTS: [FncallContextSlot; FNCALL_CONTEXT_SLOTS] = [const {
+        FncallContextSlot {
+            thread_key: AtomicUsize::new(0),
+            context: AtomicUsize::new(0),
+        }
+    };
+        FNCALL_CONTEXT_SLOTS];
+
+    pub(super) fn register_fncall_context(thread_key: usize, context: *mut UserContext) {
+        assert_ne!(thread_key, 0);
+        for slot in &FNCALL_CONTEXTS {
+            if slot
+                .thread_key
+                .compare_exchange(0, RESERVED_THREAD_KEY, Ordering::Acquire, Ordering::Relaxed)
+                .is_ok()
+            {
+                slot.context.store(context as usize, Ordering::Relaxed);
+                slot.thread_key.store(thread_key, Ordering::Release);
+                return;
+            }
+        }
+        panic!("too many concurrent AArch64 fncall contexts");
+    }
+
+    #[cfg(target_os = "linux")]
+    pub(super) fn host_thread_key() -> usize {
+        let thread_id: usize;
+        unsafe {
+            core::arch::asm!(
+                "svc #0",
+                in("x8") 178usize,
+                lateout("x0") thread_id,
+                options(nostack)
+            );
+        }
+        thread_id
+    }
+}
+
 fn prepare_fncall_context(context: &mut UserContext) {
     if context.tpidr == 0 {
         let kernel_thread_pointer: usize;
@@ -83,9 +135,11 @@ fn prepare_fncall_context(context: &mut UserContext) {
     }
     #[cfg(target_os = "macos")]
     register_fncall_context(context);
+    #[cfg(all(target_os = "linux", feature = "fncall-preserve-x18"))]
+    linux_context::register_fncall_context(linux_context::host_thread_key(), context);
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(feature = "fncall-preserve-x18")))]
 global_asm!(
     r#"
 .macro INIT_USER_TP dst, kernel_tp
@@ -111,6 +165,42 @@ global_asm!(
     stp     x17, x30, [sp, #-16]!
 .endm
 
+.global syscall_fn_entry
+.global syscall_fn_return
+.global syscall_fn_return_extended
+"#
+);
+
+#[cfg(all(target_os = "linux", feature = "fncall-preserve-x18"))]
+global_asm!(
+    r#"
+.macro INIT_USER_TP dst, kernel_tp
+    add \dst, \kernel_tp, #72
+.endm
+.macro LOAD_FNCALL_CONTEXT context, scratch1, scratch2, scratch3, scratch4
+    mov x8, #178
+    svc #0
+    adrp \scratch1, :got:FNCALL_CONTEXTS
+    ldr \scratch1, [\scratch1, :got_lo12:FNCALL_CONTEXTS]
+    mov \scratch2, #256
+90: ldar \scratch3, [\scratch1]
+    cmp \scratch3, x0
+    b.eq 91f
+    add \scratch1, \scratch1, #16
+    subs \scratch2, \scratch2, #1
+    b.ne 90b
+    brk #0
+91: ldr \context, [\scratch1, #8]
+    stlr xzr, [\scratch1]
+.endm
+.macro SET_FNCALL_CONTEXT context
+.endm
+.macro RESTORE_GUEST_X17_X18 base
+    ldp x17, x18, [\base], #16
+.endm
+.macro SAVE_GUEST_X17_X18
+    stp x17, x18, [sp, #-16]!
+.endm
 .global syscall_fn_entry
 .global syscall_fn_return
 .global syscall_fn_return_extended
@@ -181,7 +271,7 @@ impl UserContext {
     /// Go to user context by function return, within the same privilege level.
     ///
     /// User program should call `syscall_fn_entry()` to return back.
-    /// On Linux, `x18` is reserved for the fncall context pointer.
+    /// On Linux, `x18` is reserved unless `fncall-preserve-x18` is enabled.
     pub fn run_fncall(&mut self) {
         prepare_fncall_context(self);
         unsafe { syscall_fn_return(self) }
@@ -190,7 +280,7 @@ impl UserContext {
 
 impl UserContextWithExtensions {
     /// Goes to user context while preserving floating-point and SIMD state.
-    /// On Linux, `x18` is reserved for the fncall context pointer.
+    /// On Linux, `x18` is reserved unless `fncall-preserve-x18` is enabled.
     pub fn run_fncall(&mut self) {
         prepare_fncall_context(self);
         unsafe { syscall_fn_return_extended(self) }
@@ -220,11 +310,15 @@ mod tests {
 .endm
 
 .macro UPDATE_GUEST_X18
+    .if {preserve_x18}
+    add x18, x18, #100
+    .endif
 .endm
 
 .global test_preserve_host_state
 .global observe_guest_x18
-"#
+"#,
+        preserve_x18 = const cfg!(feature = "fncall-preserve-x18") as usize,
     );
 
     #[cfg(target_os = "macos")]
@@ -465,7 +559,7 @@ increment_x0:
             ..Default::default()
         };
         let initial_q0 = 0x1122_3344_5566_7788_99aa_bbcc_ddee_ff00;
-        cx.fp_simd.registers[0] = initial_q0;
+        cx.fp_simd.registers.q0 = initial_q0;
         let initial_host_d8 = 0x1357_9bdf_2468_ace0_u64;
         let initial_host_x18 = 0x1020_3040_5060_7080_u64;
         let mut restored_host_state = [0; 2];
@@ -483,11 +577,14 @@ increment_x0:
         assert_eq!(restored_q0, initial_q0);
         assert_eq!(cx.tpidr, initial_guest_tp + 8);
         assert_eq!(guest_tls[15], 0);
-        assert_eq!(cx.fp_simd.registers[0], UPDATED_Q0);
+        assert_eq!(cx.fp_simd.registers.q0, UPDATED_Q0);
         assert_eq!(restored_host_state, [initial_host_d8, initial_host_x18]);
         // check restored registers
         let general_dump = unsafe { *(cx.sp as *const GeneralRegs) };
-        let guest_x18 = if cfg!(target_os = "linux") {
+        let guest_x18 = if cfg!(all(
+            target_os = "linux",
+            not(feature = "fncall-preserve-x18")
+        )) {
             &cx as *const UserContextWithExtensions as usize
         } else {
             general.x18
@@ -522,7 +619,14 @@ increment_x0:
                 x15: 100 + 15,
                 x16: 100 + 16,
                 x17: 100 + 17,
-                x18: if cfg!(target_os = "linux") { 18 } else { 118 },
+                x18: if cfg!(all(
+                    target_os = "linux",
+                    not(feature = "fncall-preserve-x18")
+                )) {
+                    18
+                } else {
+                    118
+                },
                 x19: 100 + 19,
                 x20: 100 + 20,
                 x21: 100 + 21,
@@ -541,7 +645,7 @@ increment_x0:
         assert_eq!(cx.elr, elr_location as *const () as usize);
     }
 
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", feature = "fncall-preserve-x18"))]
     #[test]
     fn run_fncall_extended_restores_guest_x18() {
         unsafe extern "C" {

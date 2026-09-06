@@ -69,19 +69,128 @@ impl core::ops::DerefMut for UserContextWithExtensions {
 }
 
 /// Saved AArch64 floating-point and Advanced SIMD state.
-#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[derive(Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C, align(16))]
 pub struct FpSimdState {
     /// SIMD and floating-point registers Q0 through Q31.
-    pub registers: [u128; 32],
+    pub registers: FpSimdRegs,
     /// Floating-point control register.
     pub fpcr: u32,
     /// Floating-point status register.
     pub fpsr: u32,
 }
 
+/// Named SIMD registers, in the Q0–Q31 order used by the assembly frame.
+#[derive(Default, Clone, Copy, Eq, PartialEq)]
+#[repr(C)]
+pub struct FpSimdRegs {
+    /// SIMD register Q0.
+    pub q0: u128,
+    /// SIMD register Q1.
+    pub q1: u128,
+    /// SIMD register Q2.
+    pub q2: u128,
+    /// SIMD register Q3.
+    pub q3: u128,
+    /// SIMD register Q4.
+    pub q4: u128,
+    /// SIMD register Q5.
+    pub q5: u128,
+    /// SIMD register Q6.
+    pub q6: u128,
+    /// SIMD register Q7.
+    pub q7: u128,
+    /// SIMD register Q8.
+    pub q8: u128,
+    /// SIMD register Q9.
+    pub q9: u128,
+    /// SIMD register Q10.
+    pub q10: u128,
+    /// SIMD register Q11.
+    pub q11: u128,
+    /// SIMD register Q12.
+    pub q12: u128,
+    /// SIMD register Q13.
+    pub q13: u128,
+    /// SIMD register Q14.
+    pub q14: u128,
+    /// SIMD register Q15.
+    pub q15: u128,
+    /// SIMD register Q16.
+    pub q16: u128,
+    /// SIMD register Q17.
+    pub q17: u128,
+    /// SIMD register Q18.
+    pub q18: u128,
+    /// SIMD register Q19.
+    pub q19: u128,
+    /// SIMD register Q20.
+    pub q20: u128,
+    /// SIMD register Q21.
+    pub q21: u128,
+    /// SIMD register Q22.
+    pub q22: u128,
+    /// SIMD register Q23.
+    pub q23: u128,
+    /// SIMD register Q24.
+    pub q24: u128,
+    /// SIMD register Q25.
+    pub q25: u128,
+    /// SIMD register Q26.
+    pub q26: u128,
+    /// SIMD register Q27.
+    pub q27: u128,
+    /// SIMD register Q28.
+    pub q28: u128,
+    /// SIMD register Q29.
+    pub q29: u128,
+    /// SIMD register Q30.
+    pub q30: u128,
+    /// SIMD register Q31.
+    pub q31: u128,
+}
+
+impl core::fmt::Debug for FpSimdRegs {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        writeln!(f, "FpSimdRegs {{")?;
+        writeln!(f, "    q0: {:#034x},", self.q0)?;
+        writeln!(f, "    q1: {:#034x},", self.q1)?;
+        writeln!(f, "    q2: {:#034x},", self.q2)?;
+        writeln!(f, "    q3: {:#034x},", self.q3)?;
+        writeln!(f, "    q4: {:#034x},", self.q4)?;
+        writeln!(f, "    q5: {:#034x},", self.q5)?;
+        writeln!(f, "    q6: {:#034x},", self.q6)?;
+        writeln!(f, "    q7: {:#034x},", self.q7)?;
+        writeln!(f, "    q8: {:#034x},", self.q8)?;
+        writeln!(f, "    q9: {:#034x},", self.q9)?;
+        writeln!(f, "    q10: {:#034x},", self.q10)?;
+        writeln!(f, "    q11: {:#034x},", self.q11)?;
+        writeln!(f, "    q12: {:#034x},", self.q12)?;
+        writeln!(f, "    q13: {:#034x},", self.q13)?;
+        writeln!(f, "    q14: {:#034x},", self.q14)?;
+        writeln!(f, "    q15: {:#034x},", self.q15)?;
+        writeln!(f, "    q16: {:#034x},", self.q16)?;
+        writeln!(f, "    q17: {:#034x},", self.q17)?;
+        writeln!(f, "    q18: {:#034x},", self.q18)?;
+        writeln!(f, "    q19: {:#034x},", self.q19)?;
+        writeln!(f, "    q20: {:#034x},", self.q20)?;
+        writeln!(f, "    q21: {:#034x},", self.q21)?;
+        writeln!(f, "    q22: {:#034x},", self.q22)?;
+        writeln!(f, "    q23: {:#034x},", self.q23)?;
+        writeln!(f, "    q24: {:#034x},", self.q24)?;
+        writeln!(f, "    q25: {:#034x},", self.q25)?;
+        writeln!(f, "    q26: {:#034x},", self.q26)?;
+        writeln!(f, "    q27: {:#034x},", self.q27)?;
+        writeln!(f, "    q28: {:#034x},", self.q28)?;
+        writeln!(f, "    q29: {:#034x},", self.q29)?;
+        writeln!(f, "    q30: {:#034x},", self.q30)?;
+        writeln!(f, "    q31: {:#034x},", self.q31)?;
+        write!(f, "}}")
+    }
+}
+
 /// AArch64 general-purpose registers.
-#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[derive(Default, Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct GeneralRegs {
     /// General-purpose register X1.
@@ -199,5 +308,91 @@ impl UserContext {
     /// Sets the user TLS pointer.
     pub fn set_tls(&mut self, tls: usize) {
         self.tpidr = tls;
+    }
+}
+
+impl core::fmt::Debug for GeneralRegs {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        writeln!(f, "GeneralRegs {{")?;
+        writeln!(f, "    x1: {:#018x},", self.x1)?;
+        writeln!(f, "    x2: {:#018x},", self.x2)?;
+        writeln!(f, "    x3: {:#018x},", self.x3)?;
+        writeln!(f, "    x4: {:#018x},", self.x4)?;
+        writeln!(f, "    x5: {:#018x},", self.x5)?;
+        writeln!(f, "    x6: {:#018x},", self.x6)?;
+        writeln!(f, "    x7: {:#018x},", self.x7)?;
+        writeln!(f, "    x8: {:#018x},", self.x8)?;
+        writeln!(f, "    x9: {:#018x},", self.x9)?;
+        writeln!(f, "    x10: {:#018x},", self.x10)?;
+        writeln!(f, "    x11: {:#018x},", self.x11)?;
+        writeln!(f, "    x12: {:#018x},", self.x12)?;
+        writeln!(f, "    x13: {:#018x},", self.x13)?;
+        writeln!(f, "    x14: {:#018x},", self.x14)?;
+        writeln!(f, "    x15: {:#018x},", self.x15)?;
+        writeln!(f, "    x16: {:#018x},", self.x16)?;
+        writeln!(f, "    x17: {:#018x},", self.x17)?;
+        writeln!(f, "    x18: {:#018x},", self.x18)?;
+        writeln!(f, "    x19: {:#018x},", self.x19)?;
+        writeln!(f, "    x20: {:#018x},", self.x20)?;
+        writeln!(f, "    x21: {:#018x},", self.x21)?;
+        writeln!(f, "    x22: {:#018x},", self.x22)?;
+        writeln!(f, "    x23: {:#018x},", self.x23)?;
+        writeln!(f, "    x24: {:#018x},", self.x24)?;
+        writeln!(f, "    x25: {:#018x},", self.x25)?;
+        writeln!(f, "    x26: {:#018x},", self.x26)?;
+        writeln!(f, "    x27: {:#018x},", self.x27)?;
+        writeln!(f, "    x28: {:#018x},", self.x28)?;
+        writeln!(f, "    x29: {:#018x},", self.x29)?;
+        writeln!(f, "    __reserved: {:#018x},", self.__reserved)?;
+        writeln!(f, "    x30: {:#018x},", self.x30)?;
+        writeln!(f, "    x0: {:#018x},", self.x0)?;
+        write!(f, "}}")
+    }
+}
+
+impl core::fmt::Debug for FpSimdState {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        writeln!(f, "FpSimdState {{")?;
+        writeln!(f, "    registers: {:?},", self.registers)?;
+        writeln!(f, "    fpcr: {:#018x},", self.fpcr)?;
+        writeln!(f, "    fpsr: {:#018x},", self.fpsr)?;
+        write!(f, "}}")
+    }
+}
+
+#[cfg(test)]
+mod layout_tests {
+    use super::*;
+    use core::mem::{align_of, offset_of, size_of};
+    extern crate std;
+
+    #[test]
+    fn named_simd_registers_keep_the_assembly_layout() {
+        assert_eq!(size_of::<FpSimdRegs>(), 512);
+        assert_eq!(offset_of!(FpSimdRegs, q31), 31 * 16);
+        assert_eq!(offset_of!(FpSimdState, fpcr), 512);
+        assert_eq!(offset_of!(FpSimdState, fpsr), 516);
+        assert_eq!(offset_of!(UserContextWithExtensions, fp_simd), 304);
+        assert_eq!(size_of::<UserContextWithExtensions>(), 832);
+        assert_eq!(align_of::<UserContext>(), 16);
+    }
+
+    #[test]
+    fn debug_names_every_simd_register_on_its_own_line() {
+        let dump = std::format!(
+            "{:?}",
+            FpSimdRegs {
+                q31: 0x1234,
+                ..Default::default()
+            }
+        );
+        assert_eq!(dump.lines().count(), 34);
+        for i in 0..32 {
+            assert!(
+                dump.lines()
+                    .any(|line| line.starts_with(&std::format!("    q{i}: ")))
+            );
+        }
+        assert!(dump.contains("q31: 0x00000000000000000000000000001234"));
     }
 }

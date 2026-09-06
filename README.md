@@ -135,3 +135,8 @@ round-trip costs.
 ## How the x86-64 transition works
 
 ![x86-64 control flow](./docs/x86_64.svg)
+
+For guests that use AArch64 x18 (including Fuchsia shadow-call stacks), enable
+`fncall-preserve-x18` on Linux. It locates contexts by the host TID so guest TLS
+and all guest registers remain independent of the host. Darwin always preserves
+x18 and uses a pthread-specific context slot.

@@ -40,6 +40,8 @@ raw-cpuid = "11.0"
 
 [features]
 default = []
+# Preserve guest x18 on Linux (e.g. Fuchsia shadow-call stacks) via host TID lookup.
+fncall-preserve-x18 = []
 # This requires allocating a 64K consecutive memory block.
 ioport_bitmap = []
 
